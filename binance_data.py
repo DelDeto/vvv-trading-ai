@@ -1,7 +1,6 @@
 import requests
 import pandas as pd
 
-
 BASE_URL = "https://fapi.binance.com"
 SYMBOL = "VVVUSDT"
 
@@ -16,15 +15,31 @@ def get_klines(interval="4h", limit=200):
         "limit": limit
     }
 
-    response = requests.get(url, params=params, timeout=15)
-    if response.status_code != 200:
-    print("Binance status:", response.status_code)
-    print("Binance response:", response.text)
-    raise Exception(
-        f"Binance request failed: {response.status_code}"
+    print(f"Requesting Binance: {SYMBOL} {interval}")
+
+    response = requests.get(
+        url,
+        params=params,
+        timeout=15
     )
 
+    print("Binance HTTP status:", response.status_code)
+
+    if response.status_code != 200:
+        print("Binance response:")
+        print(response.text)
+
+        raise Exception(
+            f"Binance request failed with HTTP "
+            f"{response.status_code}"
+        )
+
     data = response.json()
+
+    print(
+        f"Successfully received "
+        f"{len(data)} candles from Binance."
+    )
 
     df = pd.DataFrame(
         data,
@@ -44,7 +59,13 @@ def get_klines(interval="4h", limit=200):
         ]
     )
 
-    for column in ["open", "high", "low", "close", "volume"]:
+    for column in [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume"
+    ]:
         df[column] = pd.to_numeric(df[column])
 
     df["open_time"] = pd.to_datetime(
@@ -53,6 +74,9 @@ def get_klines(interval="4h", limit=200):
         utc=True
     )
 
-    df.set_index("open_time", inplace=True)
+    df.set_index(
+        "open_time",
+        inplace=True
+    )
 
     return df
