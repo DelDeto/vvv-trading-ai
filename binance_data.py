@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 
-BASE_URL = "https://data-api.binance.vision"
+BASE_URL = "https://fapi.binance.com"
 SYMBOL = "VVVUSDT"
 
 
@@ -17,7 +17,12 @@ def get_klines(interval="4h", limit=200):
     }
 
     response = requests.get(url, params=params, timeout=15)
-    response.raise_for_status()
+    if response.status_code != 200:
+    print("Binance status:", response.status_code)
+    print("Binance response:", response.text)
+    raise Exception(
+        f"Binance request failed: {response.status_code}"
+    )
 
     data = response.json()
 
