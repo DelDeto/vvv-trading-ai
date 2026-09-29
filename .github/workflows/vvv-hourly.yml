@@ -1,4 +1,4 @@
-name: Test VVVUSDT Binance
+name: Test VVVUSDT MEXC
 
 on:
   workflow_dispatch:
@@ -21,12 +21,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Get Binance data and create charts
+      - name: Get MEXC data and create charts
         run: |
           python main.py
 
       - name: Upload generated charts
         uses: actions/upload-artifact@v4
         with:
-          name: VVVUSDT-charts
+          name: VVVUSDT-MEXC-charts
           path: output/
