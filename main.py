@@ -4,51 +4,55 @@ from chart import create_chart
 
 def main():
 
-    print("================================")
+    print("=" * 40)
     print("VVVUSDT BINANCE DATA")
-    print("================================")
+    print("=" * 40)
 
-    # Lấy dữ liệu OHLC thật từ Binance Futures
+    # Lấy OHLC Binance Futures thật
     df_4h = get_klines("4h", 200)
     df_1h = get_klines("1h", 200)
     df_15m = get_klines("15m", 200)
 
-    # Giá Close của candle 15m đang chạy
     current_price = df_15m.iloc[-1]["close"]
 
-    print(f"\nCurrent VVVUSDT: {current_price} USDT")
+    print()
+    print(f"Current VVVUSDT close: {current_price}")
+    print()
 
-    # Hiển thị 5 candle 4H cuối để kiểm tra
-    print("\nLatest 5 x 4H candles:")
-
+    print("Latest 5 x 4H candles:")
     print(
         df_4h[
             ["open", "high", "low", "close", "volume"]
         ].tail(5)
     )
 
-    # Tạo chart
+    print()
+
     create_chart(
         df_4h,
         "4H",
-        "output/VVVUSDT_4H.png"
+        "output/VVVUSDT_4H.png",
+        candles=100
     )
 
     create_chart(
         df_1h,
         "1H",
-        "output/VVVUSDT_1H.png"
+        "output/VVVUSDT_1H.png",
+        candles=120
     )
 
     create_chart(
         df_15m,
         "15M",
-        "output/VVVUSDT_15M.png"
+        "output/VVVUSDT_15M.png",
+        candles=150
     )
 
-    print("\n================================")
-    print("ALL CHARTS CREATED SUCCESSFULLY")
-    print("================================")
+    print()
+    print("=" * 40)
+    print("ALL CHARTS CREATED")
+    print("=" * 40)
 
 
 if __name__ == "__main__":
