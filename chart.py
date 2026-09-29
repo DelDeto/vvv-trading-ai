@@ -2,9 +2,15 @@ import os
 import mplfinance as mpf
 
 
-def create_chart(df, interval, output_path, candles=100):
+def create_chart(
+    df,
+    interval,
+    output_path,
+    candles=100,
+    exchange="MEXC"
+):
     """
-    Vẽ candlestick chart từ OHLC Binance thật.
+    Vẽ candlestick chart từ OHLC Futures thật.
     """
 
     output_dir = os.path.dirname(output_path)
@@ -30,7 +36,7 @@ def create_chart(df, interval, output_path, candles=100):
 
     print(
         f"Creating {interval} chart | "
-        f"Current close: {current_price}"
+        f"{exchange} | Current close: {current_price}"
     )
 
     mpf.plot(
@@ -38,7 +44,7 @@ def create_chart(df, interval, output_path, candles=100):
         type="candle",
         volume=True,
         style="nightclouds",
-        title=f"VVVUSDT PERPETUAL - BINANCE - {interval}",
+        title=f"VVV_USDT PERPETUAL - {exchange} - {interval}",
         ylabel="Price (USDT)",
         ylabel_lower="Volume",
         figsize=(16, 9),
