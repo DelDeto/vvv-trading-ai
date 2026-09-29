@@ -2,18 +2,16 @@ import os
 import mplfinance as mpf
 
 
-def create_chart(df, interval, output_path):
+def create_chart(df, interval, output_path, candles=100):
     """
-    Vẽ candlestick chart từ dữ liệu OHLC Binance.
+    Vẽ candlestick chart từ OHLC Binance thật.
     """
 
-    # Tạo folder output nếu chưa tồn tại
     output_dir = os.path.dirname(output_path)
 
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    # mplfinance yêu cầu đúng tên các cột này
     plot_df = df[
         ["open", "high", "low", "close", "volume"]
     ].copy()
@@ -26,14 +24,13 @@ def create_chart(df, interval, output_path):
         "Volume"
     ]
 
-    # Chỉ lấy 100 candle gần nhất để chart dễ nhìn
-    plot_df = plot_df.tail(100)
+    plot_df = plot_df.tail(candles)
 
     current_price = plot_df.iloc[-1]["Close"]
 
     print(
         f"Creating {interval} chart | "
-        f"Current price: {current_price}"
+        f"Current close: {current_price}"
     )
 
     mpf.plot(
@@ -53,4 +50,4 @@ def create_chart(df, interval, output_path):
         )
     )
 
-    print(f"Chart saved: {output_path}")
+    print(f"Saved chart: {output_path}")
