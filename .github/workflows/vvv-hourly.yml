@@ -1,0 +1,40 @@
+name: VVVUSDT Analysis
+
+on:
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Get Binance data and create charts
+        run: |
+          python main.py
+
+      - name: Save generated charts
+        run: |
+          git config user.name "VVV Trading Bot"
+          git config user.email "actions@github.com"
+
+          git add output/
+
+          git diff --cached --quiet || git commit -m "Update VVVUSDT Binance charts"
+
+          git push
