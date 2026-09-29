@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 
-BASE_URL = "https://fapi.binance.com"
+BASE_URL = "https://data-api.binance.vision"
 SYMBOL = "VVVUSDT"
 
 
