@@ -4,28 +4,53 @@ import mplfinance as mpf
 import pandas as pd
 
 
-# Binance-like colors
+# Binance dark-theme palette
+BG = "#0B0E11"
+PANEL = "#0B0E11"
+GRID = "#1E2329"
+TEXT = "#EAECEF"
+MUTED = "#848E9C"
+
+GREEN = "#0ECB81"
+RED = "#F6465D"
+YELLOW = "#F0B90B"
+BLUE = "#2B7FFF"
+
+SUPPLY = "#F6465D"
+DEMAND = "#0ECB81"
+BULL_FVG = "#0ECB81"
+BEAR_FVG = "#F6465D"
+
+
 binance_mc = mpf.make_marketcolors(
-    up="#0ECB81",        # green
-    down="#F6465D",      # red
-    edge="inherit",
-    wick="inherit",
-    volume="inherit",
-    ohlc="inherit",
+    up=GREEN,
+    down=RED,
+    edge={"up": GREEN, "down": RED},
+    wick={"up": GREEN, "down": RED},
+    volume={"up": GREEN, "down": RED},
+    ohlc={"up": GREEN, "down": RED},
 )
 
 binance_style = mpf.make_mpf_style(
     base_mpf_style="nightclouds",
     marketcolors=binance_mc,
-    facecolor="#181A20",
-    figcolor="#181A20",
-    gridcolor="#2B3139",
+    facecolor=PANEL,
+    figcolor=BG,
+    gridcolor=GRID,
     gridstyle="-",
+    y_on_right=True,
     rc={
-        "axes.labelcolor": "#B7BDC6",
-        "xtick.color": "#B7BDC6",
-        "ytick.color": "#B7BDC6",
-        "text.color": "#EAECEF",
+        "axes.edgecolor": GRID,
+        "axes.labelcolor": MUTED,
+        "axes.titlecolor": TEXT,
+        "axes.grid": True,
+        "axes.grid.axis": "both",
+        "axes.grid.which": "major",
+        "axes.axisbelow": True,
+        "xtick.color": MUTED,
+        "ytick.color": MUTED,
+        "text.color": TEXT,
+        "font.size": 9,
     },
 )
 
@@ -35,6 +60,111 @@ def _fmt(value):
         return "-"
 
     return f"{value:.3f}"
+
+
+def _style_axes(axes):
+    """
+    Remove heavy borders and keep the chart close to Binance dark mode.
+    """
+
+    for axis in axes:
+        axis.set_facecolor(PANEL)
+
+        for spine in axis.spines.values():
+            spine.set_visible(False)
+
+        axis.tick_params(
+            colors=MUTED,
+            labelsize=8,
+            length=0,
+        )
+
+        axis.grid(
+            True,
+            color=GRID,
+            linewidth=0.6,
+            alpha=0.55,
+        )
+
+
+def _draw_price_tag(
+    ax,
+    current_price,
+    last_open,
+):
+    """
+    Binance-like current-price dotted line + price tag on right axis.
+    """
+
+    price_color = (
+        GREEN
+        if current_price >= last_open
+        else RED
+    )
+
+    ax.axhline(
+        current_price,
+        color=price_color,
+        linewidth=0.9,
+        linestyle=(0, (2, 2)),
+        alpha=0.95,
+        zorder=2,
+    )
+
+    ax.text(
+        1.002,
+        current_price,
+        f" {_fmt(current_price)} ",
+        transform=ax.get_yaxis_transform(),
+        ha="left",
+        va="center",
+        fontsize=8,
+        color=BG,
+        clip_on=False,
+        bbox=dict(
+            boxstyle="square,pad=0.22",
+            facecolor=price_color,
+            edgecolor=price_color,
+            linewidth=0,
+        ),
+        zorder=7,
+    )
+
+
+def _draw_liquidity_line(
+    ax,
+    price,
+    label,
+    color,
+    va,
+):
+    ax.axhline(
+        price,
+        color=color,
+        linewidth=0.9,
+        linestyle=(0, (5, 4)),
+        alpha=0.85,
+        zorder=2,
+    )
+
+    ax.text(
+        0.995,
+        price,
+        f" {label} {_fmt(price)} ",
+        transform=ax.get_yaxis_transform(),
+        ha="right",
+        va=va,
+        fontsize=7.5,
+        color=color,
+        bbox=dict(
+            boxstyle="round,pad=0.20",
+            facecolor=BG,
+            edgecolor=color,
+            linewidth=0.7,
+            alpha=0.92,
+        ),
+        zorder=6,
+    )
 
 
 def create_chart(
@@ -47,13 +177,18 @@ def create_chart(
 ):
     """
     Vẽ candlestick chart từ OHLC Futures thật
-    và overlay SMC rule-based.
+    theo phong cách Binance và overlay SMC rule-based.
     """
 
-    output_dir = os.path.dirname(output_path)
+    output_dir = os.path.dirname(
+        output_path
+    )
 
     if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(
+            output_dir,
+            exist_ok=True,
+        )
 
     plot_df = df[
         ["open", "high", "low", "close", "volume"]
@@ -69,7 +204,21 @@ def create_chart(
 
     plot_df = plot_df.tail(candles)
 
-    current_price = float(plot_df.iloc[-1]["Close"])
+    current_price = float(
+        plot_df.iloc[-1]["Close"]
+    )
+
+    last_open = float(
+        plot_df.iloc[-1]["Open"]
+    )
+
+    last_high = float(
+        plot_df.iloc[-1]["High"]
+    )
+
+    last_low = float(
+        plot_df.iloc[-1]["Low"]
+    )
 
     print(
         f"Creating {interval} chart | "
@@ -82,96 +231,136 @@ def create_chart(
         type="candle",
         volume=True,
         style=binance_style,
-        title=f"VVV_USDT PERPETUAL - {exchange} - {interval}",
-        ylabel="Price (USDT)",
-        ylabel_lower="Volume",
+        ylabel="",
+        ylabel_lower="",
+        datetime_format="%m-%d %H:%M",
+        xrotation=0,
         figsize=(16, 9),
         tight_layout=True,
         returnfig=True,
+        update_width_config={
+            "candle_width": 0.68,
+            "candle_linewidth": 0.75,
+            "volume_width": 0.68,
+        },
     )
+
+    fig.patch.set_facecolor(BG)
+
+    _style_axes(axes)
 
     ax = axes[0]
     x_right = len(plot_df) - 1
 
-    # Current price
-    ax.axhline(
-        current_price,
-        linewidth=1.0,
-        linestyle=":",
-        alpha=0.75,
+    # Binance-like title/header
+    fig.text(
+        0.065,
+        0.972,
+        (
+            f"VVV_USDT Perpetual  ·  "
+            f"{interval}  ·  {exchange}"
+        ),
+        ha="left",
+        va="top",
+        fontsize=13,
+        fontweight="bold",
+        color=TEXT,
     )
 
-    ax.text(
-        x_right,
+    candle_color = (
+        GREEN
+        if current_price >= last_open
+        else RED
+    )
+
+    fig.text(
+        0.065,
+        0.947,
+        (
+            f"O {_fmt(last_open)}    "
+            f"H {_fmt(last_high)}    "
+            f"L {_fmt(last_low)}    "
+            f"C {_fmt(current_price)}"
+        ),
+        ha="left",
+        va="top",
+        fontsize=8.5,
+        color=candle_color,
+    )
+
+    _draw_price_tag(
+        ax,
         current_price,
-        f" PRICE {_fmt(current_price)}",
-        ha="right",
-        va="bottom",
-        fontsize=8,
+        last_open,
     )
 
     if analysis:
         bsl = analysis.get("bsl")
         ssl = analysis.get("ssl")
 
-        # Buy-side liquidity
         if bsl:
-            ax.axhline(
+            _draw_liquidity_line(
+                ax,
                 bsl["price"],
-                linewidth=1.1,
-                linestyle="--",
-                alpha=0.85,
+                "BSL",
+                YELLOW,
+                "bottom",
             )
 
-            ax.text(
-                x_right,
-                bsl["price"],
-                f" BSL {_fmt(bsl['price'])}",
-                ha="right",
-                va="bottom",
-                fontsize=8,
-            )
-
-        # Sell-side liquidity
         if ssl:
-            ax.axhline(
+            _draw_liquidity_line(
+                ax,
                 ssl["price"],
-                linewidth=1.1,
-                linestyle="--",
-                alpha=0.85,
+                "SSL",
+                BLUE,
+                "top",
             )
 
-            ax.text(
-                x_right,
-                ssl["price"],
-                f" SSL {_fmt(ssl['price'])}",
-                ha="right",
-                va="top",
-                fontsize=8,
-            )
+        demand = analysis.get(
+            "nearest_demand"
+        )
 
-        demand = analysis.get("nearest_demand")
-        supply = analysis.get("nearest_supply")
+        supply = analysis.get(
+            "nearest_supply"
+        )
 
         # Demand zone
         if demand:
             ax.axhspan(
                 demand["lower"],
                 demand["upper"],
-                alpha=0.10,
+                color=DEMAND,
+                alpha=0.075,
+                zorder=0,
+            )
+
+            ax.axhline(
+                demand["upper"],
+                color=DEMAND,
+                linewidth=0.7,
+                alpha=0.65,
             )
 
             ax.text(
-                0,
+                0.008,
                 demand["upper"],
                 (
-                    f"Demand "
+                    f" DEMAND "
                     f"{_fmt(demand['lower'])}-"
-                    f"{_fmt(demand['upper'])}"
+                    f"{_fmt(demand['upper'])} "
                 ),
+                transform=ax.get_yaxis_transform(),
                 ha="left",
                 va="bottom",
-                fontsize=8,
+                fontsize=7.2,
+                color=DEMAND,
+                bbox=dict(
+                    boxstyle="round,pad=0.18",
+                    facecolor=BG,
+                    edgecolor=DEMAND,
+                    linewidth=0.6,
+                    alpha=0.88,
+                ),
             )
 
         # Supply zone
@@ -179,35 +368,71 @@ def create_chart(
             ax.axhspan(
                 supply["lower"],
                 supply["upper"],
-                alpha=0.10,
+                color=SUPPLY,
+                alpha=0.075,
+                zorder=0,
+            )
+
+            ax.axhline(
+                supply["lower"],
+                color=SUPPLY,
+                linewidth=0.7,
+                alpha=0.65,
             )
 
             ax.text(
-                0,
+                0.008,
                 supply["lower"],
                 (
-                    f"Supply "
+                    f" SUPPLY "
                     f"{_fmt(supply['lower'])}-"
-                    f"{_fmt(supply['upper'])}"
+                    f"{_fmt(supply['upper'])} "
                 ),
+                transform=ax.get_yaxis_transform(),
                 ha="left",
                 va="top",
-                fontsize=8,
+                fontsize=7.2,
+                color=SUPPLY,
+                bbox=dict(
+                    boxstyle="round,pad=0.18",
+                    facecolor=BG,
+                    edgecolor=SUPPLY,
+                    linewidth=0.6,
+                    alpha=0.88,
+                ),
             )
 
         # Last two active FVGs
-        active_fvgs = analysis.get("active_fvgs", [])[-2:]
+        active_fvgs = analysis.get(
+            "active_fvgs",
+            [],
+        )[-2:]
 
         for fvg in active_fvgs:
+            fvg_color = (
+                BULL_FVG
+                if fvg["type"] == "bullish"
+                else BEAR_FVG
+            )
+
             ax.axhspan(
                 fvg["lower"],
                 fvg["upper"],
-                alpha=0.06,
+                color=fvg_color,
+                alpha=0.045,
+                zorder=0,
             )
 
             ax.text(
-                max(0, x_right - 18),
-                (fvg["lower"] + fvg["upper"]) / 2,
+                max(
+                    0,
+                    x_right - 18,
+                ),
+                (
+                    fvg["lower"]
+                    + fvg["upper"]
+                )
+                / 2,
                 (
                     f"{fvg['type'].upper()} FVG "
                     f"{_fmt(fvg['lower'])}-"
@@ -215,46 +440,102 @@ def create_chart(
                 ),
                 ha="left",
                 va="center",
-                fontsize=7,
+                fontsize=6.8,
+                color=fvg_color,
+                bbox=dict(
+                    boxstyle="round,pad=0.15",
+                    facecolor=BG,
+                    edgecolor=fvg_color,
+                    linewidth=0.5,
+                    alpha=0.82,
+                ),
             )
 
         # Latest BOS / CHoCH
-        last_event = analysis.get("last_event")
+        last_event = analysis.get(
+            "last_event"
+        )
 
         if last_event:
-            event_time = last_event.get("time")
+            event_time = last_event.get(
+                "time"
+            )
 
             try:
-                timestamp = pd.Timestamp(event_time)
+                timestamp = pd.Timestamp(
+                    event_time
+                )
 
                 if timestamp in plot_df.index:
-                    event_x = plot_df.index.get_loc(timestamp)
-                    event_y = float(plot_df.loc[timestamp, "Close"])
+                    event_x = (
+                        plot_df.index.get_loc(
+                            timestamp
+                        )
+                    )
+
+                    event_y = float(
+                        plot_df.loc[
+                            timestamp,
+                            "Close",
+                        ]
+                    )
+
+                    bullish = (
+                        last_event["direction"]
+                        == "bullish"
+                    )
 
                     marker = (
                         "^"
-                        if last_event["direction"] == "bullish"
+                        if bullish
                         else "v"
+                    )
+
+                    event_color = (
+                        GREEN
+                        if bullish
+                        else RED
                     )
 
                     ax.scatter(
                         [event_x],
                         [event_y],
                         marker=marker,
-                        s=70,
-                        zorder=5,
+                        s=58,
+                        color=event_color,
+                        edgecolors=BG,
+                        linewidths=0.6,
+                        zorder=6,
                     )
 
                     ax.text(
                         event_x,
                         event_y,
-                        f" {last_event['kind']} {last_event['direction'].upper()}",
-                        fontsize=8,
-                        va="bottom" if marker == "^" else "top",
+                        (
+                            f" {last_event['kind']} "
+                            f"{last_event['direction'].upper()}"
+                        ),
+                        fontsize=7.2,
+                        color=event_color,
+                        va=(
+                            "bottom"
+                            if bullish
+                            else "top"
+                        ),
+                        bbox=dict(
+                            boxstyle="round,pad=0.15",
+                            facecolor=BG,
+                            edgecolor=event_color,
+                            linewidth=0.45,
+                            alpha=0.85,
+                        ),
                     )
 
             except Exception as exc:
-                print("SMC event overlay warning:", exc)
+                print(
+                    "SMC event overlay warning:",
+                    exc,
+                )
 
         event_text = "None"
 
@@ -264,32 +545,53 @@ def create_chart(
                 f"{last_event['direction'].upper()}"
             )
 
+        trend_text = analysis.get(
+            "trend",
+            "neutral",
+        ).upper()
+
+        trend_color = MUTED
+
+        if trend_text == "BULLISH":
+            trend_color = GREEN
+
+        elif trend_text == "BEARISH":
+            trend_color = RED
+
         summary = (
-            f"Trend: {analysis.get('trend', 'neutral').upper()}\n"
-            f"Last structure: {event_text}\n"
-            f"ATR: {_fmt(analysis.get('atr'))}"
+            f"TREND  {trend_text}\n"
+            f"STRUCTURE  {event_text}\n"
+            f"ATR  {_fmt(analysis.get('atr'))}"
         )
 
         ax.text(
             0.012,
-            0.98,
+            0.982,
             summary,
             transform=ax.transAxes,
             ha="left",
             va="top",
-            fontsize=9,
+            fontsize=7.6,
+            color=trend_color,
             bbox=dict(
-                boxstyle="round,pad=0.4",
-                alpha=0.35,
+                boxstyle="round,pad=0.42",
+                facecolor="#181A20",
+                edgecolor=GRID,
+                linewidth=0.8,
+                alpha=0.92,
             ),
+            zorder=8,
         )
 
     fig.savefig(
         output_path,
-        dpi=150,
+        dpi=160,
+        facecolor=BG,
         bbox_inches="tight",
     )
 
     plt.close(fig)
 
-    print(f"Saved chart: {output_path}")
+    print(
+        f"Saved chart: {output_path}"
+    )
