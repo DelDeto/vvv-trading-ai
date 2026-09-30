@@ -929,6 +929,7 @@ def _draw_side_panel(
     analysis,
     trade_plan,
     vwap_info,
+    market_snapshot=None,
 ):
     setup = analysis.get(
         "setup",
@@ -997,28 +998,50 @@ def _draw_side_panel(
         ),
     )
 
-    bias_color = (
-        GREEN
-        if bias == "LONG"
-        else (
-            RED
-            if bias == "SHORT"
-            else MUTED
-        )
-    )
+    hold_change = None
+    funding = None
 
-    execution_color = (
-        GREEN
-        if ready
-        else YELLOW
+    if market_snapshot:
+        hold_change = (
+            market_snapshot.get(
+                "hold_vol_change_pct"
+            )
+        )
+
+        funding = (
+            market_snapshot.get(
+                "funding_rate"
+            )
+        )
+
+    if hold_change is None:
+        oi_text = "N/A"
+    elif hold_change > 0.05:
+        oi_text = (
+            f"UP {hold_change:+.2f}%"
+        )
+    elif hold_change < -0.05:
+        oi_text = (
+            f"DOWN {hold_change:+.2f}%"
+        )
+    else:
+        oi_text = (
+            f"FLAT {hold_change:+.2f}%"
+        )
+
+    funding_text = (
+        f"{funding * 100:+.4f}%"
+        if funding is not None
+        else "N/A"
     )
 
     panel_text = (
         f"Bias: {bias}\n"
         f"Execution: "
         f"{'READY' if ready else 'WAIT'}\n"
+        f"OI: {oi_text}\n"
+        f"Funding: {funding_text}\n"
         f"VWAP: {vwap_relation}\n"
-        f"SMC setup: {score}/4\n"
         f"Confluence: {confluence}/5"
     )
 
@@ -1040,33 +1063,6 @@ def _draw_side_panel(
         ),
     )
 
-    fig.text(
-        0.905,
-        0.876,
-        bias,
-        ha="right",
-        va="top",
-        fontsize=9.0,
-        fontweight="bold",
-        color=bias_color,
-    )
-
-    fig.text(
-        0.905,
-        0.846,
-        (
-            "READY"
-            if ready
-            else "WAIT"
-        ),
-        ha="right",
-        va="top",
-        fontsize=9.0,
-        fontweight="bold",
-        color=execution_color,
-    )
-
-
 def create_chart(
     df,
     interval,
@@ -1075,6 +1071,7 @@ def create_chart(
     exchange="MEXC",
     analysis=None,
     trade_plan=None,
+    market_snapshot=None,
 ):
     """
     Clean scenario chart:
@@ -1199,31 +1196,83 @@ def create_chart(
         color=TEXT,
     )
 
+    header_price = (
+        market_snapshot.get(
+            "last_price"
+        )
+        if market_snapshot
+        else None
+    )
+
+    if header_price is None:
+        header_price = current_price
+
     fig.text(
         0.23,
         0.955,
-        _fmt(current_price),
+        _fmt(header_price),
         ha="left",
         va="top",
         fontsize=18,
         fontweight="bold",
         color=(
             GREEN
-            if current_price
+            if header_price
             >= last_open
             else RED
         ),
     )
 
+    header_bits = [
+        f"O {_fmt(last_open)}",
+        f"H {_fmt(last_high)}",
+        f"L {_fmt(last_low)}",
+        f"C {_fmt(current_price)}",
+        f"· {exchange}",
+    ]
+
+    if market_snapshot:
+        high_24h = (
+            market_snapshot.get(
+                "high_24h"
+            )
+        )
+
+        low_24h = (
+            market_snapshot.get(
+                "low_24h"
+            )
+        )
+
+        change_24h = (
+            market_snapshot.get(
+                "change_rate_24h"
+            )
+        )
+
+        if high_24h is not None:
+            header_bits.append(
+                f"24H H {_fmt(high_24h)}"
+            )
+
+        if low_24h is not None:
+            header_bits.append(
+                f"24H L {_fmt(low_24h)}"
+            )
+
+        if change_24h is not None:
+            header_bits.append(
+                (
+                    "24H "
+                    f"{change_24h * 100:+.2f}%"
+                )
+            )
+
     fig.text(
         0.058,
         0.925,
-        (
-            f"O {_fmt(last_open)}   "
-            f"H {_fmt(last_high)}   "
-            f"L {_fmt(last_low)}   "
-            f"C {_fmt(current_price)}   "
-            f"· {exchange}"
+        "   ".join(
+            header_bits
         ),
         ha="left",
         va="top",
@@ -1325,6 +1374,9 @@ def create_chart(
             analysis,
             trade_plan,
             vwap_info,
+            market_snapshot=(
+                market_snapshot
+            ),
         )
 
     fig.savefig(
