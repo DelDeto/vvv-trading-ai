@@ -566,7 +566,7 @@ def create_chart(
 
         ax.text(
             0.012,
-            0.982,
+            0.900,
             summary,
             transform=ax.transAxes,
             ha="left",
