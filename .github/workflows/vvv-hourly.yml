@@ -43,6 +43,13 @@ jobs:
           path: output/
           retention-days: 30
 
+      - name: Send Telegram update
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python telegram_notify.py
+
       - name: Persist state for next hourly run
         run: |
           git config user.name "github-actions[bot]"
