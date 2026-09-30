@@ -1071,13 +1071,25 @@ def _nearest_zone(
     zones,
     current_price,
     side,
+    current_index,
+    max_age=80,
 ):
     active = [
         zone
         for zone in zones
-        if not zone.get(
-            "invalidated",
-            False,
+        if (
+            not zone.get(
+                "invalidated",
+                False,
+            )
+            and (
+                current_index
+                - zone.get(
+                    "index",
+                    current_index,
+                )
+                <= max_age
+            )
         )
     ]
 
@@ -1177,34 +1189,67 @@ def _setup_signal(
     retests,
     direction,
 ):
-    sweep = _latest_recent(
-        sweeps,
-        current_index,
-        20,
-        direction,
-    )
-
-    displacement = (
+    latest_opposite_structure = (
         _latest_recent(
-            displacements,
+            structure_events,
             current_index,
-            12,
-            direction,
+            20,
+            (
+                "bearish"
+                if direction == "bullish"
+                else "bullish"
+            ),
         )
     )
 
-    structure = _latest_recent(
-        structure_events,
-        current_index,
-        12,
-        direction,
+    cutoff_index = (
+        latest_opposite_structure[
+            "index"
+        ]
+        if latest_opposite_structure
+        else -1
     )
 
-    retest = _latest_recent(
+    def after_cutoff(
+        events,
+        bars,
+    ):
+        candidate = _latest_recent(
+            events,
+            current_index,
+            bars,
+            direction,
+        )
+
+        if (
+            candidate
+            and candidate["index"]
+            <= cutoff_index
+        ):
+            return None
+
+        return candidate
+
+    sweep = after_cutoff(
+        sweeps,
+        20,
+    )
+
+    displacement = (
+        after_cutoff(
+            displacements,
+            12,
+        )
+    )
+
+    structure = after_cutoff(
+        structure_events,
+        12,
+    )
+
+    retest = after_cutoff(
         retests,
-        current_index,
         8,
-        direction,
     )
 
     score = sum(
@@ -1415,11 +1460,16 @@ def analyze_smc(
         if not fvg["filled"]
     ]
 
+    current_index = (
+        len(work) - 1
+    )
+
     nearest_supply = (
         _nearest_zone(
             supply,
             current_price,
             "supply",
+            current_index,
         )
     )
 
@@ -1428,6 +1478,7 @@ def analyze_smc(
             demand,
             current_price,
             "demand",
+            current_index,
         )
     )
 
@@ -1435,10 +1486,6 @@ def analyze_smc(
         structure_events[-1]
         if structure_events
         else None
-    )
-
-    current_index = (
-        len(work) - 1
     )
 
     bullish_setup = (
