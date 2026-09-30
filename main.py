@@ -28,9 +28,32 @@ def _zone_text(zone):
     if not zone:
         return "-"
 
+    quality = zone.get(
+        "quality"
+    )
+
+    mitigations = zone.get(
+        "mitigations"
+    )
+
+    suffix = ""
+
+    if quality:
+        suffix += (
+            f" [{quality}"
+        )
+
+        if mitigations is not None:
+            suffix += (
+                f", M{mitigations}"
+            )
+
+        suffix += "]"
+
     return (
         f"{_fmt(zone['lower'])}"
         f"-{_fmt(zone['upper'])}"
+        f"{suffix}"
     )
 
 
