@@ -537,6 +537,214 @@ def create_chart(
                     exc,
                 )
 
+
+        # Latest Liquidity Sweep
+        last_sweep = analysis.get(
+            "last_sweep"
+        )
+
+        if last_sweep:
+            try:
+                timestamp = pd.Timestamp(
+                    last_sweep["time"]
+                )
+
+                if timestamp in plot_df.index:
+                    sweep_x = (
+                        plot_df.index.get_loc(
+                            timestamp
+                        )
+                    )
+
+                    sweep_y = float(
+                        last_sweep.get(
+                            "extreme",
+                            last_sweep[
+                                "level"
+                            ],
+                        )
+                    )
+
+                    ax.scatter(
+                        [sweep_x],
+                        [sweep_y],
+                        marker="o",
+                        s=42,
+                        facecolors="none",
+                        edgecolors=YELLOW,
+                        linewidths=1.2,
+                        zorder=7,
+                    )
+
+                    ax.text(
+                        sweep_x,
+                        sweep_y,
+                        (
+                            f" {last_sweep['type']} "
+                            "SWEEP"
+                        ),
+                        fontsize=6.8,
+                        color=YELLOW,
+                        va=(
+                            "bottom"
+                            if last_sweep[
+                                "direction"
+                            ]
+                            == "bearish"
+                            else "top"
+                        ),
+                        bbox=dict(
+                            boxstyle="round,pad=0.13",
+                            facecolor=BG,
+                            edgecolor=YELLOW,
+                            linewidth=0.45,
+                            alpha=0.85,
+                        ),
+                        zorder=8,
+                    )
+
+            except Exception as exc:
+                print(
+                    "Sweep overlay warning:",
+                    exc,
+                )
+
+        # Latest displacement
+        last_displacement = analysis.get(
+            "last_displacement"
+        )
+
+        if last_displacement:
+            try:
+                timestamp = pd.Timestamp(
+                    last_displacement[
+                        "time"
+                    ]
+                )
+
+                if timestamp in plot_df.index:
+                    disp_x = (
+                        plot_df.index.get_loc(
+                            timestamp
+                        )
+                    )
+
+                    disp_y = float(
+                        last_displacement[
+                            "close"
+                        ]
+                    )
+
+                    bullish_disp = (
+                        last_displacement[
+                            "direction"
+                        ]
+                        == "bullish"
+                    )
+
+                    disp_color = (
+                        GREEN
+                        if bullish_disp
+                        else RED
+                    )
+
+                    ax.scatter(
+                        [disp_x],
+                        [disp_y],
+                        marker="*",
+                        s=72,
+                        color=disp_color,
+                        edgecolors=BG,
+                        linewidths=0.5,
+                        zorder=7,
+                    )
+
+                    ax.text(
+                        disp_x,
+                        disp_y,
+                        (
+                            " DISP "
+                            f"{last_displacement['strength']:.1f}x"
+                        ),
+                        fontsize=6.8,
+                        color=disp_color,
+                        va=(
+                            "bottom"
+                            if bullish_disp
+                            else "top"
+                        ),
+                        bbox=dict(
+                            boxstyle="round,pad=0.13",
+                            facecolor=BG,
+                            edgecolor=disp_color,
+                            linewidth=0.45,
+                            alpha=0.85,
+                        ),
+                        zorder=8,
+                    )
+
+            except Exception as exc:
+                print(
+                    "Displacement overlay warning:",
+                    exc,
+                )
+
+        # Latest retest
+        last_retest = analysis.get(
+            "last_retest"
+        )
+
+        if last_retest:
+            try:
+                timestamp = pd.Timestamp(
+                    last_retest["time"]
+                )
+
+                if timestamp in plot_df.index:
+                    retest_x = (
+                        plot_df.index.get_loc(
+                            timestamp
+                        )
+                    )
+
+                    retest_y = float(
+                        last_retest["level"]
+                    )
+
+                    ax.scatter(
+                        [retest_x],
+                        [retest_y],
+                        marker="D",
+                        s=34,
+                        color=BLUE,
+                        edgecolors=BG,
+                        linewidths=0.5,
+                        zorder=7,
+                    )
+
+                    ax.text(
+                        retest_x,
+                        retest_y,
+                        " RETEST",
+                        fontsize=6.8,
+                        color=BLUE,
+                        va="bottom",
+                        bbox=dict(
+                            boxstyle="round,pad=0.13",
+                            facecolor=BG,
+                            edgecolor=BLUE,
+                            linewidth=0.45,
+                            alpha=0.85,
+                        ),
+                        zorder=8,
+                    )
+
+            except Exception as exc:
+                print(
+                    "Retest overlay warning:",
+                    exc,
+                )
+
         event_text = "None"
 
         if last_event:
@@ -558,9 +766,37 @@ def create_chart(
         elif trend_text == "BEARISH":
             trend_color = RED
 
+        setup = analysis.get(
+            "setup",
+            {},
+        )
+
+        setup_state = (
+            "CONFIRMED"
+            if setup.get(
+                "confirmed",
+                False,
+            )
+            else "DEVELOPING"
+        )
+
+        setup_direction = (
+            setup.get(
+                "direction",
+                "-",
+            ).upper()
+        )
+
+        setup_score = setup.get(
+            "score",
+            0,
+        )
+
         summary = (
             f"TREND  {trend_text}\n"
             f"STRUCTURE  {event_text}\n"
+            f"SETUP  {setup_state} "
+            f"{setup_direction} {setup_score}/4\n"
             f"ATR  {_fmt(analysis.get('atr'))}"
         )
 
