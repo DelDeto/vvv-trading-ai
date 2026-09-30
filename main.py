@@ -1282,15 +1282,18 @@ def main():
 
     # Rule-based SMC analysis
     smc_4h = analyze_smc(
-        df_4h
+        df_4h,
+        timeframe="4H",
     )
 
     smc_1h = analyze_smc(
-        df_1h
+        df_1h,
+        timeframe="1H",
     )
 
     smc_15m = analyze_smc(
-        df_15m
+        df_15m,
+        timeframe="15M",
     )
 
     analyses = {
