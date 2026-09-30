@@ -1,7 +1,42 @@
 {
-  "generated_at_utc": "2026-09-30T07:27:26.081576+00:00",
-  "current_price": 26.93,
-  "status": "DEVELOPING SHORT",
+  "generated_at_utc": "2026-09-30T07:41:28.070461+00:00",
+  "current_price": 27.057,
+  "status": "DEVELOPING LONG",
+  "trade_plan": {
+    "active": true,
+    "direction": "long",
+    "setup_state": "developing",
+    "setup_score": 2,
+    "entry_zone": {
+      "lower": 26.86,
+      "upper": 26.897,
+      "source": "bullish FVG"
+    },
+    "entry_mid": 26.8785,
+    "stop_loss": 26.36864285714286,
+    "risk": 0.5098571428571397,
+    "targets": [
+      {
+        "name": "TP1",
+        "price": 27.285,
+        "source": "15M BSL",
+        "rr": 0.7972821518632743
+      },
+      {
+        "name": "TP2",
+        "price": 27.445,
+        "source": "1H BSL",
+        "rr": 1.1110955449705895
+      },
+      {
+        "name": "TP3",
+        "price": 28.542,
+        "source": "4H BSL",
+        "rr": 3.26267862146262
+      }
+    ],
+    "trigger": "Wait for price to trade into the entry zone and hold/reject in the setup direction."
+  },
   "timeframes": {
     "4H": {
       "trend": "mixed",
@@ -27,24 +62,8 @@
         "level": 26.602,
         "extreme": 26.043
       },
-      "last_displacement": {
-        "index": 186,
-        "time": "2026-09-28T00:00:00+00:00",
-        "direction": "bearish",
-        "strength": 1.2164559614444364,
-        "open": 29.367,
-        "close": 28.123,
-        "high": 29.5,
-        "low": 28.066
-      },
-      "last_retest": {
-        "index": 182,
-        "time": "2026-09-27T08:00:00+00:00",
-        "direction": "bullish",
-        "structure_kind": "BOS",
-        "level": 30.385,
-        "source_index": 181
-      },
+      "last_displacement": null,
+      "last_retest": null,
       "setup": {
         "direction": "bullish",
         "score": 1,
@@ -54,10 +73,7 @@
         "lower": 29.367,
         "upper": 30.116
       },
-      "nearest_demand": {
-        "lower": 17.81,
-        "upper": 18.492
-      }
+      "nearest_demand": null
     },
     "1H": {
       "trend": "mixed",
@@ -75,24 +91,8 @@
         "kind": "CHoCH",
         "level": 26.74
       },
-      "last_sweep": {
-        "index": 195,
-        "time": "2026-09-30T03:00:00+00:00",
-        "type": "SSL",
-        "direction": "bullish",
-        "level": 26.74,
-        "extreme": 26.686
-      },
-      "last_displacement": {
-        "index": 186,
-        "time": "2026-09-29T18:00:00+00:00",
-        "direction": "bullish",
-        "strength": 1.3293381275802387,
-        "open": 26.613,
-        "close": 27.326,
-        "high": 27.5,
-        "low": 26.61
-      },
+      "last_sweep": null,
+      "last_displacement": null,
       "last_retest": {
         "index": 198,
         "time": "2026-09-30T06:00:00+00:00",
@@ -118,8 +118,8 @@
     "15M": {
       "trend": "bearish",
       "bsl": {
-        "price": 27.036,
-        "time": "2026-09-30T04:45:00+00:00"
+        "price": 27.285,
+        "time": "2026-09-30T03:00:00+00:00"
       },
       "ssl": {
         "price": 26.502,
@@ -132,34 +132,18 @@
         "level": 26.82
       },
       "last_sweep": {
-        "index": 198,
-        "time": "2026-09-30T07:00:00+00:00",
-        "type": "BSL",
-        "direction": "bearish",
-        "level": 26.82,
-        "extreme": 26.86
+        "index": 195,
+        "time": "2026-09-30T06:30:00+00:00",
+        "type": "SSL",
+        "direction": "bullish",
+        "level": 26.526,
+        "extreme": 26.502
       },
-      "last_displacement": {
-        "index": 167,
-        "time": "2026-09-29T23:15:00+00:00",
-        "direction": "bearish",
-        "strength": 1.5631901840490732,
-        "open": 27.387,
-        "close": 27.114,
-        "high": 27.427,
-        "low": 27.105
-      },
-      "last_retest": {
-        "index": 194,
-        "time": "2026-09-30T06:00:00+00:00",
-        "direction": "bearish",
-        "structure_kind": "BOS",
-        "level": 26.686,
-        "source_index": 190
-      },
+      "last_displacement": null,
+      "last_retest": null,
       "setup": {
-        "direction": "bearish",
-        "score": 3,
+        "direction": "bullish",
+        "score": 2,
         "confirmed": false
       },
       "nearest_supply": {
