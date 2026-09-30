@@ -68,6 +68,84 @@ def _event_text(analysis):
     )
 
 
+def _sweep_text(analysis):
+    event = analysis.get(
+        "last_sweep"
+    )
+
+    if not event:
+        return "None"
+
+    return (
+        f"{event['type']} SWEEP "
+        f"-> {event['direction'].upper()} "
+        f"@ {_fmt(event['level'])}"
+    )
+
+
+def _displacement_text(analysis):
+    event = analysis.get(
+        "last_displacement"
+    )
+
+    if not event:
+        return "None"
+
+    return (
+        f"{event['direction'].upper()} "
+        f"x{event['strength']:.2f} ATR"
+    )
+
+
+def _retest_text(analysis):
+    event = analysis.get(
+        "last_retest"
+    )
+
+    if not event:
+        return "None"
+
+    return (
+        f"{event['structure_kind']} "
+        f"{event['direction'].upper()} "
+        f"@ {_fmt(event['level'])}"
+    )
+
+
+def _setup_text(analysis):
+    setup = analysis.get(
+        "setup",
+        {},
+    )
+
+    if not setup:
+        return "None"
+
+    direction = setup.get(
+        "direction",
+        "-",
+    ).upper()
+
+    score = setup.get(
+        "score",
+        0,
+    )
+
+    state = (
+        "CONFIRMED"
+        if setup.get(
+            "confirmed",
+            False,
+        )
+        else "DEVELOPING"
+    )
+
+    return (
+        f"{state} {direction} "
+        f"({score}/4 signals)"
+    )
+
+
 def _print_summary(
     timeframe,
     analysis,
@@ -122,6 +200,30 @@ def _print_summary(
         f"[{timeframe}] "
         f"Last structure: "
         f"{_event_text(analysis)}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Liquidity sweep: "
+        f"{_sweep_text(analysis)}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Displacement: "
+        f"{_displacement_text(analysis)}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Retest: "
+        f"{_retest_text(analysis)}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Setup sequence: "
+        f"{_setup_text(analysis)}"
     )
 
 
@@ -225,6 +327,47 @@ def _make_state(report):
                     analysis
                 )
             ),
+            "last_sweep": (
+                analysis.get(
+                    "last_sweep"
+                )
+            ),
+            "last_displacement": (
+                analysis.get(
+                    "last_displacement"
+                )
+            ),
+            "last_retest": (
+                analysis.get(
+                    "last_retest"
+                )
+            ),
+            "setup": {
+                "direction": (
+                    analysis.get(
+                        "setup",
+                        {},
+                    ).get(
+                        "direction"
+                    )
+                ),
+                "score": (
+                    analysis.get(
+                        "setup",
+                        {},
+                    ).get(
+                        "score"
+                    )
+                ),
+                "confirmed": (
+                    analysis.get(
+                        "setup",
+                        {},
+                    ).get(
+                        "confirmed"
+                    )
+                ),
+            },
             "nearest_supply": (
                 _compact_zone(
                     analysis.get(
@@ -386,6 +529,53 @@ def _compare_state(
                     f"{timeframe} structure "
                     "event changed"
                 )
+            )
+
+        for field, label in [
+            ("last_sweep", "liquidity sweep"),
+            ("last_displacement", "displacement"),
+            ("last_retest", "retest"),
+        ]:
+            previous_signal = (
+                previous_tf.get(field)
+                or {}
+            )
+
+            current_signal = (
+                current_tf.get(field)
+                or {}
+            )
+
+            previous_signature = (
+                previous_signal.get("time"),
+                previous_signal.get("direction"),
+                previous_signal.get("level"),
+                previous_signal.get("type"),
+                previous_signal.get("structure_kind"),
+            )
+
+            current_signature = (
+                current_signal.get("time"),
+                current_signal.get("direction"),
+                current_signal.get("level"),
+                current_signal.get("type"),
+                current_signal.get("structure_kind"),
+            )
+
+            if (
+                previous_signature
+                != current_signature
+            ):
+                changes.append(
+                    f"{timeframe} {label} changed"
+                )
+
+        if (
+            previous_tf.get("setup")
+            != current_tf.get("setup")
+        ):
+            changes.append(
+                f"{timeframe} setup sequence changed"
             )
 
     material_change = bool(
@@ -617,6 +807,38 @@ def _build_hourly_update(
                 f"[{timeframe}] "
                 "Active FVG: "
                 f"{_fvg_text(analysis)}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Liquidity Sweep: "
+                f"{_sweep_text(analysis)}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Displacement: "
+                f"{_displacement_text(analysis)}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Retest: "
+                f"{_retest_text(analysis)}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Setup: "
+                f"{_setup_text(analysis)}"
             )
         )
 
