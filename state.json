@@ -1,62 +1,63 @@
 {
-  "generated_at_utc": "2026-09-30T10:48:03.351207+00:00",
-  "current_price": 27.097,
+  "generated_at_utc": "2026-09-30T11:06:20.946182+00:00",
+  "current_price": 27.22,
   "status": "DEVELOPING SHORT",
   "trade_plan": {
     "active": true,
     "execution_ready": false,
     "blockers": [
       "15M setup has fewer than 3/4 signals",
-      "15M BOS/CHoCH is missing"
+      "15M BOS/CHoCH is missing",
+      "First liquidity target is only 0.57R"
     ],
     "higher_tf_conflict": false,
-    "first_target_rr": 1.8013680435648782,
+    "first_target_rr": 0.5702161743027758,
     "direction": "short",
     "setup_state": "watch",
     "setup_score": 2,
     "entry_zone": {
-      "lower": 27.09,
-      "upper": 27.169,
-      "source": "supply"
+      "lower": 27.195665714285713,
+      "upper": 27.244334285714285,
+      "source": "ATR pullback"
     },
-    "entry_mid": 27.1295,
-    "stop_loss": 27.344614285714286,
-    "risk": 0.2151142857142858,
+    "entry_mid": 27.22,
+    "stop_loss": 28.058278571428573,
+    "risk": 0.8382785714285745,
     "targets": [
       {
         "name": "TP1",
         "price": 26.742,
         "source": "15M SSL",
-        "rr": 1.8013680435648782
+        "rr": 0.5702161743027758
       },
       {
         "name": "TP2",
         "price": 26.502,
         "source": "1H SSL",
-        "rr": 2.917054057643782
+        "rr": 0.8565171823209096
       },
       {
         "name": "TP3",
         "price": 26.388,
         "source": "4H SSL",
-        "rr": 3.447004914331244
+        "rr": 0.9925101611295186
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 27.095,
-    "high_24h": 28.427,
+    "last_price": 27.22,
+    "high_24h": 28.178,
     "low_24h": 26.388,
-    "change_rate_24h": 0.015,
-    "change_value_24h": 0.403,
-    "hold_vol": 4227709.0,
+    "change_rate_24h": 0.0197,
+    "change_value_24h": 0.528,
+    "hold_vol": 4241853.0,
     "funding_rate": 5e-05,
-    "index_price": 27.054,
-    "fair_price": 27.092,
-    "timestamp": 1790765279941,
-    "hold_vol_change_pct": 0.10885337637268441
+    "index_price": 27.192,
+    "fair_price": 27.217,
+    "timestamp": 1790766379942,
+    "hold_vol_change_pct": 0.3345547198257969
   },
   "timeframes": {
     "4H": {
@@ -91,16 +92,19 @@
         "confirmed": false
       },
       "nearest_supply": {
-        "lower": 29.367,
-        "upper": 30.116
+        "lower": 30.703,
+        "upper": 31.511
       },
-      "nearest_demand": null
+      "nearest_demand": {
+        "lower": 21.166,
+        "upper": 21.878
+      }
     },
     "1H": {
       "trend": "bearish",
       "bsl": {
-        "price": 27.445,
-        "time": "2026-09-29T23:00:00+00:00"
+        "price": 27.325,
+        "time": "2026-09-30T09:00:00+00:00"
       },
       "ssl": {
         "price": 26.502,
@@ -115,12 +119,12 @@
       "last_sweep": null,
       "last_displacement": null,
       "last_retest": {
-        "index": 195,
+        "index": 194,
         "time": "2026-09-30T06:00:00+00:00",
         "direction": "bearish",
         "structure_kind": "CHoCH",
         "level": 26.74,
-        "source_index": 194
+        "source_index": 193
       },
       "setup": {
         "direction": "bearish",
@@ -128,8 +132,8 @@
         "confirmed": false
       },
       "nearest_supply": {
-        "lower": 29.742,
-        "upper": 30.068
+        "lower": 31.838,
+        "upper": 32.406
       },
       "nearest_demand": null
     },
@@ -150,7 +154,7 @@
         "level": 26.82
       },
       "last_sweep": {
-        "index": 194,
+        "index": 193,
         "time": "2026-09-30T09:30:00+00:00",
         "type": "BSL",
         "direction": "bearish",
@@ -158,7 +162,7 @@
         "extreme": 27.325
       },
       "last_displacement": {
-        "index": 195,
+        "index": 194,
         "time": "2026-09-30T09:45:00+00:00",
         "direction": "bearish",
         "strength": 1.1820708825573245,
@@ -174,12 +178,12 @@
         "confirmed": false
       },
       "nearest_supply": {
-        "lower": 27.09,
-        "upper": 27.169
+        "lower": 27.972,
+        "upper": 28.038
       },
       "nearest_demand": {
-        "lower": 26.043,
-        "upper": 26.22
+        "lower": 26.502,
+        "upper": 26.694
       }
     }
   }
