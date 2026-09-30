@@ -129,3 +129,152 @@ def get_klines(interval="4h", limit=200):
     )
 
     return df
+
+
+
+def get_contract_snapshot():
+    """
+    Public MEXC Futures ticker snapshot for VVV_USDT.
+
+    Returns real-time-ish contract fields used by the chart header
+    and derivatives panel: last price, 24h high/low/change,
+    open interest proxy (holdVol), and funding rate.
+    """
+
+    url = (
+        f"{BASE_URL}/api/v1/contract/ticker"
+    )
+
+    response = requests.get(
+        url,
+        params={
+            "symbol": SYMBOL,
+        },
+        timeout=20,
+    )
+
+    print(
+        "MEXC ticker HTTP status:",
+        response.status_code,
+    )
+
+    if response.status_code != 200:
+        print(
+            "MEXC ticker response:"
+        )
+        print(response.text)
+
+        raise RuntimeError(
+            (
+                "MEXC ticker request "
+                f"failed with HTTP "
+                f"{response.status_code}"
+            )
+        )
+
+    payload = response.json()
+
+    if (
+        not payload.get("success")
+        or payload.get("code") != 0
+    ):
+        print(
+            "MEXC ticker response:"
+        )
+        print(payload)
+
+        raise RuntimeError(
+            (
+                "MEXC ticker API error: "
+                f"code={payload.get('code')}"
+            )
+        )
+
+    data = payload.get("data")
+
+    if isinstance(data, list):
+        matches = [
+            item
+            for item in data
+            if item.get("symbol")
+            == SYMBOL
+        ]
+
+        data = (
+            matches[0]
+            if matches
+            else None
+        )
+
+    if not isinstance(
+        data,
+        dict,
+    ):
+        raise RuntimeError(
+            (
+                "MEXC ticker returned "
+                "unexpected data."
+            )
+        )
+
+    def num(key):
+        value = data.get(key)
+
+        if value is None:
+            return None
+
+        try:
+            return float(value)
+        except (
+            TypeError,
+            ValueError,
+        ):
+            return None
+
+    snapshot = {
+        "symbol": (
+            data.get("symbol")
+            or SYMBOL
+        ),
+        "last_price": num(
+            "lastPrice"
+        ),
+        "high_24h": num(
+            "high24Price"
+        ),
+        "low_24h": num(
+            "lower24Price"
+        ),
+        "change_rate_24h": num(
+            "riseFallRate"
+        ),
+        "change_value_24h": num(
+            "riseFallValue"
+        ),
+        "hold_vol": num(
+            "holdVol"
+        ),
+        "funding_rate": num(
+            "fundingRate"
+        ),
+        "index_price": num(
+            "indexPrice"
+        ),
+        "fair_price": num(
+            "fairPrice"
+        ),
+        "timestamp": (
+            data.get("timestamp")
+        ),
+    }
+
+    print(
+        (
+            "MEXC ticker snapshot: "
+            f"last={snapshot['last_price']} | "
+            f"holdVol={snapshot['hold_vol']} | "
+            f"funding={snapshot['funding_rate']}"
+        )
+    )
+
+    return snapshot
