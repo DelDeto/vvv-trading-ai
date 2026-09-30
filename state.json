@@ -1,49 +1,62 @@
 {
-  "generated_at_utc": "2026-09-30T09:06:10.041952+00:00",
-  "current_price": 27.1,
+  "generated_at_utc": "2026-09-30T09:48:17.506505+00:00",
+  "current_price": 27.14,
   "status": "DEVELOPING LONG",
   "trade_plan": {
     "active": true,
     "execution_ready": false,
     "blockers": [
       "15M displacement is missing",
-      "First liquidity target is only 0.85R",
       "1H active setup is opposite the 15M direction"
     ],
     "higher_tf_conflict": true,
-    "first_target_rr": 0.8548063082301229,
+    "first_target_rr": 1.38701751604978,
     "direction": "long",
     "setup_state": "developing",
     "setup_score": 3,
     "entry_zone": {
-      "lower": 26.800435714285715,
-      "upper": 26.839564285714285,
+      "lower": 26.801392857142858,
+      "upper": 26.838607142857143,
       "source": "retest"
     },
     "entry_mid": 26.82,
-    "stop_loss": 26.368435714285717,
-    "risk": 0.45156428571428364,
+    "stop_loss": 26.36939285714286,
+    "risk": 0.450607142857141,
     "targets": [
       {
         "name": "TP1",
-        "price": 27.206,
+        "price": 27.445,
         "source": "15M BSL",
-        "rr": 0.8548063082301229
+        "rr": 1.38701751604978
       },
       {
         "name": "TP2",
         "price": 28.542,
         "source": "4H BSL",
-        "rr": 3.8134105253167765
+        "rr": 3.8215106602203566
       },
       {
         "name": "TP3",
-        "price": 27.271564285714284,
+        "price": 27.27060714285714,
         "source": "1R",
         "rr": 1.0
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
+  },
+  "market_snapshot": {
+    "symbol": "VVV_USDT",
+    "last_price": 27.132,
+    "high_24h": 28.427,
+    "low_24h": 26.388,
+    "change_rate_24h": 0.0164,
+    "change_value_24h": 0.44,
+    "hold_vol": 4135460.0,
+    "funding_rate": 5e-05,
+    "index_price": 27.118,
+    "fair_price": 27.132,
+    "timestamp": 1790761694910,
+    "hold_vol_change_pct": null
   },
   "timeframes": {
     "4H": {
@@ -86,8 +99,8 @@
     "1H": {
       "trend": "bearish",
       "bsl": {
-        "price": 27.206,
-        "time": "2026-09-30T07:00:00+00:00"
+        "price": 27.445,
+        "time": "2026-09-29T23:00:00+00:00"
       },
       "ssl": {
         "price": 26.502,
@@ -126,8 +139,8 @@
     "15M": {
       "trend": "bullish",
       "bsl": {
-        "price": 27.206,
-        "time": "2026-09-30T07:45:00+00:00"
+        "price": 27.445,
+        "time": "2026-09-29T23:00:00+00:00"
       },
       "ssl": {
         "price": 26.775,
@@ -140,7 +153,7 @@
         "level": 26.82
       },
       "last_sweep": {
-        "index": 189,
+        "index": 186,
         "time": "2026-09-30T06:30:00+00:00",
         "type": "SSL",
         "direction": "bullish",
@@ -149,12 +162,12 @@
       },
       "last_displacement": null,
       "last_retest": {
-        "index": 197,
+        "index": 194,
         "time": "2026-09-30T08:30:00+00:00",
         "direction": "bullish",
         "structure_kind": "CHoCH",
         "level": 26.82,
-        "source_index": 192
+        "source_index": 189
       },
       "setup": {
         "direction": "bullish",
