@@ -470,6 +470,15 @@ def _trade_plan_signature(plan):
         True,
         plan.get("direction"),
         plan.get("setup_state"),
+        plan.get(
+            "execution_ready"
+        ),
+        tuple(
+            plan.get(
+                "blockers",
+                [],
+            )
+        ),
         round(
             float(
                 entry.get(
@@ -896,6 +905,39 @@ def _build_hourly_update(
                 f"({trade_plan['setup_state'].upper()})"
             )
         )
+
+        execution_ready = (
+            trade_plan.get(
+                "execution_ready",
+                False,
+            )
+        )
+
+        lines.append(
+            (
+                "Execution: "
+                + (
+                    "READY"
+                    if execution_ready
+                    else "WAIT"
+                )
+            )
+        )
+
+        blockers = trade_plan.get(
+            "blockers",
+            [],
+        )
+
+        if blockers:
+            lines.append(
+                "Blockers:"
+            )
+
+            for blocker in blockers:
+                lines.append(
+                    f"- {blocker}"
+                )
 
         lines.append(
             (
