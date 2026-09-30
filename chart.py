@@ -1,40 +1,42 @@
 import os
+
 import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch
 import mplfinance as mpf
+import numpy as np
 import pandas as pd
 
 
-# Binance dark-theme palette
+# Clean dark trading palette
 BG = "#0B0E11"
-PANEL = "#0B0E11"
-GRID = "#1E2329"
+PANEL = "#11161D"
+GRID = "#20262E"
 TEXT = "#EAECEF"
-MUTED = "#848E9C"
+MUTED = "#8A94A6"
 
 GREEN = "#0ECB81"
 RED = "#F6465D"
 YELLOW = "#F0B90B"
 BLUE = "#2B7FFF"
+WHITE = "#D8DEE9"
 
-SUPPLY = "#F6465D"
-DEMAND = "#0ECB81"
-BULL_FVG = "#0ECB81"
-BEAR_FVG = "#F6465D"
+SUPPLY = RED
+DEMAND = GREEN
+VWAP = BLUE
 
 
-binance_mc = mpf.make_marketcolors(
+market_colors = mpf.make_marketcolors(
     up=GREEN,
     down=RED,
     edge={"up": GREEN, "down": RED},
     wick={"up": GREEN, "down": RED},
     volume={"up": GREEN, "down": RED},
-    ohlc={"up": GREEN, "down": RED},
 )
 
-binance_style = mpf.make_mpf_style(
+chart_style = mpf.make_mpf_style(
     base_mpf_style="nightclouds",
-    marketcolors=binance_mc,
-    facecolor=PANEL,
+    marketcolors=market_colors,
+    facecolor=BG,
     figcolor=BG,
     gridcolor=GRID,
     gridstyle="-",
@@ -43,10 +45,6 @@ binance_style = mpf.make_mpf_style(
         "axes.edgecolor": GRID,
         "axes.labelcolor": MUTED,
         "axes.titlecolor": TEXT,
-        "axes.grid": True,
-        "axes.grid.axis": "both",
-        "axes.grid.which": "major",
-        "axes.axisbelow": True,
         "xtick.color": MUTED,
         "ytick.color": MUTED,
         "text.color": TEXT,
@@ -58,63 +56,53 @@ binance_style = mpf.make_mpf_style(
 def _fmt(value):
     if value is None:
         return "-"
-
-    return f"{value:.3f}"
-
-
-def _style_axes(axes):
-    """
-    Remove heavy borders and keep the chart close to Binance dark mode.
-    """
-
-    for axis in axes:
-        axis.set_facecolor(PANEL)
-
-        for spine in axis.spines.values():
-            spine.set_visible(False)
-
-        axis.tick_params(
-            colors=MUTED,
-            labelsize=8,
-            length=0,
-        )
-
-        axis.grid(
-            True,
-            color=GRID,
-            linewidth=0.6,
-            alpha=0.55,
-        )
+    return f"{float(value):.3f}"
 
 
-def _draw_price_tag(
+def _style_axis(ax):
+    ax.set_facecolor(BG)
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    ax.tick_params(
+        colors=MUTED,
+        labelsize=8,
+        length=0,
+    )
+
+    ax.grid(
+        True,
+        color=GRID,
+        linewidth=0.55,
+        alpha=0.58,
+    )
+
+
+def _price_tag(
     ax,
-    current_price,
+    price,
     last_open,
 ):
-    """
-    Binance-like current-price dotted line + price tag on right axis.
-    """
-
-    price_color = (
+    color = (
         GREEN
-        if current_price >= last_open
+        if price >= last_open
         else RED
     )
 
     ax.axhline(
-        current_price,
-        color=price_color,
-        linewidth=0.9,
+        price,
+        color=color,
+        linewidth=0.8,
         linestyle=(0, (2, 2)),
-        alpha=0.95,
+        alpha=0.8,
         zorder=2,
     )
 
     ax.text(
         1.002,
-        current_price,
-        f" {_fmt(current_price)} ",
+        price,
+        f" {_fmt(price)} ",
         transform=ax.get_yaxis_transform(),
         ha="left",
         va="center",
@@ -123,60 +111,424 @@ def _draw_price_tag(
         clip_on=False,
         bbox=dict(
             boxstyle="square,pad=0.22",
-            facecolor=price_color,
-            edgecolor=price_color,
+            facecolor=color,
+            edgecolor=color,
             linewidth=0,
+        ),
+        zorder=10,
+    )
+
+
+def _anchored_vwap(
+    plot_df,
+    analysis,
+):
+    setup = (
+        analysis.get(
+            "setup",
+            {},
+        )
+        if analysis
+        else {}
+    )
+
+    anchor_candidates = []
+
+    for field in [
+        "sweep",
+        "structure",
+        "displacement",
+    ]:
+        event = setup.get(field)
+
+        if (
+            event
+            and event.get("time")
+        ):
+            try:
+                ts = pd.Timestamp(
+                    event["time"]
+                )
+
+                if ts in plot_df.index:
+                    anchor_candidates.append(
+                        plot_df.index.get_loc(
+                            ts
+                        )
+                    )
+            except Exception:
+                pass
+
+    if anchor_candidates:
+        anchor = min(
+            anchor_candidates
+        )
+    else:
+        anchor = max(
+            0,
+            len(plot_df) - 96,
+        )
+
+    typical = (
+        plot_df["High"]
+        + plot_df["Low"]
+        + plot_df["Close"]
+    ) / 3
+
+    volume = (
+        plot_df["Volume"]
+        .astype(float)
+        .fillna(0)
+    )
+
+    vwap = pd.Series(
+        np.nan,
+        index=plot_df.index,
+        dtype=float,
+    )
+
+    segment = slice(
+        anchor,
+        None,
+    )
+
+    pv = (
+        typical.iloc[segment]
+        * volume.iloc[segment]
+    ).cumsum()
+
+    vv = (
+        volume.iloc[segment]
+        .cumsum()
+        .replace(
+            0,
+            np.nan,
+        )
+    )
+
+    vwap.iloc[segment] = (
+        pv / vv
+    )
+
+    return (
+        vwap,
+        anchor,
+    )
+
+
+def _zone_candidates(
+    analysis,
+    side,
+    current_price,
+    max_zones=2,
+):
+    key = (
+        "supply_zones"
+        if side == "supply"
+        else "demand_zones"
+    )
+
+    zones = [
+        dict(zone)
+        for zone in analysis.get(
+            key,
+            [],
+        )
+        if not zone.get(
+            "invalidated",
+            False,
+        )
+    ]
+
+    if not zones:
+        nearest = analysis.get(
+            (
+                "nearest_supply"
+                if side == "supply"
+                else "nearest_demand"
+            )
+        )
+
+        return (
+            [nearest]
+            if nearest
+            else []
+        )
+
+    filtered = []
+
+    for zone in zones:
+        midpoint = (
+            float(zone["lower"])
+            + float(zone["upper"])
+        ) / 2
+
+        distance_pct = (
+            abs(
+                midpoint
+                - current_price
+            )
+            / max(
+                current_price,
+                1e-9,
+            )
+        )
+
+        if distance_pct <= 0.20:
+            filtered.append(zone)
+
+    if not filtered:
+        filtered = zones
+
+    if side == "supply":
+        filtered.sort(
+            key=lambda zone: abs(
+                max(
+                    float(
+                        zone["lower"]
+                    ),
+                    current_price,
+                )
+                - current_price
+            )
+        )
+    else:
+        filtered.sort(
+            key=lambda zone: abs(
+                current_price
+                - min(
+                    float(
+                        zone["upper"]
+                    ),
+                    current_price,
+                )
+            )
+        )
+
+    return filtered[:max_zones]
+
+
+def _draw_zone(
+    ax,
+    zone,
+    side,
+    number,
+    x_left,
+    x_right,
+):
+    if not zone:
+        return
+
+    lower = float(
+        zone["lower"]
+    )
+
+    upper = float(
+        zone["upper"]
+    )
+
+    color = (
+        SUPPLY
+        if side == "supply"
+        else DEMAND
+    )
+
+    ax.fill_between(
+        [x_left, x_right],
+        lower,
+        upper,
+        color=color,
+        alpha=0.11,
+        zorder=0,
+    )
+
+    ax.hlines(
+        [lower, upper],
+        xmin=x_left,
+        xmax=x_right,
+        color=color,
+        linewidth=0.8,
+        alpha=0.80,
+        zorder=2,
+    )
+
+    label = (
+        "Supply"
+        if side == "supply"
+        else "Demand"
+    )
+
+    ax.text(
+        x_right - 1.0,
+        (
+            lower
+            + upper
+        )
+        / 2,
+        (
+            f"{label} Zone {number}\n"
+            f"{_fmt(lower)} – {_fmt(upper)}"
+        ),
+        ha="right",
+        va="center",
+        fontsize=7.4,
+        color=(
+            "#FF8A97"
+            if side == "supply"
+            else "#5AF0B0"
+        ),
+        fontweight="bold",
+        bbox=dict(
+            boxstyle="round,pad=0.25",
+            facecolor=BG,
+            edgecolor=color,
+            linewidth=0.5,
+            alpha=0.72,
         ),
         zorder=7,
     )
 
 
-def _draw_liquidity_line(
+def _draw_liquidity(
     ax,
-    price,
-    label,
-    color,
-    va,
+    analysis,
+    x_start,
+    x_end,
 ):
-    ax.axhline(
-        price,
-        color=color,
-        linewidth=0.9,
-        linestyle=(0, (5, 4)),
-        alpha=0.85,
-        zorder=2,
+    for key, label in [
+        ("bsl", "BSL"),
+        ("ssl", "SSL"),
+    ]:
+        point = analysis.get(key)
+
+        if not point:
+            continue
+
+        price = float(
+            point["price"]
+        )
+
+        ax.hlines(
+            price,
+            xmin=x_start,
+            xmax=x_end,
+            color=WHITE,
+            linewidth=0.8,
+            linestyle=(0, (4, 4)),
+            alpha=0.72,
+            zorder=3,
+        )
+
+        ax.text(
+            x_start,
+            price,
+            (
+                f" {label} "
+                f"({_fmt(price)}) "
+            ),
+            ha="left",
+            va=(
+                "bottom"
+                if key == "bsl"
+                else "top"
+            ),
+            fontsize=6.8,
+            color=WHITE,
+            zorder=7,
+        )
+
+
+def _draw_vwap(
+    ax,
+    plot_df,
+    analysis,
+):
+    vwap, anchor = (
+        _anchored_vwap(
+            plot_df,
+            analysis,
+        )
     )
 
-    ax.text(
-        0.995,
-        price,
-        f" {label} {_fmt(price)} ",
-        transform=ax.get_yaxis_transform(),
-        ha="right",
-        va=va,
-        fontsize=7.5,
-        color=color,
-        bbox=dict(
-            boxstyle="round,pad=0.20",
-            facecolor=BG,
-            edgecolor=color,
-            linewidth=0.7,
-            alpha=0.92,
-        ),
-        zorder=6,
+    x = np.arange(
+        len(plot_df)
     )
 
+    valid = (
+        ~vwap.isna()
+    ).to_numpy()
+
+    if valid.any():
+        ax.plot(
+            x[valid],
+            vwap.to_numpy()[valid],
+            color=VWAP,
+            linewidth=1.35,
+            alpha=0.96,
+            zorder=4,
+        )
+
+        last_valid = np.where(
+            valid
+        )[0][-1]
+
+        ax.text(
+            last_valid,
+            float(
+                vwap.iloc[
+                    last_valid
+                ]
+            ),
+            " VWAP ",
+            ha="left",
+            va="bottom",
+            fontsize=7,
+            color=WHITE,
+            bbox=dict(
+                boxstyle="round,pad=0.18",
+                facecolor="#153C72",
+                edgecolor=VWAP,
+                linewidth=0.6,
+                alpha=0.94,
+            ),
+            zorder=8,
+        )
+
+    current_price = float(
+        plot_df.iloc[-1][
+            "Close"
+        ]
+    )
+
+    current_vwap = (
+        float(vwap.dropna().iloc[-1])
+        if not vwap.dropna().empty
+        else None
+    )
+
+    relation = "N/A"
+
+    if current_vwap is not None:
+        relation = (
+            "ABOVE"
+            if current_price
+            >= current_vwap
+            else "BELOW"
+        )
+
+    return {
+        "value": current_vwap,
+        "relation": relation,
+        "anchor_index": anchor,
+    }
 
 
-
-def _draw_trade_plan(
+def _draw_trade_targets(
     ax,
     trade_plan,
+    x_now,
+    x_future,
 ):
-    """
-    Draw the current rule-based execution map on the 15M chart.
-    """
-
     if (
         not trade_plan
         or not trade_plan.get(
@@ -186,16 +538,16 @@ def _draw_trade_plan(
     ):
         return
 
-    direction = trade_plan[
-        "direction"
-    ]
-
     execution_ready = (
         trade_plan.get(
             "execution_ready",
             False,
         )
     )
+
+    direction = trade_plan[
+        "direction"
+    ]
 
     entry = trade_plan[
         "entry_zone"
@@ -209,134 +561,88 @@ def _draw_trade_plan(
         entry["upper"]
     )
 
-    stop_loss = float(
+    stop = float(
         trade_plan[
             "stop_loss"
         ]
     )
 
-    entry_color = (
+    zone_color = (
         GREEN
         if execution_ready
         else YELLOW
     )
 
-    ax.axhspan(
+    ax.fill_between(
+        [x_now - 8, x_future],
         entry_lower,
         entry_upper,
-        color=entry_color,
-        alpha=0.11,
+        color=zone_color,
+        alpha=0.07,
         zorder=1,
     )
 
-    ax.axhline(
-        entry_lower,
-        color=entry_color,
-        linewidth=0.75,
-        linestyle=(0, (3, 3)),
-        alpha=0.9,
-        zorder=3,
-    )
-
-    ax.axhline(
-        entry_upper,
-        color=entry_color,
-        linewidth=0.75,
-        linestyle=(0, (3, 3)),
-        alpha=0.9,
-        zorder=3,
-    )
-
     ax.text(
-        0.995,
+        x_future - 0.5,
         (
             entry_lower
             + entry_upper
-        )
-        / 2,
+        ) / 2,
         (
-            f" {'ENTRY' if execution_ready else 'WATCH'} "
-            f"{_fmt(entry_lower)}-"
-            f"{_fmt(entry_upper)} "
+            f"{'ENTRY' if execution_ready else 'WATCH'} "
+            f"{_fmt(entry_lower)}–{_fmt(entry_upper)}"
         ),
-        transform=ax.get_yaxis_transform(),
         ha="right",
         va="center",
-        fontsize=7.2,
-        color=entry_color,
+        fontsize=7.1,
+        color=zone_color,
         bbox=dict(
-            boxstyle="round,pad=0.20",
+            boxstyle="round,pad=0.22",
             facecolor=BG,
-            edgecolor=entry_color,
+            edgecolor=zone_color,
             linewidth=0.7,
-            alpha=0.94,
+            alpha=0.92,
         ),
         zorder=9,
     )
 
-    ax.axhline(
-        stop_loss,
+    ax.hlines(
+        stop,
+        xmin=max(
+            0,
+            x_now - 25,
+        ),
+        xmax=x_future,
         color=RED,
-        linewidth=1.0,
-        linestyle=(0, (2, 2)),
-        alpha=0.95,
-        zorder=4,
+        linewidth=0.9,
+        linestyle=(0, (5, 4)),
+        alpha=0.9,
+        zorder=3,
     )
 
     ax.text(
-        0.995,
-        stop_loss,
+        x_future,
+        stop,
         (
-            f" {'SL' if execution_ready else 'REF SL'} "
-            f"{_fmt(stop_loss)} "
+            f" Invalidation "
+            f"{_fmt(stop)} "
         ),
-        transform=ax.get_yaxis_transform(),
         ha="right",
         va=(
             "top"
             if direction == "long"
             else "bottom"
         ),
-        fontsize=7.2,
+        fontsize=7.0,
         color=RED,
         bbox=dict(
-            boxstyle="round,pad=0.20",
+            boxstyle="round,pad=0.18",
             facecolor=BG,
             edgecolor=RED,
-            linewidth=0.7,
-            alpha=0.94,
+            linewidth=0.6,
+            alpha=0.9,
         ),
         zorder=9,
-    )
-
-    status_color = (
-        GREEN
-        if execution_ready
-        else YELLOW
-    )
-
-    ax.text(
-        0.992,
-        0.975,
-        (
-            "EXECUTION READY"
-            if execution_ready
-            else "EXECUTION WAIT"
-        ),
-        transform=ax.transAxes,
-        ha="right",
-        va="top",
-        fontsize=7.5,
-        fontweight="bold",
-        color=status_color,
-        bbox=dict(
-            boxstyle="round,pad=0.24",
-            facecolor=BG,
-            edgecolor=status_color,
-            linewidth=0.7,
-            alpha=0.94,
-        ),
-        zorder=10,
     )
 
     for index, target in enumerate(
@@ -350,56 +656,415 @@ def _draw_trade_plan(
             target["price"]
         )
 
-        rr = target.get(
-            "rr"
-        )
-
-        rr_text = (
-            f" {rr:.2f}R"
-            if rr is not None
-            else ""
-        )
-
-        alpha = max(
-            0.55,
-            0.92
-            - (
-                index - 1
-            )
-            * 0.15,
-        )
-
-        ax.axhline(
+        ax.hlines(
             price,
+            xmin=x_now + 2,
+            xmax=x_future,
             color=GREEN,
-            linewidth=0.9,
+            linewidth=0.85,
             linestyle=(0, (6, 4)),
-            alpha=alpha,
+            alpha=0.86,
             zorder=3,
         )
 
         ax.text(
-            0.995,
+            x_future,
             price,
             (
                 f" TP{index} "
-                f"{_fmt(price)}"
-                f"{rr_text} "
+                f"{_fmt(price)} "
             ),
-            transform=ax.get_yaxis_transform(),
             ha="right",
             va="bottom",
-            fontsize=7.0,
-            color=GREEN,
+            fontsize=7.2,
+            color=BG,
             bbox=dict(
                 boxstyle="round,pad=0.18",
-                facecolor=BG,
+                facecolor=GREEN,
                 edgecolor=GREEN,
-                linewidth=0.6,
-                alpha=0.92,
+                linewidth=0.5,
+                alpha=0.95,
             ),
             zorder=9,
         )
+
+
+def _scenario_points(
+    current_price,
+    trade_plan,
+    x_now,
+):
+    if (
+        not trade_plan
+        or not trade_plan.get(
+            "active",
+            False,
+        )
+    ):
+        return None
+
+    direction = trade_plan[
+        "direction"
+    ]
+
+    entry = trade_plan[
+        "entry_zone"
+    ]
+
+    entry_mid = (
+        float(
+            entry["lower"]
+        )
+        + float(
+            entry["upper"]
+        )
+    ) / 2
+
+    targets = [
+        float(item["price"])
+        for item
+        in trade_plan.get(
+            "targets",
+            [],
+        )
+    ]
+
+    xs = [
+        x_now,
+        x_now + 3,
+    ]
+
+    ys = [
+        current_price,
+        entry_mid,
+    ]
+
+    for i, target in enumerate(
+        targets[:3],
+        start=1,
+    ):
+        xs.append(
+            x_now + 7 * i
+        )
+
+        ys.append(target)
+
+        if i < len(
+            targets[:3]
+        ):
+            xs.append(
+                x_now
+                + 7 * i
+                + 2
+            )
+
+            if direction == "long":
+                ys.append(
+                    target
+                    - abs(
+                        target
+                        - entry_mid
+                    )
+                    * 0.12
+                )
+            else:
+                ys.append(
+                    target
+                    + abs(
+                        target
+                        - entry_mid
+                    )
+                    * 0.12
+                )
+
+    return (
+        np.array(xs),
+        np.array(ys),
+    )
+
+
+def _draw_preferred_scenario(
+    ax,
+    current_price,
+    trade_plan,
+    x_now,
+):
+    points = _scenario_points(
+        current_price,
+        trade_plan,
+        x_now,
+    )
+
+    if points is None:
+        ax.text(
+            0.69,
+            0.11,
+            (
+                "Preferred scenario\n"
+                "WAIT – no active execution map"
+            ),
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=7.8,
+            color=MUTED,
+            bbox=dict(
+                boxstyle="round,pad=0.34",
+                facecolor=PANEL,
+                edgecolor=GRID,
+                linewidth=0.7,
+                alpha=0.93,
+            ),
+            zorder=10,
+        )
+
+        return
+
+    xs, ys = points
+
+    dense_x = np.linspace(
+        xs.min(),
+        xs.max(),
+        180,
+    )
+
+    dense_y = np.interp(
+        dense_x,
+        xs,
+        ys,
+    )
+
+    direction = trade_plan[
+        "direction"
+    ]
+
+    scenario_color = (
+        GREEN
+        if direction == "long"
+        else RED
+    )
+
+    ax.plot(
+        dense_x,
+        dense_y,
+        color=scenario_color,
+        linewidth=2.0,
+        alpha=0.95,
+        zorder=6,
+    )
+
+    ax.annotate(
+        "",
+        xy=(
+            dense_x[-1],
+            dense_y[-1],
+        ),
+        xytext=(
+            dense_x[-12],
+            dense_y[-12],
+        ),
+        arrowprops=dict(
+            arrowstyle="-|>",
+            color=scenario_color,
+            lw=2.0,
+            mutation_scale=18,
+        ),
+        zorder=7,
+    )
+
+    execution_ready = (
+        trade_plan.get(
+            "execution_ready",
+            False,
+        )
+    )
+
+    if direction == "long":
+        scenario = (
+            "Preferred scenario:\n"
+            "pullback into demand/FVG →\n"
+            "hold above VWAP → bullish continuation"
+        )
+    else:
+        scenario = (
+            "Preferred scenario:\n"
+            "retest supply/FVG →\n"
+            "hold below VWAP → bearish continuation"
+        )
+
+    if not execution_ready:
+        scenario += (
+            "\nExecution: WAIT"
+        )
+
+    ax.text(
+        min(
+            xs.max() - 12,
+            x_now + 4,
+        ),
+        np.mean(
+            [
+                current_price,
+                ys[-1],
+            ]
+        ),
+        scenario,
+        ha="left",
+        va="center",
+        fontsize=7.5,
+        color=scenario_color,
+        bbox=dict(
+            boxstyle="round,pad=0.34",
+            facecolor=PANEL,
+            edgecolor=scenario_color,
+            linewidth=0.7,
+            alpha=0.94,
+        ),
+        zorder=9,
+    )
+
+
+def _draw_side_panel(
+    fig,
+    analysis,
+    trade_plan,
+    vwap_info,
+):
+    setup = analysis.get(
+        "setup",
+        {},
+    )
+
+    score = int(
+        setup.get(
+            "score",
+            0,
+        )
+        or 0
+    )
+
+    direction = (
+        trade_plan.get(
+            "direction"
+        )
+        if trade_plan
+        else None
+    )
+
+    if direction:
+        bias = direction.upper()
+    else:
+        bias = analysis.get(
+            "trend",
+            "mixed",
+        ).upper()
+
+    ready = bool(
+        trade_plan
+        and trade_plan.get(
+            "execution_ready",
+            False,
+        )
+    )
+
+    vwap_relation = (
+        vwap_info.get(
+            "relation",
+            "N/A",
+        )
+    )
+
+    vwap_align = (
+        (
+            direction == "long"
+            and vwap_relation
+            == "ABOVE"
+        )
+        or (
+            direction == "short"
+            and vwap_relation
+            == "BELOW"
+        )
+    )
+
+    confluence = min(
+        5,
+        score
+        + (
+            1
+            if vwap_align
+            else 0
+        ),
+    )
+
+    bias_color = (
+        GREEN
+        if bias == "LONG"
+        else (
+            RED
+            if bias == "SHORT"
+            else MUTED
+        )
+    )
+
+    execution_color = (
+        GREEN
+        if ready
+        else YELLOW
+    )
+
+    panel_text = (
+        f"Bias: {bias}\n"
+        f"Execution: "
+        f"{'READY' if ready else 'WAIT'}\n"
+        f"VWAP: {vwap_relation}\n"
+        f"SMC setup: {score}/4\n"
+        f"Confluence: {confluence}/5"
+    )
+
+    fig.text(
+        0.842,
+        0.885,
+        panel_text,
+        ha="left",
+        va="top",
+        fontsize=9.0,
+        color=TEXT,
+        linespacing=1.55,
+        bbox=dict(
+            boxstyle="round,pad=0.70",
+            facecolor=PANEL,
+            edgecolor=GRID,
+            linewidth=0.9,
+            alpha=0.97,
+        ),
+    )
+
+    fig.text(
+        0.905,
+        0.876,
+        bias,
+        ha="right",
+        va="top",
+        fontsize=9.0,
+        fontweight="bold",
+        color=bias_color,
+    )
+
+    fig.text(
+        0.905,
+        0.846,
+        (
+            "READY"
+            if ready
+            else "WAIT"
+        ),
+        ha="right",
+        va="top",
+        fontsize=9.0,
+        fontweight="bold",
+        color=execution_color,
+    )
 
 
 def create_chart(
@@ -412,8 +1077,9 @@ def create_chart(
     trade_plan=None,
 ):
     """
-    Vẽ candlestick chart từ OHLC Futures thật
-    theo phong cách Binance và overlay SMC rule-based.
+    Clean scenario chart:
+    candles + Supply/Demand + liquidity + VWAP + preferred scenario.
+    Volume panel is intentionally removed.
     """
 
     output_dir = os.path.dirname(
@@ -427,7 +1093,13 @@ def create_chart(
         )
 
     plot_df = df[
-        ["open", "high", "low", "close", "volume"]
+        [
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+        ]
     ].copy()
 
     plot_df.columns = [
@@ -438,637 +1110,226 @@ def create_chart(
         "Volume",
     ]
 
-    plot_df = plot_df.tail(candles)
+    plot_df = (
+        plot_df
+        .tail(candles)
+        .copy()
+    )
 
     current_price = float(
-        plot_df.iloc[-1]["Close"]
+        plot_df.iloc[-1][
+            "Close"
+        ]
     )
 
     last_open = float(
-        plot_df.iloc[-1]["Open"]
+        plot_df.iloc[-1][
+            "Open"
+        ]
     )
 
     last_high = float(
-        plot_df.iloc[-1]["High"]
+        plot_df.iloc[-1][
+            "High"
+        ]
     )
 
     last_low = float(
-        plot_df.iloc[-1]["Low"]
-    )
-
-    print(
-        f"Creating {interval} chart | "
-        f"{exchange} | "
-        f"Current close: {current_price}"
+        plot_df.iloc[-1][
+            "Low"
+        ]
     )
 
     fig, axes = mpf.plot(
         plot_df,
         type="candle",
-        volume=True,
-        style=binance_style,
+        volume=False,
+        style=chart_style,
         ylabel="",
-        ylabel_lower="",
         datetime_format="%m-%d %H:%M",
         xrotation=0,
         figsize=(16, 9),
-        tight_layout=True,
         returnfig=True,
+        tight_layout=False,
         update_width_config={
-            "candle_width": 0.68,
-            "candle_linewidth": 0.75,
-            "volume_width": 0.68,
+            "candle_width": 0.64,
+            "candle_linewidth": 0.72,
         },
     )
 
-    fig.patch.set_facecolor(BG)
-
-    _style_axes(axes)
+    fig.patch.set_facecolor(
+        BG
+    )
 
     ax = axes[0]
-    x_right = len(plot_df) - 1
 
-    # Binance-like title/header
+    _style_axis(ax)
+
+    fig.subplots_adjust(
+        left=0.055,
+        right=0.82,
+        top=0.88,
+        bottom=0.105,
+    )
+
+    x_now = (
+        len(plot_df) - 1
+    )
+
+    x_future = (
+        x_now + 24
+    )
+
+    ax.set_xlim(
+        -1,
+        x_future + 2,
+    )
+
+    # Header
     fig.text(
-        0.065,
-        0.972,
+        0.058,
+        0.955,
         (
-            f"VVV_USDT Perpetual  ·  "
-            f"{interval}  ·  {exchange}"
+            f"VVV/USDT   {interval}"
         ),
         ha="left",
         va="top",
-        fontsize=13,
+        fontsize=17,
         fontweight="bold",
         color=TEXT,
     )
 
-    candle_color = (
-        GREEN
-        if current_price >= last_open
-        else RED
+    fig.text(
+        0.23,
+        0.955,
+        _fmt(current_price),
+        ha="left",
+        va="top",
+        fontsize=18,
+        fontweight="bold",
+        color=(
+            GREEN
+            if current_price
+            >= last_open
+            else RED
+        ),
     )
 
     fig.text(
-        0.065,
-        0.947,
+        0.058,
+        0.925,
         (
-            f"O {_fmt(last_open)}    "
-            f"H {_fmt(last_high)}    "
-            f"L {_fmt(last_low)}    "
-            f"C {_fmt(current_price)}"
+            f"O {_fmt(last_open)}   "
+            f"H {_fmt(last_high)}   "
+            f"L {_fmt(last_low)}   "
+            f"C {_fmt(current_price)}   "
+            f"· {exchange}"
         ),
         ha="left",
         va="top",
-        fontsize=8.5,
-        color=candle_color,
+        fontsize=8.7,
+        color=MUTED,
     )
 
-    _draw_price_tag(
+    _price_tag(
         ax,
         current_price,
         last_open,
     )
 
-    _draw_trade_plan(
-        ax,
-        trade_plan,
-    )
-
     if analysis:
-        bsl = analysis.get("bsl")
-        ssl = analysis.get("ssl")
-
-        if bsl:
-            _draw_liquidity_line(
-                ax,
-                bsl["price"],
-                "BSL",
-                YELLOW,
-                "bottom",
-            )
-
-        if ssl:
-            _draw_liquidity_line(
-                ax,
-                ssl["price"],
-                "SSL",
-                BLUE,
-                "top",
-            )
-
-        demand = analysis.get(
-            "nearest_demand"
+        # Draw up to two relevant zones on each side.
+        supplies = _zone_candidates(
+            analysis,
+            "supply",
+            current_price,
+            max_zones=2,
         )
 
-        supply = analysis.get(
-            "nearest_supply"
+        demands = _zone_candidates(
+            analysis,
+            "demand",
+            current_price,
+            max_zones=2,
         )
 
-        # Demand zone
-        if demand:
-            ax.axhspan(
-                demand["lower"],
-                demand["upper"],
-                color=DEMAND,
-                alpha=0.075,
-                zorder=0,
-            )
-
-            ax.axhline(
-                demand["upper"],
-                color=DEMAND,
-                linewidth=0.7,
-                alpha=0.65,
-            )
-
-            ax.text(
-                0.008,
-                demand["upper"],
-                (
-                    f" DEMAND "
-                    f"{_fmt(demand['lower'])}-"
-                    f"{_fmt(demand['upper'])} "
-                ),
-                transform=ax.get_yaxis_transform(),
-                ha="left",
-                va="bottom",
-                fontsize=7.2,
-                color=DEMAND,
-                bbox=dict(
-                    boxstyle="round,pad=0.18",
-                    facecolor=BG,
-                    edgecolor=DEMAND,
-                    linewidth=0.6,
-                    alpha=0.88,
-                ),
-            )
-
-        # Supply zone
-        if supply:
-            ax.axhspan(
-                supply["lower"],
-                supply["upper"],
-                color=SUPPLY,
-                alpha=0.075,
-                zorder=0,
-            )
-
-            ax.axhline(
-                supply["lower"],
-                color=SUPPLY,
-                linewidth=0.7,
-                alpha=0.65,
-            )
-
-            ax.text(
-                0.008,
-                supply["lower"],
-                (
-                    f" SUPPLY "
-                    f"{_fmt(supply['lower'])}-"
-                    f"{_fmt(supply['upper'])} "
-                ),
-                transform=ax.get_yaxis_transform(),
-                ha="left",
-                va="top",
-                fontsize=7.2,
-                color=SUPPLY,
-                bbox=dict(
-                    boxstyle="round,pad=0.18",
-                    facecolor=BG,
-                    edgecolor=SUPPLY,
-                    linewidth=0.6,
-                    alpha=0.88,
-                ),
-            )
-
-        # Last two active FVGs
-        active_fvgs = analysis.get(
-            "active_fvgs",
-            [],
-        )[-2:]
-
-        for fvg in active_fvgs:
-            fvg_color = (
-                BULL_FVG
-                if fvg["type"] == "bullish"
-                else BEAR_FVG
-            )
-
-            ax.axhspan(
-                fvg["lower"],
-                fvg["upper"],
-                color=fvg_color,
-                alpha=0.045,
-                zorder=0,
-            )
-
-            ax.text(
+        for i, zone in enumerate(
+            supplies,
+            start=1,
+        ):
+            _draw_zone(
+                ax,
+                zone,
+                "supply",
+                i,
                 max(
                     0,
-                    x_right - 18,
+                    x_now - 68,
                 ),
-                (
-                    fvg["lower"]
-                    + fvg["upper"]
-                )
-                / 2,
-                (
-                    f"{fvg['type'].upper()} FVG "
-                    f"{_fmt(fvg['lower'])}-"
-                    f"{_fmt(fvg['upper'])}"
-                ),
-                ha="left",
-                va="center",
-                fontsize=6.8,
-                color=fvg_color,
-                bbox=dict(
-                    boxstyle="round,pad=0.15",
-                    facecolor=BG,
-                    edgecolor=fvg_color,
-                    linewidth=0.5,
-                    alpha=0.82,
-                ),
+                x_future - 2,
             )
 
-        # Latest BOS / CHoCH
-        last_event = analysis.get(
-            "last_event"
-        )
-
-        if last_event:
-            event_time = last_event.get(
-                "time"
-            )
-
-            try:
-                timestamp = pd.Timestamp(
-                    event_time
-                )
-
-                if timestamp in plot_df.index:
-                    event_x = (
-                        plot_df.index.get_loc(
-                            timestamp
-                        )
-                    )
-
-                    event_y = float(
-                        plot_df.loc[
-                            timestamp,
-                            "Close",
-                        ]
-                    )
-
-                    bullish = (
-                        last_event["direction"]
-                        == "bullish"
-                    )
-
-                    marker = (
-                        "^"
-                        if bullish
-                        else "v"
-                    )
-
-                    event_color = (
-                        GREEN
-                        if bullish
-                        else RED
-                    )
-
-                    ax.scatter(
-                        [event_x],
-                        [event_y],
-                        marker=marker,
-                        s=58,
-                        color=event_color,
-                        edgecolors=BG,
-                        linewidths=0.6,
-                        zorder=6,
-                    )
-
-                    ax.text(
-                        event_x,
-                        event_y,
-                        (
-                            f" {last_event['kind']} "
-                            f"{last_event['direction'].upper()}"
-                        ),
-                        fontsize=7.2,
-                        color=event_color,
-                        va=(
-                            "bottom"
-                            if bullish
-                            else "top"
-                        ),
-                        bbox=dict(
-                            boxstyle="round,pad=0.15",
-                            facecolor=BG,
-                            edgecolor=event_color,
-                            linewidth=0.45,
-                            alpha=0.85,
-                        ),
-                    )
-
-            except Exception as exc:
-                print(
-                    "SMC event overlay warning:",
-                    exc,
-                )
-
-
-        setup = analysis.get(
-            "setup",
-            {},
-        )
-
-        # Current setup Liquidity Sweep
-        last_sweep = setup.get(
-            "sweep"
-        )
-
-        if last_sweep:
-            try:
-                timestamp = pd.Timestamp(
-                    last_sweep["time"]
-                )
-
-                if timestamp in plot_df.index:
-                    sweep_x = (
-                        plot_df.index.get_loc(
-                            timestamp
-                        )
-                    )
-
-                    sweep_y = float(
-                        last_sweep.get(
-                            "extreme",
-                            last_sweep[
-                                "level"
-                            ],
-                        )
-                    )
-
-                    ax.scatter(
-                        [sweep_x],
-                        [sweep_y],
-                        marker="o",
-                        s=42,
-                        facecolors="none",
-                        edgecolors=YELLOW,
-                        linewidths=1.2,
-                        zorder=7,
-                    )
-
-                    ax.text(
-                        sweep_x,
-                        sweep_y,
-                        (
-                            f" {last_sweep['type']} "
-                            "SWEEP"
-                        ),
-                        fontsize=6.8,
-                        color=YELLOW,
-                        va=(
-                            "bottom"
-                            if last_sweep[
-                                "direction"
-                            ]
-                            == "bearish"
-                            else "top"
-                        ),
-                        bbox=dict(
-                            boxstyle="round,pad=0.13",
-                            facecolor=BG,
-                            edgecolor=YELLOW,
-                            linewidth=0.45,
-                            alpha=0.85,
-                        ),
-                        zorder=8,
-                    )
-
-            except Exception as exc:
-                print(
-                    "Sweep overlay warning:",
-                    exc,
-                )
-
-        # Current setup displacement
-        last_displacement = setup.get(
-            "displacement"
-        )
-
-        if last_displacement:
-            try:
-                timestamp = pd.Timestamp(
-                    last_displacement[
-                        "time"
-                    ]
-                )
-
-                if timestamp in plot_df.index:
-                    disp_x = (
-                        plot_df.index.get_loc(
-                            timestamp
-                        )
-                    )
-
-                    disp_y = float(
-                        last_displacement[
-                            "close"
-                        ]
-                    )
-
-                    bullish_disp = (
-                        last_displacement[
-                            "direction"
-                        ]
-                        == "bullish"
-                    )
-
-                    disp_color = (
-                        GREEN
-                        if bullish_disp
-                        else RED
-                    )
-
-                    ax.scatter(
-                        [disp_x],
-                        [disp_y],
-                        marker="*",
-                        s=72,
-                        color=disp_color,
-                        edgecolors=BG,
-                        linewidths=0.5,
-                        zorder=7,
-                    )
-
-                    ax.text(
-                        disp_x,
-                        disp_y,
-                        (
-                            " DISP "
-                            f"{last_displacement['strength']:.1f}x"
-                        ),
-                        fontsize=6.8,
-                        color=disp_color,
-                        va=(
-                            "bottom"
-                            if bullish_disp
-                            else "top"
-                        ),
-                        bbox=dict(
-                            boxstyle="round,pad=0.13",
-                            facecolor=BG,
-                            edgecolor=disp_color,
-                            linewidth=0.45,
-                            alpha=0.85,
-                        ),
-                        zorder=8,
-                    )
-
-            except Exception as exc:
-                print(
-                    "Displacement overlay warning:",
-                    exc,
-                )
-
-        # Current setup retest
-        last_retest = setup.get(
-            "retest"
-        )
-
-        if last_retest:
-            try:
-                timestamp = pd.Timestamp(
-                    last_retest["time"]
-                )
-
-                if timestamp in plot_df.index:
-                    retest_x = (
-                        plot_df.index.get_loc(
-                            timestamp
-                        )
-                    )
-
-                    retest_y = float(
-                        last_retest["level"]
-                    )
-
-                    ax.scatter(
-                        [retest_x],
-                        [retest_y],
-                        marker="D",
-                        s=34,
-                        color=BLUE,
-                        edgecolors=BG,
-                        linewidths=0.5,
-                        zorder=7,
-                    )
-
-                    ax.text(
-                        retest_x,
-                        retest_y,
-                        " RETEST",
-                        fontsize=6.8,
-                        color=BLUE,
-                        va="bottom",
-                        bbox=dict(
-                            boxstyle="round,pad=0.13",
-                            facecolor=BG,
-                            edgecolor=BLUE,
-                            linewidth=0.45,
-                            alpha=0.85,
-                        ),
-                        zorder=8,
-                    )
-
-            except Exception as exc:
-                print(
-                    "Retest overlay warning:",
-                    exc,
-                )
-
-        event_text = "None"
-
-        if last_event:
-            event_text = (
-                f"{last_event['kind']} "
-                f"{last_event['direction'].upper()}"
-            )
-
-        trend_text = analysis.get(
-            "trend",
-            "neutral",
-        ).upper()
-
-        trend_color = MUTED
-
-        if trend_text == "BULLISH":
-            trend_color = GREEN
-
-        elif trend_text == "BEARISH":
-            trend_color = RED
-
-        setup_score = setup.get(
-            "score",
-            0,
-        )
-
-        if setup.get(
-            "confirmed",
-            False,
+        for i, zone in enumerate(
+            demands,
+            start=1,
         ):
-            setup_state = "CONFIRMED"
+            _draw_zone(
+                ax,
+                zone,
+                "demand",
+                i,
+                max(
+                    0,
+                    x_now - 68,
+                ),
+                x_future - 2,
+            )
 
-        elif setup_score >= 2:
-            setup_state = "DEVELOPING"
-
-        elif setup_score == 1:
-            setup_state = "WATCH"
-
-        else:
-            setup_state = "WAIT"
-
-        setup_direction = (
-            setup.get(
-                "direction",
-                "-",
-            ).upper()
-        )
-
-        summary = (
-            f"TREND  {trend_text}\n"
-            f"STRUCTURE  {event_text}\n"
-            f"SETUP  {setup_state} "
-            f"{setup_direction} {setup_score}/4\n"
-            f"ATR  {_fmt(analysis.get('atr'))}"
-        )
-
-        ax.text(
-            0.012,
-            0.900,
-            summary,
-            transform=ax.transAxes,
-            ha="left",
-            va="top",
-            fontsize=7.6,
-            color=trend_color,
-            bbox=dict(
-                boxstyle="round,pad=0.42",
-                facecolor="#181A20",
-                edgecolor=GRID,
-                linewidth=0.8,
-                alpha=0.92,
+        _draw_liquidity(
+            ax,
+            analysis,
+            max(
+                0,
+                x_now - 40,
             ),
-            zorder=8,
+            min(
+                x_future - 5,
+                x_now + 6,
+            ),
+        )
+
+        vwap_info = _draw_vwap(
+            ax,
+            plot_df,
+            analysis,
+        )
+
+        # Only the execution timeframe receives the projected trade map.
+        if trade_plan is not None:
+            _draw_trade_targets(
+                ax,
+                trade_plan,
+                x_now,
+                x_future,
+            )
+
+            _draw_preferred_scenario(
+                ax,
+                current_price,
+                trade_plan,
+                x_now,
+            )
+
+        _draw_side_panel(
+            fig,
+            analysis,
+            trade_plan,
+            vwap_info,
         )
 
     fig.savefig(
         output_path,
-        dpi=160,
+        dpi=165,
         facecolor=BG,
         bbox_inches="tight",
     )
