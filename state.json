@@ -1,0 +1,82 @@
+{
+  "generated_at_utc": "2026-09-30T07:11:33.204338+00:00",
+  "current_price": 26.689,
+  "status": "DEVELOPING SHORT",
+  "timeframes": {
+    "4H": {
+      "trend": "mixed",
+      "bsl": {
+        "price": 27.082,
+        "time": "2026-09-11T12:00:00+00:00"
+      },
+      "ssl": {
+        "price": 26.602,
+        "time": "2026-09-28T12:00:00+00:00"
+      },
+      "last_event": {
+        "time": "2026-09-28T00:00:00+00:00",
+        "direction": "bearish",
+        "kind": "CHoCH",
+        "level": 29.056
+      },
+      "nearest_supply": {
+        "lower": 29.367,
+        "upper": 30.116
+      },
+      "nearest_demand": {
+        "lower": 24.805,
+        "upper": 25.701
+      }
+    },
+    "1H": {
+      "trend": "mixed",
+      "bsl": {
+        "price": 27.445,
+        "time": "2026-09-29T23:00:00+00:00"
+      },
+      "ssl": {
+        "price": 26.602,
+        "time": "2026-09-28T15:00:00+00:00"
+      },
+      "last_event": {
+        "time": "2026-09-30T05:00:00+00:00",
+        "direction": "bearish",
+        "kind": "CHoCH",
+        "level": 26.74
+      },
+      "nearest_supply": {
+        "lower": 27.986,
+        "upper": 28.626
+      },
+      "nearest_demand": {
+        "lower": 26.388,
+        "upper": 26.766
+      }
+    },
+    "15M": {
+      "trend": "bearish",
+      "bsl": {
+        "price": 26.82,
+        "time": "2026-09-30T05:45:00+00:00"
+      },
+      "ssl": {
+        "price": 26.686,
+        "time": "2026-09-30T03:30:00+00:00"
+      },
+      "last_event": {
+        "time": "2026-09-30T05:00:00+00:00",
+        "direction": "bearish",
+        "kind": "BOS",
+        "level": 26.686
+      },
+      "nearest_supply": {
+        "lower": 27.27,
+        "upper": 27.445
+      },
+      "nearest_demand": {
+        "lower": 26.388,
+        "upper": 26.654
+      }
+    }
+  }
+}
