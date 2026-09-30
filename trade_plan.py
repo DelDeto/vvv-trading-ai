@@ -720,22 +720,133 @@ def build_trade_plan(
             }
         )
 
-    setup_state = (
-        "confirmed"
-        if setup.get(
-            "confirmed",
-            False,
-        )
-        else "developing"
+    if setup.get(
+        "confirmed",
+        False,
+    ):
+        setup_state = "confirmed"
+    elif score >= 3:
+        setup_state = "developing"
+    else:
+        setup_state = "watch"
+
+    first_rr = (
+        targets[0].get("rr")
+        if targets
+        else None
     )
 
-    trigger = (
-        "Wait for price to trade into the entry zone "
-        "and hold/reject in the setup direction."
+    one_hour_setup = (
+        analysis_1h.get(
+            "setup",
+            {},
+        )
     )
+
+    one_hour_direction = (
+        one_hour_setup.get(
+            "direction"
+        )
+    )
+
+    one_hour_score = int(
+        one_hour_setup.get(
+            "score",
+            0,
+        )
+        or 0
+    )
+
+    blockers = []
+
+    if score < 3:
+        blockers.append(
+            (
+                "15M setup has fewer "
+                "than 3/4 signals"
+            )
+        )
+
+    if not setup.get(
+        "displacement"
+    ):
+        blockers.append(
+            "15M displacement is missing"
+        )
+
+    if not setup.get(
+        "structure"
+    ):
+        blockers.append(
+            "15M BOS/CHoCH is missing"
+        )
+
+    if (
+        first_rr is not None
+        and first_rr < 1.0
+    ):
+        blockers.append(
+            (
+                "First liquidity target "
+                f"is only {first_rr:.2f}R"
+            )
+        )
+
+    higher_tf_conflict = (
+        one_hour_score >= 2
+        and (
+            (
+                direction == "long"
+                and one_hour_direction
+                == "bearish"
+            )
+            or (
+                direction == "short"
+                and one_hour_direction
+                == "bullish"
+            )
+        )
+    )
+
+    if higher_tf_conflict:
+        blockers.append(
+            (
+                "1H active setup is "
+                "opposite the 15M direction"
+            )
+        )
+
+    execution_ready = (
+        len(blockers) == 0
+    )
+
+    if execution_ready:
+        trigger = (
+            "Execution map is ready. "
+            "Wait for price to trade into "
+            "the entry zone and show a "
+            "15M hold/rejection in the "
+            "setup direction."
+        )
+    else:
+        trigger = (
+            "WATCH ONLY. Do not treat "
+            "the zone as an entry until "
+            "the blockers clear."
+        )
 
     return {
         "active": True,
+        "execution_ready": (
+            execution_ready
+        ),
+        "blockers": blockers,
+        "higher_tf_conflict": (
+            higher_tf_conflict
+        ),
+        "first_target_rr": (
+            first_rr
+        ),
         "direction": direction,
         "setup_state": (
             setup_state
