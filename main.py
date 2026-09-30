@@ -2,7 +2,10 @@ import json
 import os
 from datetime import datetime, timezone
 
-from mexc_data import get_klines
+from mexc_data import (
+    get_klines,
+    get_contract_snapshot,
+)
 from chart import create_chart
 from trade_plan import build_trade_plan
 from smc_analysis import (
@@ -329,6 +332,11 @@ def _make_state(report):
         "trade_plan": (
             report.get(
                 "trade_plan"
+            )
+        ),
+        "market_snapshot": (
+            report.get(
+                "market_snapshot"
             )
         ),
         "timeframes": {},
@@ -813,6 +821,64 @@ def _invalidation_and_targets(
     )
 
 
+def _market_snapshot_lines(
+    snapshot,
+):
+    if not snapshot:
+        return []
+
+    lines = []
+
+    change_rate = snapshot.get(
+        "change_rate_24h"
+    )
+
+    hold_vol = snapshot.get(
+        "hold_vol"
+    )
+
+    hold_change = snapshot.get(
+        "hold_vol_change_pct"
+    )
+
+    funding = snapshot.get(
+        "funding_rate"
+    )
+
+    if change_rate is not None:
+        lines.append(
+            (
+                "24h change: "
+                f"{change_rate * 100:+.2f}%"
+            )
+        )
+
+    if hold_vol is not None:
+        oi_text = (
+            f"{hold_vol:,.0f}"
+        )
+
+        if hold_change is not None:
+            oi_text += (
+                f" ({hold_change:+.2f}%)"
+            )
+
+        lines.append(
+            "Open interest/holdVol: "
+            + oi_text
+        )
+
+    if funding is not None:
+        lines.append(
+            (
+                "Funding: "
+                f"{funding * 100:+.4f}%"
+            )
+        )
+
+    return lines
+
+
 def _build_hourly_update(
     report,
     previous_state,
@@ -881,6 +947,16 @@ def _build_hourly_update(
         (
             "Status: "
             f"{status}"
+        )
+    )
+
+    snapshot = report.get(
+        "market_snapshot"
+    )
+
+    lines.extend(
+        _market_snapshot_lines(
+            snapshot
         )
     )
 
@@ -1157,6 +1233,53 @@ def main():
         200,
     )
 
+    market_snapshot = (
+        get_contract_snapshot()
+    )
+
+    previous_snapshot = (
+        previous_state.get(
+            "market_snapshot",
+            {},
+        )
+        if previous_state
+        else {}
+    )
+
+    previous_hold = (
+        previous_snapshot.get(
+            "hold_vol"
+        )
+        if previous_snapshot
+        else None
+    )
+
+    current_hold = (
+        market_snapshot.get(
+            "hold_vol"
+        )
+    )
+
+    hold_change_pct = None
+
+    if (
+        previous_hold
+        not in (None, 0)
+        and current_hold is not None
+    ):
+        hold_change_pct = (
+            (
+                current_hold
+                - previous_hold
+            )
+            / previous_hold
+            * 100
+        )
+
+    market_snapshot[
+        "hold_vol_change_pct"
+    ] = hold_change_pct
+
     # Rule-based SMC analysis
     smc_4h = analyze_smc(
         df_4h
@@ -1244,6 +1367,9 @@ def main():
         "trade_plan": (
             trade_plan
         ),
+        "market_snapshot": (
+            market_snapshot
+        ),
         "timeframes": analyses,
     }
 
@@ -1317,6 +1443,9 @@ def main():
         candles=100,
         exchange="MEXC",
         analysis=smc_4h,
+        market_snapshot=(
+            market_snapshot
+        ),
     )
 
     create_chart(
@@ -1326,6 +1455,9 @@ def main():
         candles=120,
         exchange="MEXC",
         analysis=smc_1h,
+        market_snapshot=(
+            market_snapshot
+        ),
     )
 
     create_chart(
@@ -1336,6 +1468,9 @@ def main():
         exchange="MEXC",
         analysis=smc_15m,
         trade_plan=trade_plan,
+        market_snapshot=(
+            market_snapshot
+        ),
     )
 
     print()
