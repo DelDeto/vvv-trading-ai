@@ -1466,7 +1466,7 @@ def main():
         df_4h,
         "4H",
         "output/VVVUSDT_4H.png",
-        candles=100,
+        candles=160,
         exchange="MEXC",
         analysis=smc_4h,
         market_snapshot=(
@@ -1478,7 +1478,7 @@ def main():
         df_1h,
         "1H",
         "output/VVVUSDT_1H.png",
-        candles=120,
+        candles=160,
         exchange="MEXC",
         analysis=smc_1h,
         market_snapshot=(
@@ -1490,7 +1490,7 @@ def main():
         df_15m,
         "15M",
         "output/VVVUSDT_15M.png",
-        candles=150,
+        candles=160,
         exchange="MEXC",
         analysis=smc_15m,
         trade_plan=trade_plan,
