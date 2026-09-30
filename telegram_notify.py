@@ -1,0 +1,226 @@
+import json
+import os
+import sys
+from pathlib import Path
+
+import requests
+
+
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+OUTPUT_DIR = Path("output")
+REPORT_PATH = OUTPUT_DIR / "VVVUSDT_SMC_report.json"
+UPDATE_PATH = OUTPUT_DIR / "VVVUSDT_hourly_update.txt"
+
+CHARTS = [
+    ("4H", OUTPUT_DIR / "VVVUSDT_4H.png"),
+    ("1H", OUTPUT_DIR / "VVVUSDT_1H.png"),
+    ("15M", OUTPUT_DIR / "VVVUSDT_15M.png"),
+]
+
+
+def _api(method):
+    return f"https://api.telegram.org/bot{BOT_TOKEN}/{method}"
+
+
+def _check_config():
+    missing = []
+
+    if not BOT_TOKEN:
+        missing.append("TELEGRAM_BOT_TOKEN")
+
+    if not CHAT_ID:
+        missing.append("TELEGRAM_CHAT_ID")
+
+    if missing:
+        print(
+            "Telegram notification skipped. "
+            "Missing secrets: "
+            + ", ".join(missing)
+        )
+        return False
+
+    return True
+
+
+def _post(method, **kwargs):
+    response = requests.post(
+        _api(method),
+        timeout=30,
+        **kwargs,
+    )
+
+    if response.status_code != 200:
+        print(
+            f"Telegram {method} failed "
+            f"with HTTP {response.status_code}"
+        )
+        print(response.text)
+        raise RuntimeError(
+            f"Telegram {method} request failed"
+        )
+
+    payload = response.json()
+
+    if not payload.get("ok"):
+        print(payload)
+        raise RuntimeError(
+            f"Telegram {method} returned ok=false"
+        )
+
+    return payload
+
+
+def _split_message(text, limit=3900):
+    text = text.strip()
+
+    if not text:
+        return []
+
+    chunks = []
+
+    while len(text) > limit:
+        cut = text.rfind(
+            "\n",
+            0,
+            limit,
+        )
+
+        if cut <= 0:
+            cut = limit
+
+        chunks.append(
+            text[:cut].strip()
+        )
+
+        text = text[cut:].strip()
+
+    if text:
+        chunks.append(text)
+
+    return chunks
+
+
+def _short_caption(report, timeframe):
+    current_price = report.get(
+        "current_price"
+    )
+
+    status = report.get(
+        "status",
+        "WAIT",
+    )
+
+    trade_plan = report.get(
+        "trade_plan",
+        {},
+    )
+
+    execution = (
+        "READY"
+        if trade_plan.get(
+            "execution_ready",
+            False,
+        )
+        else "WAIT"
+    )
+
+    price_text = (
+        f"{current_price:.3f}"
+        if isinstance(
+            current_price,
+            (int, float),
+        )
+        else "-"
+    )
+
+    return (
+        f"VVV_USDT {timeframe} | "
+        f"MEXC\n"
+        f"Price: {price_text}\n"
+        f"Status: {status}\n"
+        f"Execution: {execution}"
+    )
+
+
+def _send_text_update():
+    if not UPDATE_PATH.exists():
+        print(
+            "No hourly update file found; "
+            "skipping Telegram text update."
+        )
+        return
+
+    text = UPDATE_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    for chunk in _split_message(text):
+        _post(
+            "sendMessage",
+            data={
+                "chat_id": CHAT_ID,
+                "text": chunk,
+                "disable_web_page_preview": "true",
+            },
+        )
+
+
+def _send_charts(report):
+    for timeframe, path in CHARTS:
+        if not path.exists():
+            print(
+                f"Chart missing: {path}"
+            )
+            continue
+
+        caption = _short_caption(
+            report,
+            timeframe,
+        )
+
+        with path.open("rb") as image_file:
+            _post(
+                "sendPhoto",
+                data={
+                    "chat_id": CHAT_ID,
+                    "caption": caption,
+                },
+                files={
+                    "photo": image_file,
+                },
+            )
+
+        print(
+            f"Telegram sent: {path}"
+        )
+
+
+def main():
+    if not _check_config():
+        return 0
+
+    if not REPORT_PATH.exists():
+        raise FileNotFoundError(
+            f"Missing report: {REPORT_PATH}"
+        )
+
+    report = json.loads(
+        REPORT_PATH.read_text(
+            encoding="utf-8"
+        )
+    )
+
+    _send_text_update()
+    _send_charts(report)
+
+    print(
+        "Telegram notification completed."
+    )
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
