@@ -4,6 +4,32 @@ import mplfinance as mpf
 import pandas as pd
 
 
+# Binance-like colors
+binance_mc = mpf.make_marketcolors(
+    up="#0ECB81",        # green
+    down="#F6465D",      # red
+    edge="inherit",
+    wick="inherit",
+    volume="inherit",
+    ohlc="inherit",
+)
+
+binance_style = mpf.make_mpf_style(
+    base_mpf_style="nightclouds",
+    marketcolors=binance_mc,
+    facecolor="#181A20",
+    figcolor="#181A20",
+    gridcolor="#2B3139",
+    gridstyle="-",
+    rc={
+        "axes.labelcolor": "#B7BDC6",
+        "xtick.color": "#B7BDC6",
+        "ytick.color": "#B7BDC6",
+        "text.color": "#EAECEF",
+    },
+)
+
+
 def _fmt(value):
     if value is None:
         return "-"
@@ -24,15 +50,10 @@ def create_chart(
     và overlay SMC rule-based.
     """
 
-    output_dir = os.path.dirname(
-        output_path
-    )
+    output_dir = os.path.dirname(output_path)
 
     if output_dir:
-        os.makedirs(
-            output_dir,
-            exist_ok=True,
-        )
+        os.makedirs(output_dir, exist_ok=True)
 
     plot_df = df[
         ["open", "high", "low", "close", "volume"]
@@ -48,9 +69,7 @@ def create_chart(
 
     plot_df = plot_df.tail(candles)
 
-    current_price = float(
-        plot_df.iloc[-1]["Close"]
-    )
+    current_price = float(plot_df.iloc[-1]["Close"])
 
     print(
         f"Creating {interval} chart | "
@@ -62,11 +81,8 @@ def create_chart(
         plot_df,
         type="candle",
         volume=True,
-        style="nightclouds",
-        title=(
-            f"VVV_USDT PERPETUAL - "
-            f"{exchange} - {interval}"
-        ),
+        style=binance_style,
+        title=f"VVV_USDT PERPETUAL - {exchange} - {interval}",
         ylabel="Price (USDT)",
         ylabel_lower="Volume",
         figsize=(16, 9),
@@ -75,7 +91,6 @@ def create_chart(
     )
 
     ax = axes[0]
-
     x_right = len(plot_df) - 1
 
     # Current price
@@ -135,13 +150,8 @@ def create_chart(
                 fontsize=8,
             )
 
-        demand = analysis.get(
-            "nearest_demand"
-        )
-
-        supply = analysis.get(
-            "nearest_supply"
-        )
+        demand = analysis.get("nearest_demand")
+        supply = analysis.get("nearest_supply")
 
         # Demand zone
         if demand:
@@ -186,10 +196,7 @@ def create_chart(
             )
 
         # Last two active FVGs
-        active_fvgs = analysis.get(
-            "active_fvgs",
-            [],
-        )[-2:]
+        active_fvgs = analysis.get("active_fvgs", [])[-2:]
 
         for fvg in active_fvgs:
             ax.axhspan(
@@ -199,15 +206,8 @@ def create_chart(
             )
 
             ax.text(
-                max(
-                    0,
-                    x_right - 18,
-                ),
-                (
-                    fvg["lower"]
-                    + fvg["upper"]
-                )
-                / 2,
+                max(0, x_right - 18),
+                (fvg["lower"] + fvg["upper"]) / 2,
                 (
                     f"{fvg['type'].upper()} FVG "
                     f"{_fmt(fvg['lower'])}-"
@@ -219,38 +219,21 @@ def create_chart(
             )
 
         # Latest BOS / CHoCH
-        last_event = analysis.get(
-            "last_event"
-        )
+        last_event = analysis.get("last_event")
 
         if last_event:
-            event_time = last_event.get(
-                "time"
-            )
+            event_time = last_event.get("time")
 
             try:
-                timestamp = pd.Timestamp(
-                    event_time
-                )
+                timestamp = pd.Timestamp(event_time)
 
                 if timestamp in plot_df.index:
-                    event_x = plot_df.index.get_loc(
-                        timestamp
-                    )
-
-                    event_y = float(
-                        plot_df.loc[
-                            timestamp,
-                            "Close",
-                        ]
-                    )
+                    event_x = plot_df.index.get_loc(timestamp)
+                    event_y = float(plot_df.loc[timestamp, "Close"])
 
                     marker = (
                         "^"
-                        if last_event[
-                            "direction"
-                        ]
-                        == "bullish"
+                        if last_event["direction"] == "bullish"
                         else "v"
                     )
 
@@ -265,24 +248,13 @@ def create_chart(
                     ax.text(
                         event_x,
                         event_y,
-                        (
-                            f" "
-                            f"{last_event['kind']} "
-                            f"{last_event['direction'].upper()}"
-                        ),
+                        f" {last_event['kind']} {last_event['direction'].upper()}",
                         fontsize=8,
-                        va=(
-                            "bottom"
-                            if marker == "^"
-                            else "top"
-                        ),
+                        va="bottom" if marker == "^" else "top",
                     )
 
             except Exception as exc:
-                print(
-                    "SMC event overlay warning:",
-                    exc,
-                )
+                print("SMC event overlay warning:", exc)
 
         event_text = "None"
 
@@ -293,8 +265,7 @@ def create_chart(
             )
 
         summary = (
-            f"Trend: "
-            f"{analysis.get('trend', 'neutral').upper()}\n"
+            f"Trend: {analysis.get('trend', 'neutral').upper()}\n"
             f"Last structure: {event_text}\n"
             f"ATR: {_fmt(analysis.get('atr'))}"
         )
@@ -321,6 +292,4 @@ def create_chart(
 
     plt.close(fig)
 
-    print(
-        f"Saved chart: {output_path}"
-    )
+    print(f"Saved chart: {output_path}")
