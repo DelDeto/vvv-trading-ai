@@ -203,6 +203,43 @@ def _setup_text(analysis):
     )
 
 
+def _reference_zone_text(
+    analysis,
+    side,
+):
+    key = (
+        "reference_demand_zones"
+        if side == "demand"
+        else "reference_supply_zones"
+    )
+
+    zones = analysis.get(
+        key,
+        [],
+    )
+
+    if not zones:
+        return "-"
+
+    zone = zones[0]
+
+    pattern = zone.get(
+        "pattern",
+        "?",
+    )
+
+    mitigations = zone.get(
+        "mitigations",
+        0,
+    )
+
+    return (
+        f"{_fmt(zone['lower'])}-"
+        f"{_fmt(zone['upper'])} "
+        f"[HISTORICAL, {pattern}, M{mitigations}]"
+    )
+
+
 def _rejected_zone_text(
     analysis,
     side,
@@ -284,6 +321,18 @@ def _print_summary(
         f"[{timeframe}] "
         f"Supply: "
         f"{_zone_text(analysis.get('nearest_supply'))}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Reference Demand: "
+        f"{_reference_zone_text(analysis, 'demand')}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Reference Supply: "
+        f"{_reference_zone_text(analysis, 'supply')}"
     )
 
     print(
