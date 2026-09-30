@@ -190,6 +190,13 @@ def _draw_trade_plan(
         "direction"
     ]
 
+    execution_ready = (
+        trade_plan.get(
+            "execution_ready",
+            False,
+        )
+    )
+
     entry = trade_plan[
         "entry_zone"
     ]
@@ -208,7 +215,11 @@ def _draw_trade_plan(
         ]
     )
 
-    entry_color = YELLOW
+    entry_color = (
+        GREEN
+        if execution_ready
+        else YELLOW
+    )
 
     ax.axhspan(
         entry_lower,
@@ -244,7 +255,7 @@ def _draw_trade_plan(
         )
         / 2,
         (
-            f" ENTRY "
+            f" {'ENTRY' if execution_ready else 'WATCH'} "
             f"{_fmt(entry_lower)}-"
             f"{_fmt(entry_upper)} "
         ),
@@ -275,7 +286,10 @@ def _draw_trade_plan(
     ax.text(
         0.995,
         stop_loss,
-        f" SL {_fmt(stop_loss)} ",
+        (
+            f" {'SL' if execution_ready else 'REF SL'} "
+            f"{_fmt(stop_loss)} "
+        ),
         transform=ax.get_yaxis_transform(),
         ha="right",
         va=(
@@ -293,6 +307,36 @@ def _draw_trade_plan(
             alpha=0.94,
         ),
         zorder=9,
+    )
+
+    status_color = (
+        GREEN
+        if execution_ready
+        else YELLOW
+    )
+
+    ax.text(
+        0.992,
+        0.975,
+        (
+            "EXECUTION READY"
+            if execution_ready
+            else "EXECUTION WAIT"
+        ),
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=7.5,
+        fontweight="bold",
+        color=status_color,
+        bbox=dict(
+            boxstyle="round,pad=0.24",
+            facecolor=BG,
+            edgecolor=status_color,
+            linewidth=0.7,
+            alpha=0.94,
+        ),
+        zorder=10,
     )
 
     for index, target in enumerate(
