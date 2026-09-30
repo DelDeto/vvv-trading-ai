@@ -32,6 +32,10 @@ def _zone_text(zone):
         "quality"
     )
 
+    pattern = zone.get(
+        "pattern"
+    )
+
     mitigations = zone.get(
         "mitigations"
     )
@@ -42,6 +46,11 @@ def _zone_text(zone):
         suffix += (
             f" [{quality}"
         )
+
+        if pattern:
+            suffix += (
+                f", {pattern}"
+            )
 
         if mitigations is not None:
             suffix += (
@@ -194,6 +203,45 @@ def _setup_text(analysis):
     )
 
 
+def _rejected_zone_text(
+    analysis,
+    side,
+):
+    key = (
+        "rejected_demand_zones"
+        if side == "demand"
+        else "rejected_supply_zones"
+    )
+
+    zones = analysis.get(
+        key,
+        [],
+    )
+
+    if not zones:
+        return "-"
+
+    zone = zones[0]
+
+    reasons = ",".join(
+        zone.get(
+            "rejection_reasons",
+            [],
+        )
+    )
+
+    pattern = zone.get(
+        "pattern",
+        "?",
+    )
+
+    return (
+        f"{_fmt(zone['lower'])}-"
+        f"{_fmt(zone['upper'])} "
+        f"[{pattern}; {reasons}]"
+    )
+
+
 def _print_summary(
     timeframe,
     analysis,
@@ -236,6 +284,18 @@ def _print_summary(
         f"[{timeframe}] "
         f"Supply: "
         f"{_zone_text(analysis.get('nearest_supply'))}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Rejected Demand: "
+        f"{_rejected_zone_text(analysis, 'demand')}"
+    )
+
+    print(
+        f"[{timeframe}] "
+        f"Rejected Supply: "
+        f"{_rejected_zone_text(analysis, 'supply')}"
     )
 
     print(
