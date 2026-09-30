@@ -538,9 +538,14 @@ def create_chart(
                 )
 
 
-        # Latest Liquidity Sweep
-        last_sweep = analysis.get(
-            "last_sweep"
+        setup = analysis.get(
+            "setup",
+            {},
+        )
+
+        # Current setup Liquidity Sweep
+        last_sweep = setup.get(
+            "sweep"
         )
 
         if last_sweep:
@@ -609,9 +614,9 @@ def create_chart(
                     exc,
                 )
 
-        # Latest displacement
-        last_displacement = analysis.get(
-            "last_displacement"
+        # Current setup displacement
+        last_displacement = setup.get(
+            "displacement"
         )
 
         if last_displacement:
@@ -689,9 +694,9 @@ def create_chart(
                     exc,
                 )
 
-        # Latest retest
-        last_retest = analysis.get(
-            "last_retest"
+        # Current setup retest
+        last_retest = setup.get(
+            "retest"
         )
 
         if last_retest:
@@ -766,30 +771,31 @@ def create_chart(
         elif trend_text == "BEARISH":
             trend_color = RED
 
-        setup = analysis.get(
-            "setup",
-            {},
+        setup_score = setup.get(
+            "score",
+            0,
         )
 
-        setup_state = (
-            "CONFIRMED"
-            if setup.get(
-                "confirmed",
-                False,
-            )
-            else "DEVELOPING"
-        )
+        if setup.get(
+            "confirmed",
+            False,
+        ):
+            setup_state = "CONFIRMED"
+
+        elif setup_score >= 2:
+            setup_state = "DEVELOPING"
+
+        elif setup_score == 1:
+            setup_state = "WATCH"
+
+        else:
+            setup_state = "WAIT"
 
         setup_direction = (
             setup.get(
                 "direction",
                 "-",
             ).upper()
-        )
-
-        setup_score = setup.get(
-            "score",
-            0,
         )
 
         summary = (
