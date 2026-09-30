@@ -69,8 +69,13 @@ def _event_text(analysis):
 
 
 def _sweep_text(analysis):
-    event = analysis.get(
-        "last_sweep"
+    event = (
+        analysis.get(
+            "setup",
+            {},
+        ).get(
+            "sweep"
+        )
     )
 
     if not event:
@@ -84,8 +89,13 @@ def _sweep_text(analysis):
 
 
 def _displacement_text(analysis):
-    event = analysis.get(
-        "last_displacement"
+    event = (
+        analysis.get(
+            "setup",
+            {},
+        ).get(
+            "displacement"
+        )
     )
 
     if not event:
@@ -98,8 +108,13 @@ def _displacement_text(analysis):
 
 
 def _retest_text(analysis):
-    event = analysis.get(
-        "last_retest"
+    event = (
+        analysis.get(
+            "setup",
+            {},
+        ).get(
+            "retest"
+        )
     )
 
     if not event:
@@ -131,14 +146,20 @@ def _setup_text(analysis):
         0,
     )
 
-    state = (
-        "CONFIRMED"
-        if setup.get(
-            "confirmed",
-            False,
-        )
-        else "DEVELOPING"
-    )
+    if setup.get(
+        "confirmed",
+        False,
+    ):
+        state = "CONFIRMED"
+
+    elif score >= 2:
+        state = "DEVELOPING"
+
+    elif score == 1:
+        state = "WATCH"
+
+    else:
+        state = "WAIT"
 
     return (
         f"{state} {direction} "
@@ -329,17 +350,26 @@ def _make_state(report):
             ),
             "last_sweep": (
                 analysis.get(
-                    "last_sweep"
+                    "setup",
+                    {},
+                ).get(
+                    "sweep"
                 )
             ),
             "last_displacement": (
                 analysis.get(
-                    "last_displacement"
+                    "setup",
+                    {},
+                ).get(
+                    "displacement"
                 )
             ),
             "last_retest": (
                 analysis.get(
-                    "last_retest"
+                    "setup",
+                    {},
+                ).get(
+                    "retest"
                 )
             ),
             "setup": {
