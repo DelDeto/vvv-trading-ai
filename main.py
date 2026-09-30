@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from mexc_data import get_klines
 from chart import create_chart
+from trade_plan import build_trade_plan
 from smc_analysis import (
     analyze_smc,
     derive_overall_status,
@@ -325,6 +326,11 @@ def _make_state(report):
                 "status"
             ]
         ),
+        "trade_plan": (
+            report.get(
+                "trade_plan"
+            )
+        ),
         "timeframes": {},
     }
 
@@ -437,6 +443,76 @@ def _event_signature(event):
     )
 
 
+def _trade_plan_signature(plan):
+    if not plan:
+        return None
+
+    if not plan.get(
+        "active",
+        False,
+    ):
+        return (
+            False,
+            plan.get("status"),
+        )
+
+    entry = plan.get(
+        "entry_zone",
+        {},
+    )
+
+    targets = plan.get(
+        "targets",
+        [],
+    )
+
+    return (
+        True,
+        plan.get("direction"),
+        plan.get("setup_state"),
+        round(
+            float(
+                entry.get(
+                    "lower",
+                    0,
+                )
+            ),
+            3,
+        ),
+        round(
+            float(
+                entry.get(
+                    "upper",
+                    0,
+                )
+            ),
+            3,
+        ),
+        round(
+            float(
+                plan.get(
+                    "stop_loss",
+                    0,
+                )
+            ),
+            3,
+        ),
+        tuple(
+            round(
+                float(
+                    item.get(
+                        "price",
+                        0,
+                    )
+                ),
+                3,
+            )
+            for item
+            in targets
+        ),
+    )
+
+
 def _compare_state(
     previous,
     current,
@@ -495,6 +571,23 @@ def _compare_state(
                 "-> "
                 f"{current.get('status')}"
             )
+        )
+
+    if (
+        _trade_plan_signature(
+            previous.get(
+                "trade_plan"
+            )
+        )
+        !=
+        _trade_plan_signature(
+            current.get(
+                "trade_plan"
+            )
+        )
+    ):
+        changes.append(
+            "Trade plan changed"
         )
 
     for timeframe in [
@@ -782,6 +875,76 @@ def _build_hourly_update(
         )
     )
 
+    trade_plan = report.get(
+        "trade_plan",
+        {},
+    )
+
+    if trade_plan.get(
+        "active",
+        False,
+    ):
+        entry = trade_plan[
+            "entry_zone"
+        ]
+
+        lines.append("")
+        lines.append(
+            (
+                "TRADE MAP: "
+                f"{trade_plan['direction'].upper()} "
+                f"({trade_plan['setup_state'].upper()})"
+            )
+        )
+
+        lines.append(
+            (
+                "Entry zone: "
+                f"{_fmt(entry['lower'])}-"
+                f"{_fmt(entry['upper'])} "
+                f"[{entry['source']}]"
+            )
+        )
+
+        lines.append(
+            (
+                "SL / invalidation: "
+                f"{_fmt(trade_plan['stop_loss'])}"
+            )
+        )
+
+        for target in (
+            trade_plan.get(
+                "targets",
+                []
+            )
+        ):
+            rr = target.get(
+                "rr"
+            )
+
+            rr_text = (
+                f"{rr:.2f}R"
+                if rr is not None
+                else "-"
+            )
+
+            lines.append(
+                (
+                    f"{target['name']}: "
+                    f"{_fmt(target['price'])} "
+                    f"[{target['source']}, "
+                    f"{rr_text}]"
+                )
+            )
+
+        lines.append(
+            (
+                "Trigger: "
+                f"{trade_plan['trigger']}"
+            )
+        )
+
     lines.append("")
 
     for timeframe in [
@@ -981,6 +1144,13 @@ def main():
         df_15m.iloc[-1]["close"]
     )
 
+    trade_plan = build_trade_plan(
+        smc_4h,
+        smc_1h,
+        smc_15m,
+        status,
+    )
+
     generated_at = (
         datetime.now(
             timezone.utc
@@ -1029,6 +1199,9 @@ def main():
             current_price
         ),
         "status": status,
+        "trade_plan": (
+            trade_plan
+        ),
         "timeframes": analyses,
     }
 
@@ -1120,6 +1293,7 @@ def main():
         candles=150,
         exchange="MEXC",
         analysis=smc_15m,
+        trade_plan=trade_plan,
     )
 
     print()
