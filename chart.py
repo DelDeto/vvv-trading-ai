@@ -222,6 +222,11 @@ def _zone_candidates(
     current_price,
     max_zones=2,
 ):
+    """
+    Chart only receives already-qualified V2 zones from the SMC engine.
+    No fallback to stale historical zones.
+    """
+
     key = (
         "supply_zones"
         if side == "supply"
@@ -234,78 +239,30 @@ def _zone_candidates(
             key,
             [],
         )
-        if not zone.get(
-            "invalidated",
-            False,
+        if (
+            zone
+            and zone.get(
+                "qualified",
+                False,
+            )
+            and not zone.get(
+                "invalidated",
+                False,
+            )
         )
     ]
 
-    if not zones:
-        nearest = analysis.get(
-            (
-                "nearest_supply"
-                if side == "supply"
-                else "nearest_demand"
+    zones.sort(
+        key=lambda zone: (
+            zone.get(
+                "rank_score",
+                0,
             )
-        )
+        ),
+        reverse=True,
+    )
 
-        return (
-            [nearest]
-            if nearest
-            else []
-        )
-
-    filtered = []
-
-    for zone in zones:
-        midpoint = (
-            float(zone["lower"])
-            + float(zone["upper"])
-        ) / 2
-
-        distance_pct = (
-            abs(
-                midpoint
-                - current_price
-            )
-            / max(
-                current_price,
-                1e-9,
-            )
-        )
-
-        if distance_pct <= 0.20:
-            filtered.append(zone)
-
-    if not filtered:
-        filtered = zones
-
-    if side == "supply":
-        filtered.sort(
-            key=lambda zone: abs(
-                max(
-                    float(
-                        zone["lower"]
-                    ),
-                    current_price,
-                )
-                - current_price
-            )
-        )
-    else:
-        filtered.sort(
-            key=lambda zone: abs(
-                current_price
-                - min(
-                    float(
-                        zone["upper"]
-                    ),
-                    current_price,
-                )
-            )
-        )
-
-    return filtered[:max_zones]
+    return zones[:max_zones]
 
 
 def _draw_zone(
@@ -358,6 +315,22 @@ def _draw_zone(
         else "Demand"
     )
 
+    tier = (
+        "Primary"
+        if number == 1
+        else "Secondary"
+    )
+
+    quality = zone.get(
+        "quality",
+        "N/A",
+    )
+
+    mitigations = zone.get(
+        "mitigations",
+        0,
+    )
+
     ax.text(
         x_right - 1.0,
         (
@@ -366,8 +339,9 @@ def _draw_zone(
         )
         / 2,
         (
-            f"{label} Zone {number}\n"
+            f"{tier} {label} · {quality}\n"
             f"{_fmt(lower)} – {_fmt(upper)}"
+            f" · M{mitigations}"
         ),
         ha="right",
         va="center",
