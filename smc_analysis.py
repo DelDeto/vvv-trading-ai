@@ -898,18 +898,252 @@ def _find_retests(
     return retests
 
 
+ZONE_POLICIES = {
+    "15M": {
+        "primary_age": 96,
+        "max_age": 288,
+        "max_distance_pct": 0.12,
+        "max_mitigations": 2,
+        "min_quality": 3.25,
+    },
+    "1H": {
+        "primary_age": 120,
+        "max_age": 240,
+        "max_distance_pct": 0.18,
+        "max_mitigations": 2,
+        "min_quality": 3.25,
+    },
+    "4H": {
+        "primary_age": 120,
+        "max_age": 270,
+        "max_distance_pct": 0.25,
+        "max_mitigations": 2,
+        "min_quality": 3.25,
+    },
+}
+
+
+def _zone_policy(timeframe):
+    return ZONE_POLICIES.get(
+        timeframe,
+        ZONE_POLICIES["1H"],
+    )
+
+
+def _zone_base_index(
+    df,
+    displacement_index,
+    direction,
+    lookback=3,
+):
+    """
+    Find the last opposite-colour base candle before displacement.
+    If none exists in the lookback, use the candle immediately before it.
+    """
+
+    fallback = max(
+        0,
+        displacement_index - 1,
+    )
+
+    for index in range(
+        displacement_index - 1,
+        max(
+            -1,
+            displacement_index
+            - lookback
+            - 1,
+        ),
+        -1,
+    ):
+        open_price = float(
+            df["open"].iloc[index]
+        )
+
+        close_price = float(
+            df["close"].iloc[index]
+        )
+
+        if (
+            direction == "bullish"
+            and close_price <= open_price
+        ):
+            return index
+
+        if (
+            direction == "bearish"
+            and close_price >= open_price
+        ):
+            return index
+
+    return fallback
+
+
+def _zone_mitigation_count(
+    df,
+    start_index,
+    lower,
+    upper,
+    side,
+):
+    """
+    Count separate revisits to the zone after departure.
+    Consecutive candles inside the same revisit count as one mitigation.
+    """
+
+    mitigations = 0
+    in_touch = False
+    invalidated = False
+
+    for i in range(
+        start_index + 1,
+        len(df),
+    ):
+        high_now = float(
+            df["high"].iloc[i]
+        )
+
+        low_now = float(
+            df["low"].iloc[i]
+        )
+
+        close_now = float(
+            df["close"].iloc[i]
+        )
+
+        if side == "demand":
+            invalidated = (
+                close_now < lower
+            )
+        else:
+            invalidated = (
+                close_now > upper
+            )
+
+        if invalidated:
+            break
+
+        overlaps = (
+            high_now >= lower
+            and low_now <= upper
+        )
+
+        if (
+            overlaps
+            and not in_touch
+        ):
+            mitigations += 1
+
+        in_touch = overlaps
+
+    return (
+        mitigations,
+        invalidated,
+    )
+
+
+def _event_near(
+    events,
+    start_index,
+    end_index,
+    direction,
+):
+    return any(
+        event.get("direction")
+        == direction
+        and start_index
+        <= event.get(
+            "index",
+            -1,
+        )
+        <= end_index
+        for event in events
+    )
+
+
+def _fvg_near(
+    fvgs,
+    start_index,
+    end_index,
+    direction,
+):
+    return any(
+        fvg.get("type")
+        == direction
+        and start_index
+        <= fvg.get(
+            "index",
+            -1,
+        )
+        <= end_index
+        for fvg in fvgs
+    )
+
+
+def _sweep_before(
+    sweeps,
+    base_index,
+    displacement_index,
+    direction,
+):
+    return any(
+        sweep.get("direction")
+        == direction
+        and (
+            base_index - 8
+            <= sweep.get(
+                "index",
+                -1,
+            )
+            <= displacement_index
+        )
+        for sweep in sweeps
+    )
+
+
+def _quality_label(score):
+    if score >= 6.0:
+        return "HIGH"
+
+    if score >= 4.25:
+        return "MEDIUM"
+
+    return "LOW"
+
+
 def _find_zones(
     df,
     atr,
+    structure_events,
+    fvgs,
+    sweeps,
+    timeframe="1H",
 ):
     """
-    Supply/Demand:
-    base candle immediately before
-    an ATR-sized displacement candle.
+    Supply/Demand V2.
+
+    Candidate origin:
+    - Last opposite-colour candle within 3 bars before displacement.
+
+    Quality:
+    - Strength of departure.
+    - Freshness / mitigation count.
+    - Nearby BOS/CHoCH.
+    - FVG created with the departure.
+    - Liquidity sweep context.
+    - Timeframe-specific age.
+    - Distance from current price.
+
+    Old, repeatedly mitigated, invalidated, or very distant zones are
+    excluded from the main chart.
     """
 
     supply = []
     demand = []
+
+    policy = _zone_policy(
+        timeframe
+    )
 
     displacements = (
         _find_displacements(
@@ -918,24 +1152,39 @@ def _find_zones(
         )
     )
 
-    by_index = {
-        item["index"]: item
-        for item
-        in displacements
-    }
+    current_index = (
+        len(df) - 1
+    )
 
-    for i in range(
-        1,
-        len(df),
-    ):
-        displacement = (
-            by_index.get(i)
+    current_price = float(
+        df["close"].iloc[-1]
+    )
+
+    for displacement in displacements:
+        i = int(
+            displacement["index"]
         )
 
-        if not displacement:
+        if i <= 0:
             continue
 
-        base_index = i - 1
+        direction = displacement[
+            "direction"
+        ]
+
+        side = (
+            "demand"
+            if direction == "bullish"
+            else "supply"
+        )
+
+        base_index = (
+            _zone_base_index(
+                df,
+                i,
+                direction,
+            )
+        )
 
         base_open = float(
             df["open"].iloc[
@@ -961,58 +1210,13 @@ def _find_zones(
             ]
         )
 
-        if (
-            displacement[
-                "direction"
-            ]
-            == "bullish"
-        ):
+        if side == "demand":
             lower = base_low
 
             upper = max(
                 base_open,
                 base_close,
             )
-
-            later = df.iloc[
-                i + 1 :
-            ]
-
-            invalidated = (
-                not later.empty
-                and bool(
-                    (
-                        later[
-                            "close"
-                        ]
-                        < lower
-                    ).any()
-                )
-            )
-
-            demand.append(
-                {
-                    "index": (
-                        base_index
-                    ),
-                    "time": (
-                        df.index[
-                            base_index
-                        ].isoformat()
-                    ),
-                    "lower": lower,
-                    "upper": upper,
-                    "invalidated": (
-                        invalidated
-                    ),
-                    "strength": (
-                        displacement[
-                            "strength"
-                        ]
-                    ),
-                }
-            )
-
         else:
             lower = min(
                 base_open,
@@ -1021,130 +1225,253 @@ def _find_zones(
 
             upper = base_high
 
-            later = df.iloc[
-                i + 1 :
+        if upper <= lower:
+            continue
+
+        mitigations, invalidated = (
+            _zone_mitigation_count(
+                df,
+                i,
+                lower,
+                upper,
+                side,
+            )
+        )
+
+        age_bars = (
+            current_index
+            - base_index
+        )
+
+        midpoint = (
+            lower + upper
+        ) / 2
+
+        distance_pct = (
+            abs(
+                midpoint
+                - current_price
+            )
+            / max(
+                current_price,
+                1e-9,
+            )
+        )
+
+        structure_confirmed = (
+            _event_near(
+                structure_events,
+                i,
+                min(
+                    current_index,
+                    i + 6,
+                ),
+                direction,
+            )
+        )
+
+        fvg_confirmed = (
+            _fvg_near(
+                fvgs,
+                i,
+                min(
+                    current_index,
+                    i + 3,
+                ),
+                direction,
+            )
+        )
+
+        sweep_context = (
+            _sweep_before(
+                sweeps,
+                base_index,
+                i,
+                direction,
+            )
+        )
+
+        strength = float(
+            displacement.get(
+                "strength",
+                1.15,
+            )
+        )
+
+        strength_score = min(
+            2.5,
+            1.0
+            + max(
+                0.0,
+                strength - 1.15,
+            )
+            * 2.5,
+        )
+
+        if mitigations == 0:
+            freshness_score = 2.0
+        elif mitigations == 1:
+            freshness_score = 1.0
+        else:
+            freshness_score = 0.35
+
+        age_score = (
+            1.0
+            if age_bars
+            <= policy[
+                "primary_age"
             ]
+            else 0.25
+        )
 
-            invalidated = (
-                not later.empty
-                and bool(
-                    (
-                        later[
-                            "close"
-                        ]
-                        > upper
-                    ).any()
+        quality_score = (
+            strength_score
+            + freshness_score
+            + age_score
+            + (
+                1.5
+                if structure_confirmed
+                else 0.0
+            )
+            + (
+                1.0
+                if fvg_confirmed
+                else 0.0
+            )
+            + (
+                1.0
+                if sweep_context
+                else 0.0
+            )
+            - (
+                0.50
+                * mitigations
+            )
+        )
+
+        rank_score = (
+            quality_score
+            - (
+                distance_pct
+                * 5.0
+            )
+            - (
+                mitigations
+                * 0.25
+            )
+        )
+
+        qualified = (
+            not invalidated
+            and age_bars
+            <= policy["max_age"]
+            and mitigations
+            <= policy[
+                "max_mitigations"
+            ]
+            and distance_pct
+            <= policy[
+                "max_distance_pct"
+            ]
+            and quality_score
+            >= policy[
+                "min_quality"
+            ]
+        )
+
+        zone = {
+            "index": base_index,
+            "time": (
+                df.index[
+                    base_index
+                ].isoformat()
+            ),
+            "lower": lower,
+            "upper": upper,
+            "invalidated": (
+                invalidated
+            ),
+            "qualified": (
+                qualified
+            ),
+            "strength": strength,
+            "mitigations": (
+                mitigations
+            ),
+            "age_bars": age_bars,
+            "distance_pct": (
+                distance_pct
+            ),
+            "structure_confirmed": (
+                structure_confirmed
+            ),
+            "fvg_confirmed": (
+                fvg_confirmed
+            ),
+            "sweep_context": (
+                sweep_context
+            ),
+            "quality_score": (
+                quality_score
+            ),
+            "quality": (
+                _quality_label(
+                    quality_score
                 )
-            )
+            ),
+            "rank_score": (
+                rank_score
+            ),
+            "timeframe": timeframe,
+        }
 
-            supply.append(
-                {
-                    "index": (
-                        base_index
-                    ),
-                    "time": (
-                        df.index[
-                            base_index
-                        ].isoformat()
-                    ),
-                    "lower": lower,
-                    "upper": upper,
-                    "invalidated": (
-                        invalidated
-                    ),
-                    "strength": (
-                        displacement[
-                            "strength"
-                        ]
-                    ),
-                }
+        if side == "demand":
+            demand.append(zone)
+        else:
+            supply.append(zone)
+
+    def qualified_ranked(
+        zones,
+    ):
+        active = [
+            zone
+            for zone in zones
+            if zone.get(
+                "qualified",
+                False,
             )
+        ]
+
+        active.sort(
+            key=lambda zone: (
+                zone.get(
+                    "rank_score",
+                    0,
+                )
+            ),
+            reverse=True,
+        )
+
+        return active
 
     return (
-        supply,
-        demand,
+        qualified_ranked(
+            supply
+        ),
+        qualified_ranked(
+            demand
+        ),
         displacements,
     )
 
 
-def _nearest_zone(
+def _primary_zone(
     zones,
-    current_price,
-    side,
-    current_index,
-    max_age=80,
 ):
-    active = [
-        zone
-        for zone in zones
-        if (
-            not zone.get(
-                "invalidated",
-                False,
-            )
-            and (
-                current_index
-                - zone.get(
-                    "index",
-                    current_index,
-                )
-                <= max_age
-            )
-        )
-    ]
-
-    if not active:
+    if not zones:
         return None
 
-    if side == "supply":
-        above = [
-            zone
-            for zone in active
-            if zone["upper"]
-            >= current_price
-        ]
-
-        if above:
-            return min(
-                above,
-                key=lambda zone: (
-                    abs(
-                        zone["lower"]
-                        - current_price
-                    )
-                    if zone[
-                        "lower"
-                    ]
-                    >= current_price
-                    else 0
-                ),
-            )
-
-    if side == "demand":
-        below = [
-            zone
-            for zone in active
-            if zone["lower"]
-            <= current_price
-        ]
-
-        if below:
-            return min(
-                below,
-                key=lambda zone: (
-                    abs(
-                        current_price
-                        - zone["upper"]
-                    )
-                    if zone[
-                        "upper"
-                    ]
-                    <= current_price
-                    else 0
-                ),
-            )
-
-    return active[-1]
+    return zones[0]
 
 
 def _latest_recent(
@@ -1328,6 +1655,7 @@ def _setup_signal(
 def analyze_smc(
     df,
     swing_window=2,
+    timeframe="1H",
 ):
     """
     Conservative, rule-based SMC analysis.
@@ -1426,10 +1754,24 @@ def analyze_smc(
         window=swing_window,
     )
 
+    fvgs = _find_fvgs(
+        work
+    )
+
+    active_fvgs = [
+        fvg
+        for fvg in fvgs
+        if not fvg["filled"]
+    ]
+
     supply, demand, displacements = (
         _find_zones(
             work,
             atr,
+            structure_events,
+            fvgs,
+            sweeps,
+            timeframe=timeframe,
         )
     )
 
@@ -1450,35 +1792,19 @@ def analyze_smc(
         swing_lows,
     )
 
-    fvgs = _find_fvgs(
-        work
-    )
-
-    active_fvgs = [
-        fvg
-        for fvg in fvgs
-        if not fvg["filled"]
-    ]
-
     current_index = (
         len(work) - 1
     )
 
     nearest_supply = (
-        _nearest_zone(
-            supply,
-            current_price,
-            "supply",
-            current_index,
+        _primary_zone(
+            supply
         )
     )
 
     nearest_demand = (
-        _nearest_zone(
-            demand,
-            current_price,
-            "demand",
-            current_index,
+        _primary_zone(
+            demand
         )
     )
 
@@ -1524,6 +1850,12 @@ def analyze_smc(
     return {
         "current_price": (
             current_price
+        ),
+        "timeframe": timeframe,
+        "zone_policy": (
+            _zone_policy(
+                timeframe
+            )
         ),
         "atr": float(
             atr.iloc[-1]
@@ -1598,20 +1930,12 @@ def analyze_smc(
         "nearest_demand": (
             nearest_demand
         ),
-        "supply_zones": [
-            zone
-            for zone in supply
-            if not zone[
-                "invalidated"
-            ]
-        ][-4:],
-        "demand_zones": [
-            zone
-            for zone in demand
-            if not zone[
-                "invalidated"
-            ]
-        ][-4:],
+        "supply_zones": (
+            supply[:4]
+        ),
+        "demand_zones": (
+            demand[:4]
+        ),
         "setup": (
             preferred_setup
         ),
