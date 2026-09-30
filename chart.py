@@ -167,6 +167,197 @@ def _draw_liquidity_line(
     )
 
 
+
+
+def _draw_trade_plan(
+    ax,
+    trade_plan,
+):
+    """
+    Draw the current rule-based execution map on the 15M chart.
+    """
+
+    if (
+        not trade_plan
+        or not trade_plan.get(
+            "active",
+            False,
+        )
+    ):
+        return
+
+    direction = trade_plan[
+        "direction"
+    ]
+
+    entry = trade_plan[
+        "entry_zone"
+    ]
+
+    entry_lower = float(
+        entry["lower"]
+    )
+
+    entry_upper = float(
+        entry["upper"]
+    )
+
+    stop_loss = float(
+        trade_plan[
+            "stop_loss"
+        ]
+    )
+
+    entry_color = YELLOW
+
+    ax.axhspan(
+        entry_lower,
+        entry_upper,
+        color=entry_color,
+        alpha=0.11,
+        zorder=1,
+    )
+
+    ax.axhline(
+        entry_lower,
+        color=entry_color,
+        linewidth=0.75,
+        linestyle=(0, (3, 3)),
+        alpha=0.9,
+        zorder=3,
+    )
+
+    ax.axhline(
+        entry_upper,
+        color=entry_color,
+        linewidth=0.75,
+        linestyle=(0, (3, 3)),
+        alpha=0.9,
+        zorder=3,
+    )
+
+    ax.text(
+        0.995,
+        (
+            entry_lower
+            + entry_upper
+        )
+        / 2,
+        (
+            f" ENTRY "
+            f"{_fmt(entry_lower)}-"
+            f"{_fmt(entry_upper)} "
+        ),
+        transform=ax.get_yaxis_transform(),
+        ha="right",
+        va="center",
+        fontsize=7.2,
+        color=entry_color,
+        bbox=dict(
+            boxstyle="round,pad=0.20",
+            facecolor=BG,
+            edgecolor=entry_color,
+            linewidth=0.7,
+            alpha=0.94,
+        ),
+        zorder=9,
+    )
+
+    ax.axhline(
+        stop_loss,
+        color=RED,
+        linewidth=1.0,
+        linestyle=(0, (2, 2)),
+        alpha=0.95,
+        zorder=4,
+    )
+
+    ax.text(
+        0.995,
+        stop_loss,
+        f" SL {_fmt(stop_loss)} ",
+        transform=ax.get_yaxis_transform(),
+        ha="right",
+        va=(
+            "top"
+            if direction == "long"
+            else "bottom"
+        ),
+        fontsize=7.2,
+        color=RED,
+        bbox=dict(
+            boxstyle="round,pad=0.20",
+            facecolor=BG,
+            edgecolor=RED,
+            linewidth=0.7,
+            alpha=0.94,
+        ),
+        zorder=9,
+    )
+
+    for index, target in enumerate(
+        trade_plan.get(
+            "targets",
+            [],
+        ),
+        start=1,
+    ):
+        price = float(
+            target["price"]
+        )
+
+        rr = target.get(
+            "rr"
+        )
+
+        rr_text = (
+            f" {rr:.2f}R"
+            if rr is not None
+            else ""
+        )
+
+        alpha = max(
+            0.55,
+            0.92
+            - (
+                index - 1
+            )
+            * 0.15,
+        )
+
+        ax.axhline(
+            price,
+            color=GREEN,
+            linewidth=0.9,
+            linestyle=(0, (6, 4)),
+            alpha=alpha,
+            zorder=3,
+        )
+
+        ax.text(
+            0.995,
+            price,
+            (
+                f" TP{index} "
+                f"{_fmt(price)}"
+                f"{rr_text} "
+            ),
+            transform=ax.get_yaxis_transform(),
+            ha="right",
+            va="bottom",
+            fontsize=7.0,
+            color=GREEN,
+            bbox=dict(
+                boxstyle="round,pad=0.18",
+                facecolor=BG,
+                edgecolor=GREEN,
+                linewidth=0.6,
+                alpha=0.92,
+            ),
+            zorder=9,
+        )
+
+
 def create_chart(
     df,
     interval,
@@ -174,6 +365,7 @@ def create_chart(
     candles=100,
     exchange="MEXC",
     analysis=None,
+    trade_plan=None,
 ):
     """
     Vẽ candlestick chart từ OHLC Futures thật
@@ -292,6 +484,11 @@ def create_chart(
         ax,
         current_price,
         last_open,
+    )
+
+    _draw_trade_plan(
+        ax,
+        trade_plan,
     )
 
     if analysis:
