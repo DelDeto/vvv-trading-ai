@@ -10,6 +10,9 @@ from smc_analysis import (
 )
 
 
+STATE_PATH = "state.json"
+
+
 def _fmt(value):
     if value is None:
         return "-"
@@ -27,23 +30,48 @@ def _zone_text(zone):
     )
 
 
-def _print_summary(
-    timeframe,
-    analysis,
-):
+def _fvg_text(analysis):
+    active = analysis.get(
+        "active_fvgs",
+        [],
+    )[-2:]
+
+    if not active:
+        return "-"
+
+    parts = []
+
+    for fvg in active:
+        parts.append(
+            (
+                f"{fvg['type'].upper()} "
+                f"{_fmt(fvg['lower'])}-"
+                f"{_fmt(fvg['upper'])}"
+            )
+        )
+
+    return " | ".join(parts)
+
+
+def _event_text(analysis):
     event = analysis.get(
         "last_event"
     )
 
-    event_text = "None"
+    if not event:
+        return "None"
 
-    if event:
-        event_text = (
-            f"{event['kind']} "
-            f"{event['direction'].upper()} "
-            f"@ {_fmt(event['level'])}"
-        )
+    return (
+        f"{event['kind']} "
+        f"{event['direction'].upper()} "
+        f"@ {_fmt(event['level'])}"
+    )
 
+
+def _print_summary(
+    timeframe,
+    analysis,
+):
     bsl = analysis.get("bsl")
     ssl = analysis.get("ssl")
 
@@ -86,15 +114,561 @@ def _print_summary(
 
     print(
         f"[{timeframe}] "
-        f"Last structure: "
-        f"{event_text}"
+        f"FVG: "
+        f"{_fvg_text(analysis)}"
     )
 
     print(
         f"[{timeframe}] "
-        f"Active FVG count: "
-        f"{len(analysis.get('active_fvgs', []))}"
+        f"Last structure: "
+        f"{_event_text(analysis)}"
     )
+
+
+def _load_state():
+    if not os.path.exists(
+        STATE_PATH
+    ):
+        return None
+
+    try:
+        with open(
+            STATE_PATH,
+            "r",
+            encoding="utf-8",
+        ) as file:
+            return json.load(file)
+
+    except Exception as exc:
+        print(
+            "State load warning:",
+            exc,
+        )
+        return None
+
+
+def _compact_event(analysis):
+    event = analysis.get(
+        "last_event"
+    )
+
+    if not event:
+        return None
+
+    return {
+        "time": event.get("time"),
+        "direction": event.get(
+            "direction"
+        ),
+        "kind": event.get("kind"),
+        "level": event.get("level"),
+    }
+
+
+def _compact_zone(zone):
+    if not zone:
+        return None
+
+    return {
+        "lower": zone.get("lower"),
+        "upper": zone.get("upper"),
+    }
+
+
+def _compact_liquidity(point):
+    if not point:
+        return None
+
+    return {
+        "price": point.get("price"),
+        "time": point.get("time"),
+    }
+
+
+def _make_state(report):
+    state = {
+        "generated_at_utc": (
+            report[
+                "generated_at_utc"
+            ]
+        ),
+        "current_price": (
+            report[
+                "current_price"
+            ]
+        ),
+        "status": (
+            report[
+                "status"
+            ]
+        ),
+        "timeframes": {},
+    }
+
+    for timeframe, analysis in (
+        report["timeframes"].items()
+    ):
+        state["timeframes"][
+            timeframe
+        ] = {
+            "trend": (
+                analysis.get("trend")
+            ),
+            "bsl": _compact_liquidity(
+                analysis.get("bsl")
+            ),
+            "ssl": _compact_liquidity(
+                analysis.get("ssl")
+            ),
+            "last_event": (
+                _compact_event(
+                    analysis
+                )
+            ),
+            "nearest_supply": (
+                _compact_zone(
+                    analysis.get(
+                        "nearest_supply"
+                    )
+                )
+            ),
+            "nearest_demand": (
+                _compact_zone(
+                    analysis.get(
+                        "nearest_demand"
+                    )
+                )
+            ),
+        }
+
+    return state
+
+
+def _event_signature(event):
+    if not event:
+        return None
+
+    return (
+        event.get("time"),
+        event.get("kind"),
+        event.get("direction"),
+        round(
+            float(
+                event.get(
+                    "level",
+                    0,
+                )
+            ),
+            6,
+        ),
+    )
+
+
+def _compare_state(
+    previous,
+    current,
+):
+    changes = []
+
+    if not previous:
+        return (
+            changes,
+            True,
+            None,
+        )
+
+    previous_price = previous.get(
+        "current_price"
+    )
+
+    current_price = current.get(
+        "current_price"
+    )
+
+    price_change_pct = None
+
+    if (
+        previous_price
+        not in (None, 0)
+    ):
+        price_change_pct = (
+            (
+                current_price
+                - previous_price
+            )
+            / previous_price
+            * 100
+        )
+
+        if abs(
+            price_change_pct
+        ) >= 1.0:
+            changes.append(
+                (
+                    "Price moved "
+                    f"{price_change_pct:+.2f}% "
+                    "since prior run"
+                )
+            )
+
+    if (
+        previous.get("status")
+        != current.get("status")
+    ):
+        changes.append(
+            (
+                "Status changed: "
+                f"{previous.get('status')} "
+                "-> "
+                f"{current.get('status')}"
+            )
+        )
+
+    for timeframe in [
+        "4H",
+        "1H",
+        "15M",
+    ]:
+        previous_tf = (
+            previous
+            .get(
+                "timeframes",
+                {},
+            )
+            .get(
+                timeframe,
+                {},
+            )
+        )
+
+        current_tf = (
+            current
+            .get(
+                "timeframes",
+                {},
+            )
+            .get(
+                timeframe,
+                {},
+            )
+        )
+
+        if (
+            previous_tf.get("trend")
+            != current_tf.get(
+                "trend"
+            )
+        ):
+            changes.append(
+                (
+                    f"{timeframe} trend: "
+                    f"{previous_tf.get('trend')} "
+                    "-> "
+                    f"{current_tf.get('trend')}"
+                )
+            )
+
+        if (
+            _event_signature(
+                previous_tf.get(
+                    "last_event"
+                )
+            )
+            !=
+            _event_signature(
+                current_tf.get(
+                    "last_event"
+                )
+            )
+        ):
+            changes.append(
+                (
+                    f"{timeframe} structure "
+                    "event changed"
+                )
+            )
+
+    material_change = bool(
+        changes
+    )
+
+    return (
+        changes,
+        material_change,
+        price_change_pct,
+    )
+
+
+def _invalidation_and_targets(
+    status,
+    analyses,
+):
+    a15 = analyses["15M"]
+    a1h = analyses["1H"]
+
+    bsl_15 = (
+        a15.get("bsl") or {}
+    ).get("price")
+
+    ssl_15 = (
+        a15.get("ssl") or {}
+    ).get("price")
+
+    bsl_1h = (
+        a1h.get("bsl") or {}
+    ).get("price")
+
+    ssl_1h = (
+        a1h.get("ssl") or {}
+    ).get("price")
+
+    supply_15 = (
+        a15.get(
+            "nearest_supply"
+        )
+        or {}
+    )
+
+    demand_15 = (
+        a15.get(
+            "nearest_demand"
+        )
+        or {}
+    )
+
+    if "LONG" in status:
+        invalidation = (
+            demand_15.get("lower")
+            or ssl_15
+        )
+
+        targets = [
+            value
+            for value in [
+                bsl_15,
+                bsl_1h,
+            ]
+            if value is not None
+        ]
+
+    elif "SHORT" in status:
+        invalidation = (
+            supply_15.get("upper")
+            or bsl_15
+        )
+
+        targets = [
+            value
+            for value in [
+                ssl_15,
+                ssl_1h,
+            ]
+            if value is not None
+        ]
+
+    else:
+        invalidation = None
+
+        targets = [
+            value
+            for value in [
+                ssl_15,
+                bsl_15,
+            ]
+            if value is not None
+        ]
+
+    # Preserve order, remove duplicates.
+    deduped = []
+
+    for value in targets:
+        if value not in deduped:
+            deduped.append(value)
+
+    return (
+        invalidation,
+        deduped,
+    )
+
+
+def _build_hourly_update(
+    report,
+    previous_state,
+    changes,
+    material_change,
+    price_change_pct,
+):
+    analyses = report[
+        "timeframes"
+    ]
+
+    status = report["status"]
+
+    invalidation, targets = (
+        _invalidation_and_targets(
+            status,
+            analyses,
+        )
+    )
+
+    lines = []
+
+    lines.append(
+        "VVV_USDT MEXC HOURLY SMC UPDATE"
+    )
+
+    lines.append(
+        "=" * 42
+    )
+
+    lines.append(
+        (
+            "Generated UTC: "
+            f"{report['generated_at_utc']}"
+        )
+    )
+
+    lines.append(
+        (
+            "Current price: "
+            f"{_fmt(report['current_price'])}"
+        )
+    )
+
+    if (
+        previous_state
+        and price_change_pct
+        is not None
+    ):
+        lines.append(
+            (
+                "Change vs prior run: "
+                f"{price_change_pct:+.2f}%"
+            )
+        )
+
+    else:
+        lines.append(
+            (
+                "Change vs prior run: "
+                "N/A"
+            )
+        )
+
+    lines.append(
+        (
+            "Status: "
+            f"{status}"
+        )
+    )
+
+    lines.append("")
+
+    for timeframe in [
+        "4H",
+        "1H",
+        "15M",
+    ]:
+        analysis = analyses[
+            timeframe
+        ]
+
+        bsl = analysis.get("bsl")
+        ssl = analysis.get("ssl")
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                f"Trend: "
+                f"{analysis['trend'].upper()}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Momentum/structure: "
+                f"{_event_text(analysis)}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "BSL: "
+                f"{_fmt(bsl['price']) if bsl else '-'}"
+                " | SSL: "
+                f"{_fmt(ssl['price']) if ssl else '-'}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Demand: "
+                f"{_zone_text(analysis.get('nearest_demand'))}"
+                " | Supply: "
+                f"{_zone_text(analysis.get('nearest_supply'))}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Active FVG: "
+                f"{_fvg_text(analysis)}"
+            )
+        )
+
+        lines.append("")
+
+    if invalidation is not None:
+        lines.append(
+            (
+                "Working invalidation: "
+                f"{_fmt(invalidation)}"
+            )
+        )
+
+    if targets:
+        lines.append(
+            (
+                "Nearby liquidity targets: "
+                + " -> ".join(
+                    _fmt(value)
+                    for value
+                    in targets
+                )
+            )
+        )
+
+    lines.append("")
+
+    if material_change:
+        lines.append(
+            "Material changes:"
+        )
+
+        if changes:
+            for change in changes:
+                lines.append(
+                    f"- {change}"
+                )
+
+        else:
+            lines.append(
+                "- First baseline run"
+            )
+
+    else:
+        lines.append(
+            (
+                "Nothing materially changed "
+                "since the previous run."
+            )
+        )
+
+    return "\n".join(lines)
 
 
 def main():
@@ -105,6 +679,10 @@ def main():
         "+ SMC ANALYSIS"
     )
     print("=" * 50)
+
+    previous_state = (
+        _load_state()
+    )
 
     # Real MEXC Futures OHLC
     df_4h = get_klines(
@@ -135,6 +713,12 @@ def main():
         df_15m
     )
 
+    analyses = {
+        "4H": smc_4h,
+        "1H": smc_1h,
+        "15M": smc_15m,
+    }
+
     status = derive_overall_status(
         smc_4h,
         smc_1h,
@@ -143,6 +727,12 @@ def main():
 
     current_price = float(
         df_15m.iloc[-1]["close"]
+    )
+
+    generated_at = (
+        datetime.now(
+            timezone.utc
+        ).isoformat()
     )
 
     print()
@@ -177,23 +767,46 @@ def main():
         exist_ok=True,
     )
 
-    # Save machine-readable SMC report.
     report = {
         "generated_at_utc": (
-            datetime.now(
-                timezone.utc
-            ).isoformat()
+            generated_at
         ),
         "exchange": "MEXC",
         "symbol": "VVV_USDT",
-        "current_price": current_price,
+        "current_price": (
+            current_price
+        ),
         "status": status,
-        "timeframes": {
-            "4H": smc_4h,
-            "1H": smc_1h,
-            "15M": smc_15m,
-        },
+        "timeframes": analyses,
     }
+
+    current_state = (
+        _make_state(
+            report
+        )
+    )
+
+    (
+        changes,
+        material_change,
+        price_change_pct,
+    ) = _compare_state(
+        previous_state,
+        current_state,
+    )
+
+    update_text = (
+        _build_hourly_update(
+            report,
+            previous_state,
+            changes,
+            material_change,
+            price_change_pct,
+        )
+    )
+
+    print()
+    print(update_text)
 
     with open(
         "output/VVVUSDT_SMC_report.json",
@@ -202,6 +815,28 @@ def main():
     ) as file:
         json.dump(
             report,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    with open(
+        "output/VVVUSDT_hourly_update.txt",
+        "w",
+        encoding="utf-8",
+    ) as file:
+        file.write(
+            update_text
+        )
+
+    # Persist compact state for next workflow run.
+    with open(
+        STATE_PATH,
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            current_state,
             file,
             ensure_ascii=False,
             indent=2,
