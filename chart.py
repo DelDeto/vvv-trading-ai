@@ -326,9 +326,19 @@ def _draw_zone(
         "N/A",
     )
 
+    pattern = zone.get(
+        "pattern"
+    )
+
     mitigations = zone.get(
         "mitigations",
         0,
+    )
+
+    pattern_text = (
+        f" · {pattern}"
+        if pattern
+        else ""
     )
 
     ax.text(
@@ -339,7 +349,8 @@ def _draw_zone(
         )
         / 2,
         (
-            f"{tier} {label} · {quality}\n"
+            f"{tier} {label} · {quality}"
+            f"{pattern_text}\n"
             f"{_fmt(lower)} – {_fmt(upper)}"
             f" · M{mitigations}"
         ),
