@@ -223,8 +223,9 @@ def _zone_candidates(
     max_zones=2,
 ):
     """
-    Chart only receives already-qualified V2 zones from the SMC engine.
-    No fallback to stale historical zones.
+    Active V3 zones arrive from the engine in trading priority order:
+    Primary = nearest valid zone.
+    Secondary = highest-quality remaining valid zone.
     """
 
     key = (
@@ -252,17 +253,29 @@ def _zone_candidates(
         )
     ]
 
-    zones.sort(
-        key=lambda zone: (
-            zone.get(
-                "rank_score",
-                0,
-            )
-        ),
-        reverse=True,
+    return zones[:max_zones]
+
+
+def _reference_zone_candidate(
+    analysis,
+    side,
+):
+    key = (
+        "reference_supply_zones"
+        if side == "supply"
+        else "reference_demand_zones"
     )
 
-    return zones[:max_zones]
+    zones = analysis.get(
+        key,
+        [],
+    )
+
+    return (
+        dict(zones[0])
+        if zones
+        else None
+    )
 
 
 def _draw_zone(
@@ -371,6 +384,104 @@ def _draw_zone(
             alpha=0.72,
         ),
         zorder=7,
+    )
+
+
+def _draw_reference_zone(
+    ax,
+    zone,
+    side,
+    x_left,
+    x_right,
+):
+    """
+    Historical zone for context only.
+    It is deliberately faint/dashed and must never be interpreted
+    as an active execution zone.
+    """
+
+    if not zone:
+        return
+
+    lower = float(
+        zone["lower"]
+    )
+
+    upper = float(
+        zone["upper"]
+    )
+
+    color = (
+        SUPPLY
+        if side == "supply"
+        else DEMAND
+    )
+
+    ax.fill_between(
+        [x_left, x_right],
+        lower,
+        upper,
+        color=color,
+        alpha=0.025,
+        zorder=0,
+    )
+
+    ax.hlines(
+        [lower, upper],
+        xmin=x_left,
+        xmax=x_right,
+        color=color,
+        linewidth=0.75,
+        linestyle=(0, (5, 5)),
+        alpha=0.45,
+        zorder=1,
+    )
+
+    label = (
+        "Supply"
+        if side == "supply"
+        else "Demand"
+    )
+
+    pattern = zone.get(
+        "pattern",
+        "?",
+    )
+
+    mitigations = zone.get(
+        "mitigations",
+        0,
+    )
+
+    ax.text(
+        x_right - 1.0,
+        (
+            lower
+            + upper
+        )
+        / 2,
+        (
+            f"Historical {label} · WEAK · {pattern}\n"
+            f"{_fmt(lower)} – {_fmt(upper)}"
+            f" · M{mitigations} · REFERENCE ONLY"
+        ),
+        ha="right",
+        va="center",
+        fontsize=7.0,
+        color=(
+            "#8DCFB1"
+            if side == "demand"
+            else "#C58C94"
+        ),
+        fontweight="normal",
+        bbox=dict(
+            boxstyle="round,pad=0.22",
+            facecolor=BG,
+            edgecolor=color,
+            linewidth=0.45,
+            alpha=0.55,
+        ),
+        zorder=5,
     )
 
 
@@ -1315,6 +1426,46 @@ def create_chart(
                 max(
                     0,
                     x_now - 68,
+                ),
+                x_future - 2,
+            )
+
+        # If no active zone exists on a side, show the nearest historical
+        # over-mitigated zone as context only. It is never used by Trade Map.
+        if not supplies:
+            reference_supply = (
+                _reference_zone_candidate(
+                    analysis,
+                    "supply",
+                )
+            )
+
+            _draw_reference_zone(
+                ax,
+                reference_supply,
+                "supply",
+                max(
+                    0,
+                    x_now - 52,
+                ),
+                x_future - 2,
+            )
+
+        if not demands:
+            reference_demand = (
+                _reference_zone_candidate(
+                    analysis,
+                    "demand",
+                )
+            )
+
+            _draw_reference_zone(
+                ax,
+                reference_demand,
+                "demand",
+                max(
+                    0,
+                    x_now - 52,
                 ),
                 x_future - 2,
             )
