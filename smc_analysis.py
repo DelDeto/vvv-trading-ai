@@ -2339,6 +2339,35 @@ def _find_zones(
                 zone
             )
 
+    def distance_to_price(
+        zone,
+    ):
+        lower = float(
+            zone["lower"]
+        )
+
+        upper = float(
+            zone["upper"]
+        )
+
+        if (
+            lower
+            <= current_price
+            <= upper
+        ):
+            return 0.0
+
+        return min(
+            abs(
+                current_price
+                - lower
+            ),
+            abs(
+                current_price
+                - upper
+            ),
+        )
+
     def ranked(
         zones,
         qualified,
@@ -2367,23 +2396,125 @@ def _find_zones(
 
         return selected
 
+    def prioritize_active(
+        zones,
+    ):
+        """
+        Primary = nearest valid zone to current price.
+        Secondary = highest-quality remaining valid zone.
+        Remaining zones stay quality-ranked for diagnostics.
+        """
+
+        if not zones:
+            return []
+
+        primary = min(
+            zones,
+            key=distance_to_price,
+        )
+
+        remaining = [
+            zone
+            for zone in zones
+            if zone is not primary
+        ]
+
+        remaining.sort(
+            key=lambda zone: (
+                zone.get(
+                    "rank_score",
+                    0,
+                )
+            ),
+            reverse=True,
+        )
+
+        return [
+            primary,
+            *remaining,
+        ]
+
+    def reference_zones(
+        rejected,
+    ):
+        """
+        Historical/reference zones are not active trading zones.
+        Keep only zones rejected solely because they were mitigated
+        too many times; invalidated, weak, stale or distant zones
+        stay hidden from the chart.
+        """
+
+        references = [
+            zone
+            for zone in rejected
+            if (
+                not zone.get(
+                    "invalidated",
+                    False,
+                )
+                and set(
+                    zone.get(
+                        "rejection_reasons",
+                        [],
+                    )
+                )
+                == {
+                    "over_mitigated"
+                }
+            )
+        ]
+
+        references.sort(
+            key=lambda zone: (
+                distance_to_price(
+                    zone
+                ),
+                -float(
+                    zone.get(
+                        "quality_score",
+                        0,
+                    )
+                ),
+            )
+        )
+
+        return references
+
+    active_supply = ranked(
+        supply_all,
+        True,
+    )
+
+    active_demand = ranked(
+        demand_all,
+        True,
+    )
+
+    rejected_supply = ranked(
+        supply_all,
+        False,
+    )
+
+    rejected_demand = ranked(
+        demand_all,
+        False,
+    )
+
     return (
-        ranked(
-            supply_all,
-            True,
+        prioritize_active(
+            active_supply
         ),
-        ranked(
-            demand_all,
-            True,
+        prioritize_active(
+            active_demand
         ),
         strict_displacements,
-        ranked(
-            supply_all,
-            False,
+        rejected_supply,
+        rejected_demand,
+        reference_zones(
+            rejected_supply
         ),
-        ranked(
-            demand_all,
-            False,
+        reference_zones(
+            rejected_demand
         ),
     )
 
@@ -2693,6 +2824,8 @@ def analyze_smc(
         displacements,
         rejected_supply,
         rejected_demand,
+        reference_supply,
+        reference_demand,
     ) = (
         _find_zones(
             work,
@@ -2870,6 +3003,12 @@ def analyze_smc(
         ),
         "rejected_demand_zones": (
             rejected_demand[:6]
+        ),
+        "reference_supply_zones": (
+            reference_supply[:2]
+        ),
+        "reference_demand_zones": (
+            reference_demand[:2]
         ),
         "zone_engine": "V3_PRICE_ACTION",
         "setup": (
