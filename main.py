@@ -1676,16 +1676,19 @@ def main():
     df_4h = get_closed_klines(
         "4h",
         HISTORY_LIMIT,
+        min_required=360,
     )
 
     df_1h = get_closed_klines(
         "1h",
         HISTORY_LIMIT,
+        min_required=360,
     )
 
     df_15m = get_closed_klines(
         "15m",
         HISTORY_LIMIT,
+        min_required=360,
     )
 
     market_snapshot = (
@@ -1860,9 +1863,14 @@ def main():
         },
         "data_integrity": {
             "closed_candles_only": True,
-            "history_bars": (
+            "history_bars_requested": (
                 HISTORY_LIMIT
             ),
+            "actual_history_bars": {
+                "4H": len(df_4h),
+                "1H": len(df_1h),
+                "15M": len(df_15m),
+            },
             "chart_bars": 160,
             "ai_raw_context_bars": 64,
         },
