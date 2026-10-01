@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timezone
 
 from mexc_data import (
-    get_klines,
+    get_closed_klines,
     get_contract_snapshot,
 )
 from chart import create_chart
@@ -15,6 +15,7 @@ from smc_analysis import (
 
 
 STATE_PATH = "state.json"
+HISTORY_LIMIT = 420
 
 
 def _ohlc_rows(
@@ -1385,20 +1386,23 @@ def main():
         _load_state()
     )
 
-    # Real MEXC Futures OHLC
-    df_4h = get_klines(
+    # Real MEXC Futures OHLC.
+    # Signals are calculated ONLY from fully closed candles.
+    # 420 bars covers the longest current zone-policy horizon
+    # (max_age 360) with enough warm-up history.
+    df_4h = get_closed_klines(
         "4h",
-        200,
+        HISTORY_LIMIT,
     )
 
-    df_1h = get_klines(
+    df_1h = get_closed_klines(
         "1h",
-        200,
+        HISTORY_LIMIT,
     )
 
-    df_15m = get_klines(
+    df_15m = get_closed_klines(
         "15m",
-        200,
+        HISTORY_LIMIT,
     )
 
     market_snapshot = (
@@ -1476,9 +1480,18 @@ def main():
         smc_15m,
     )
 
-    current_price = float(
+    analysis_price = float(
         df_15m.iloc[-1]["close"]
     )
+
+    current_price = (
+        market_snapshot.get(
+            "last_price"
+        )
+    )
+
+    if current_price is None:
+        current_price = analysis_price
 
     trade_plan = build_trade_plan(
         smc_4h,
@@ -1495,8 +1508,16 @@ def main():
 
     print()
     print(
-        f"Current VVV_USDT close: "
+        f"Live VVV_USDT price: "
         f"{current_price}"
+    )
+
+    print(
+        (
+            "Last closed 15M: "
+            f"{analysis_price} @ "
+            f"{df_15m.index[-1].isoformat()}"
+        )
     )
 
     _print_summary(
@@ -1534,6 +1555,31 @@ def main():
         "current_price": (
             current_price
         ),
+        "analysis_price": (
+            analysis_price
+        ),
+        "last_closed_candle": {
+            "4H": (
+                df_4h.index[-1]
+                .isoformat()
+            ),
+            "1H": (
+                df_1h.index[-1]
+                .isoformat()
+            ),
+            "15M": (
+                df_15m.index[-1]
+                .isoformat()
+            ),
+        },
+        "data_integrity": {
+            "closed_candles_only": True,
+            "history_bars": (
+                HISTORY_LIMIT
+            ),
+            "chart_bars": 160,
+            "ai_raw_context_bars": 64,
+        },
         "status": status,
         "trade_plan": (
             trade_plan
