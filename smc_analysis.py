@@ -1818,6 +1818,28 @@ def _quality_label(score):
     return "LOW"
 
 
+def _zone_grade(score):
+    """
+    Descriptive calibration bucket for later evaluation.
+
+    A+/A are the strongest structural origins under the current
+    scoring model. B/C remain visible and valid when they satisfy
+    the existing V3 policy; the grade is not yet used to rewrite
+    historical thresholds before enough outcome data exists.
+    """
+
+    if score >= 8.5:
+        return "A+"
+
+    if score >= 7.0:
+        return "A"
+
+    if score >= 5.0:
+        return "B"
+
+    return "C"
+
+
 def _rejection_reasons(
     invalidated,
     age_bars,
@@ -2324,6 +2346,11 @@ def _find_zones(
                     quality_score
                 )
             ),
+            "grade": (
+                _zone_grade(
+                    quality_score
+                )
+            ),
             "rank_score": (
                 rank_score
             ),
@@ -2706,6 +2733,118 @@ def _setup_signal(
     }
 
 
+def _infer_market_regime(
+    trend,
+    last_event,
+    bullish_setup,
+    bearish_setup,
+):
+    """
+    Add transition/pullback context on top of the structural trend.
+
+    Trend remains the deterministic HH/HL vs LH/LL classification.
+    Regime explains whether the latest PA is continuing that trend,
+    pulling back inside it, or beginning a structural transition.
+    """
+
+    bullish_score = int(
+        bullish_setup.get(
+            "score",
+            0,
+        )
+        or 0
+    )
+
+    bearish_score = int(
+        bearish_setup.get(
+            "score",
+            0,
+        )
+        or 0
+    )
+
+    event_direction = (
+        last_event.get(
+            "direction"
+        )
+        if last_event
+        else None
+    )
+
+    event_kind = (
+        last_event.get(
+            "kind"
+        )
+        if last_event
+        else None
+    )
+
+    if trend == "bullish":
+        if (
+            event_direction
+            == "bearish"
+            and event_kind
+            == "CHoCH"
+            and bearish_score >= 2
+        ):
+            return (
+                "BULLISH_TO_BEARISH_TRANSITION"
+            )
+
+        if bearish_score >= 2:
+            return "BULLISH_PULLBACK"
+
+        return "BULLISH_TREND"
+
+    if trend == "bearish":
+        if (
+            event_direction
+            == "bullish"
+            and event_kind
+            == "CHoCH"
+            and bullish_score >= 2
+        ):
+            return (
+                "BEARISH_TO_BULLISH_TRANSITION"
+            )
+
+        if bullish_score >= 2:
+            return "BEARISH_PULLBACK"
+
+        return "BEARISH_TREND"
+
+    if (
+        event_kind == "CHoCH"
+        and event_direction
+        in (
+            "bullish",
+            "bearish",
+        )
+    ):
+        return (
+            "BULLISH_TRANSITION"
+            if event_direction
+            == "bullish"
+            else "BEARISH_TRANSITION"
+        )
+
+    if (
+        bullish_score >= 2
+        and bullish_score
+        > bearish_score
+    ):
+        return "BULLISH_TRANSITION"
+
+    if (
+        bearish_score >= 2
+        and bearish_score
+        > bullish_score
+    ):
+        return "BEARISH_TRANSITION"
+
+    return "RANGE"
+
+
 def analyze_smc(
     df,
     swing_window=2,
@@ -2909,6 +3048,15 @@ def analyze_smc(
         ),
     )
 
+    regime = (
+        _infer_market_regime(
+            trend,
+            last_event,
+            bullish_setup,
+            bearish_setup,
+        )
+    )
+
     return {
         "current_price": (
             current_price
@@ -2923,6 +3071,7 @@ def analyze_smc(
             atr.iloc[-1]
         ),
         "trend": trend,
+        "regime": regime,
         "bsl": bsl,
         "ssl": ssl,
         "swing_highs": [
@@ -3029,18 +3178,12 @@ def derive_overall_status(
     analysis_15m,
 ):
     """
-    Multi-timeframe status:
-    confirmation requires a 15m sequence,
-    while higher timeframes act as a filter.
+    Signal state is owned by the 15M execution sequence.
+
+    Higher-timeframe disagreement is reported separately through
+    derive_mtf_alignment() and enforced by the Trade Plan execution
+    gate. This keeps CONFIRMED = sequence confirmed, not "trade now".
     """
-
-    trend_4h = analysis_4h[
-        "trend"
-    ]
-
-    trend_1h = analysis_1h[
-        "trend"
-    ]
 
     setup_15m = (
         analysis_15m.get(
@@ -3055,58 +3198,253 @@ def derive_overall_status(
         )
     )
 
-    score = setup_15m.get(
-        "score",
-        0,
+    score = int(
+        setup_15m.get(
+            "score",
+            0,
+        )
+        or 0
     )
 
-    confirmed = (
+    confirmed = bool(
         setup_15m.get(
             "confirmed",
             False,
         )
     )
 
-    if (
-        direction == "bullish"
-    ):
-        hard_opposition = (
-            trend_4h == "bearish"
-            and trend_1h == "bearish"
-        )
-
-        if (
-            confirmed
-            and not hard_opposition
-        ):
-            return (
-                "CONFIRMED LONG"
-            )
+    if direction == "bullish":
+        if confirmed:
+            return "CONFIRMED LONG"
 
         if score >= 2:
-            return (
-                "DEVELOPING LONG"
-            )
+            return "DEVELOPING LONG"
 
-    if (
-        direction == "bearish"
-    ):
-        hard_opposition = (
-            trend_4h == "bullish"
-            and trend_1h == "bullish"
-        )
-
-        if (
-            confirmed
-            and not hard_opposition
-        ):
-            return (
-                "CONFIRMED SHORT"
-            )
+    if direction == "bearish":
+        if confirmed:
+            return "CONFIRMED SHORT"
 
         if score >= 2:
-            return (
-                "DEVELOPING SHORT"
-            )
+            return "DEVELOPING SHORT"
 
     return "WAIT"
+
+
+def _regime_direction(
+    analysis,
+):
+    regime = str(
+        analysis.get(
+            "regime",
+            ""
+        )
+        or ""
+    )
+
+    bullish_regimes = {
+        "BULLISH_TREND",
+        "BEARISH_TO_BULLISH_TRANSITION",
+        "BULLISH_TRANSITION",
+    }
+
+    bearish_regimes = {
+        "BEARISH_TREND",
+        "BULLISH_TO_BEARISH_TRANSITION",
+        "BEARISH_TRANSITION",
+    }
+
+    if regime in bullish_regimes:
+        return "bullish"
+
+    if regime in bearish_regimes:
+        return "bearish"
+
+    # Pullbacks preserve the parent structural direction but are
+    # treated as softer context by the alignment engine.
+    if regime == "BULLISH_PULLBACK":
+        return "bullish_soft"
+
+    if regime == "BEARISH_PULLBACK":
+        return "bearish_soft"
+
+    trend = analysis.get(
+        "trend"
+    )
+
+    if trend in (
+        "bullish",
+        "bearish",
+    ):
+        return trend
+
+    return "neutral"
+
+
+def derive_mtf_alignment(
+    analysis_4h,
+    analysis_1h,
+    analysis_15m,
+):
+    """
+    Explain whether higher-timeframe context supports the active 15M
+    setup. This does not manufacture a setup and does not change the
+    15M signal sequence; it is an execution-quality filter.
+    """
+
+    setup_15m = (
+        analysis_15m.get(
+            "setup",
+            {},
+        )
+    )
+
+    direction = (
+        setup_15m.get(
+            "direction"
+        )
+    )
+
+    if direction not in (
+        "bullish",
+        "bearish",
+    ):
+        return {
+            "label": "NEUTRAL",
+            "direction": direction,
+            "supporters": [],
+            "conflicts": [],
+            "notes": [
+                "No directional 15M setup"
+            ],
+        }
+
+    opposite = (
+        "bearish"
+        if direction == "bullish"
+        else "bullish"
+    )
+
+    supporters = []
+    conflicts = []
+    notes = []
+
+    for timeframe, analysis in [
+        ("4H", analysis_4h),
+        ("1H", analysis_1h),
+    ]:
+        context = (
+            _regime_direction(
+                analysis
+            )
+        )
+
+        if context == direction:
+            supporters.append(
+                f"{timeframe} regime"
+            )
+
+        elif context == opposite:
+            conflicts.append(
+                f"{timeframe} regime"
+            )
+
+        elif context == (
+            direction + "_soft"
+        ):
+            supporters.append(
+                f"{timeframe} parent trend"
+            )
+
+            notes.append(
+                (
+                    f"{timeframe} is in a "
+                    "counter-move/pullback state"
+                )
+            )
+
+        elif context == (
+            opposite + "_soft"
+        ):
+            conflicts.append(
+                f"{timeframe} parent trend"
+            )
+
+            notes.append(
+                (
+                    f"{timeframe} is in a "
+                    "counter-move/pullback state"
+                )
+            )
+
+    one_hour_setup = (
+        analysis_1h.get(
+            "setup",
+            {},
+        )
+    )
+
+    one_hour_score = int(
+        one_hour_setup.get(
+            "score",
+            0,
+        )
+        or 0
+    )
+
+    one_hour_direction = (
+        one_hour_setup.get(
+            "direction"
+        )
+    )
+
+    if (
+        one_hour_score >= 2
+        and one_hour_direction
+        == direction
+    ):
+        supporters.append(
+            "1H active setup"
+        )
+
+    if (
+        one_hour_score >= 2
+        and one_hour_direction
+        == opposite
+    ):
+        conflicts.append(
+            "1H active setup"
+        )
+
+    # A live opposite 1H setup is a hard conflict. Two independent
+    # higher-timeframe conflicts are also treated as hard conflict.
+    hard_conflict = (
+        "1H active setup"
+        in conflicts
+        or len(
+            set(conflicts)
+        ) >= 2
+    )
+
+    if hard_conflict:
+        label = "CONFLICT"
+
+    elif (
+        supporters
+        and not conflicts
+    ):
+        label = "ALIGNED"
+
+    else:
+        label = "PARTIAL"
+
+    return {
+        "label": label,
+        "direction": direction,
+        "supporters": sorted(
+            set(supporters)
+        ),
+        "conflicts": sorted(
+            set(conflicts)
+        ),
+        "notes": notes,
+    }
