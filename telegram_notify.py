@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -14,12 +15,54 @@ REPORT_PATH = OUTPUT_DIR / "VVVUSDT_SMC_report.json"
 UPDATE_PATH = OUTPUT_DIR / "VVVUSDT_hourly_update.txt"
 AI_UPDATE_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 AI_JSON_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.json"
+TELEGRAM_STATE_PATH = Path("telegram_state.json")
+RUN_EVENT = os.getenv("VVV_RUN_EVENT", "")
 
 CHARTS = [
     ("4H", OUTPUT_DIR / "VVVUSDT_4H.png"),
     ("1H", OUTPUT_DIR / "VVVUSDT_1H.png"),
     ("15M", OUTPUT_DIR / "VVVUSDT_15M.png"),
 ]
+
+
+def _load_delivery_state():
+    if not TELEGRAM_STATE_PATH.exists():
+        return {
+            "last_sent_utc": None,
+            "last_event": None,
+        }
+
+    try:
+        return json.loads(
+            TELEGRAM_STATE_PATH.read_text(
+                encoding="utf-8"
+            )
+        )
+    except Exception:
+        return {
+            "last_sent_utc": None,
+            "last_event": None,
+        }
+
+
+def _save_delivery_state():
+    TELEGRAM_STATE_PATH.write_text(
+        json.dumps(
+            {
+                "last_sent_utc": (
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat()
+                ),
+                "last_event": (
+                    RUN_EVENT or "unknown"
+                ),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
 
 def _api(method):
@@ -265,6 +308,8 @@ def main():
 
     _send_text_update()
     _send_charts(report)
+
+    _save_delivery_state()
 
     print(
         "Telegram notification completed."
