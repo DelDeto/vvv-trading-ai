@@ -71,6 +71,8 @@ OUTPUT STYLE
 - Do not invent or nominate AI targets. Entry, SL and TP belong to the deterministic Python trade plan only.
 - In bullish_scenario and bearish_scenario, describe confirmation/invalidation CONDITIONS only; do not propose new price targets.
 - When describing whether price is inside/near/above/below a zone, use the supplied price_vs_active_demand / price_vs_active_supply fields instead of inferring location from raw numbers.
+- Do not use proximity words such as "ngay trên", "ngay dưới", "sát", or "gần" for Supply/Demand unless the supplied relation explicitly contains "near" or "inside".
+- In confluence/conflicts, do not invent spatial descriptions of Supply/Demand. Prefer structure, regime, grade, sweep, displacement, FVG, retest, and MTF alignment facts.
 """
 
 
@@ -1546,6 +1548,12 @@ def _sanitize_ai_numeric_text(
             "4H": "__TF_4H__",
             "1H": "__TF_1H__",
             "15M": "__TF_15M__",
+            "EMA20": "__EMA20__",
+            "EMA50": "__EMA50__",
+            "RSI14": "__RSI14__",
+            "20 nến": "__LOOKBACK20_VI__",
+            "20-bar": "__LOOKBACK20_BAR__",
+            "20 bar": "__LOOKBACK20_BAR_SPACE__",
             "4/4": "__SIG_4_4__",
             "3/4": "__SIG_3_4__",
             "2/4": "__SIG_2_4__",
@@ -1566,10 +1574,10 @@ def _sanitize_ai_numeric_text(
             )
 
         pattern = (
-            r"(?<![A-Za-z_])"
+            r"(?<![A-Za-z0-9_])"
             r"[-+]?\d+(?:[\.,]\d+)?"
             r"(?:%|R)?"
-            r"(?![A-Za-z_])"
+            r"(?![A-Za-z0-9_])"
         )
 
         sanitized, count = (
@@ -1587,6 +1595,23 @@ def _sanitize_ai_numeric_text(
                 sanitized.replace(
                     placeholder,
                     token,
+                )
+            )
+
+        replacements = [
+            ("ngay trên", "phía trên"),
+            ("ngay dưới", "phía dưới"),
+            ("nằm sát", "nằm cạnh"),
+            ("ở sát", "ở cạnh"),
+        ]
+
+        for old_text, new_text in (
+            replacements
+        ):
+            sanitized = (
+                sanitized.replace(
+                    old_text,
+                    new_text,
                 )
             )
 
