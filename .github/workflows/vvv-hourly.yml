@@ -40,8 +40,8 @@ jobs:
         continue-on-error: true
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_MODEL: inclusionai/ling-3.0-flash-fin:free
-          OPENROUTER_FALLBACK_MODEL: stealth/space-bunny-alpha
+          OPENROUTER_MODEL: qwen/qwen3.8-27b:free
+          OPENROUTER_FALLBACK_MODEL: openrouter/free
         run: |
           python ai_analysis.py
 
