@@ -135,6 +135,7 @@ def get_klines(interval="4h", limit=200):
 def get_closed_klines(
     interval="4h",
     limit=420,
+    min_required=20,
 ):
     """
     Return only fully closed MEXC candles.
@@ -177,6 +178,15 @@ def get_closed_klines(
             (
                 "No fully closed MEXC candles "
                 f"available for {interval}."
+            )
+        )
+
+    if len(closed) < min_required:
+        raise RuntimeError(
+            (
+                f"Only {len(closed)} closed {interval} candles "
+                f"were returned; at least {min_required} are "
+                "required for the configured analysis horizon."
             )
         )
 
