@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-01T09:49:13.816309+00:00",
-  "current_price": 27.952,
+  "generated_at_utc": "2026-10-01T09:56:06.355991+00:00",
+  "current_price": 27.792,
   "status": "DEVELOPING SHORT",
   "trade_plan": {
     "active": true,
@@ -9,53 +9,53 @@
       "1H active setup is opposite the 15M direction"
     ],
     "higher_tf_conflict": true,
-    "first_target_rr": 4.019570944674399,
+    "first_target_rr": 1.0430185051670318,
     "direction": "short",
     "setup_state": "developing",
     "setup_score": 4,
     "entry_zone": {
-      "lower": 27.981,
-      "upper": 28.197,
-      "source": "supply"
+      "lower": 27.870064285714285,
+      "upper": 27.921935714285716,
+      "source": "retest"
     },
-    "entry_mid": 28.089,
-    "stop_loss": 28.22185,
-    "risk": 0.13285000000000124,
+    "entry_mid": 27.896,
+    "stop_loss": 28.222935714285715,
+    "risk": 0.3269357142857139,
     "targets": [
       {
         "name": "TP1",
         "price": 27.555,
         "source": "15M SSL",
-        "rr": 4.019570944674399
+        "rr": 1.0430185051670318
       },
       {
         "name": "TP2",
         "price": 27.387,
         "source": "1H SSL",
-        "rr": 5.28415506210005
+        "rr": 1.5568809945161812
       },
       {
         "name": "TP3",
         "price": 27.155,
         "source": "4H SSL",
-        "rr": 7.03048550997357
+        "rr": 2.266500622665008
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 27.952,
+    "last_price": 27.806,
     "high_24h": 28.384,
     "low_24h": 26.742,
-    "change_rate_24h": -0.0095,
-    "change_value_24h": -0.269,
-    "hold_vol": 5419579.0,
+    "change_rate_24h": -0.0147,
+    "change_value_24h": -0.415,
+    "hold_vol": 5422367.0,
     "funding_rate": 5e-05,
-    "index_price": 27.928,
-    "fair_price": 27.952,
-    "timestamp": 1790848152087,
-    "hold_vol_change_pct": 0.038283305691457596
+    "index_price": 27.784,
+    "fair_price": 27.797,
+    "timestamp": 1790848562854,
+    "hold_vol_change_pct": 0.05144311024896952
   },
   "timeframes": {
     "4H": {
