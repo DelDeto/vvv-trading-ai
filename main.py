@@ -17,6 +17,42 @@ from smc_analysis import (
 STATE_PATH = "state.json"
 
 
+def _ohlc_rows(
+    df,
+    limit=160,
+):
+    rows = []
+
+    for timestamp, row in (
+        df.tail(limit)
+        .iterrows()
+    ):
+        rows.append(
+            {
+                "time": (
+                    timestamp.isoformat()
+                ),
+                "open": float(
+                    row["open"]
+                ),
+                "high": float(
+                    row["high"]
+                ),
+                "low": float(
+                    row["low"]
+                ),
+                "close": float(
+                    row["close"]
+                ),
+                "volume": float(
+                    row["volume"]
+                ),
+            }
+        )
+
+    return rows
+
+
 def _fmt(value):
     if value is None:
         return "-"
@@ -1543,6 +1579,36 @@ def main():
     ) as file:
         json.dump(
             report,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    ai_input = {
+        "report": report,
+        "ohlc": {
+            "4H": _ohlc_rows(
+                df_4h,
+                160,
+            ),
+            "1H": _ohlc_rows(
+                df_1h,
+                160,
+            ),
+            "15M": _ohlc_rows(
+                df_15m,
+                160,
+            ),
+        },
+    }
+
+    with open(
+        "output/VVVUSDT_ai_input.json",
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            ai_input,
             file,
             ensure_ascii=False,
             indent=2,
