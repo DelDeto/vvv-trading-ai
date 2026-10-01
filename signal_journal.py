@@ -879,6 +879,119 @@ def _stats(
                 "tp1_plus"
             ] += 1
 
+    by_alignment = {}
+
+    for item in signals:
+        key = (
+            item.get(
+                "mtf_alignment"
+            )
+            or "NA"
+        )
+
+        bucket = (
+            by_alignment.setdefault(
+                key,
+                {
+                    "total": 0,
+                    "entered": 0,
+                    "stop": 0,
+                    "tp1_plus": 0,
+                },
+            )
+        )
+
+        bucket[
+            "total"
+        ] += 1
+
+        if item.get(
+            "entered_at"
+        ):
+            bucket[
+                "entered"
+            ] += 1
+
+        if item.get(
+            "outcome"
+        ) == "STOP":
+            bucket[
+                "stop"
+            ] += 1
+
+        if max(
+            item.get(
+                "targets_hit",
+                [],
+            ),
+            default=0,
+        ) >= 1:
+            bucket[
+                "tp1_plus"
+            ] += 1
+
+    by_15m_regime = {}
+
+    for item in signals:
+        key = (
+            item.get(
+                "regimes",
+                {},
+            ).get(
+                "15M"
+            )
+            or "NA"
+        )
+
+        bucket = (
+            by_15m_regime.setdefault(
+                key,
+                {
+                    "total": 0,
+                    "entered": 0,
+                    "stop": 0,
+                    "tp1_plus": 0,
+                },
+            )
+        )
+
+        bucket[
+            "total"
+        ] += 1
+
+        if item.get(
+            "entered_at"
+        ):
+            bucket[
+                "entered"
+            ] += 1
+
+        if item.get(
+            "outcome"
+        ) == "STOP":
+            bucket[
+                "stop"
+            ] += 1
+
+        if max(
+            item.get(
+                "targets_hit",
+                [],
+            ),
+            default=0,
+        ) >= 1:
+            bucket[
+                "tp1_plus"
+            ] += 1
+
+    resolved_count = len(
+        resolved
+    )
+
+    tuning_ready = (
+        resolved_count >= 30
+    )
+
     return {
         "total_signals": len(
             signals
@@ -937,9 +1050,27 @@ def _stats(
         "by_zone_grade": (
             by_grade
         ),
+        "by_mtf_alignment": (
+            by_alignment
+        ),
+        "by_15m_regime": (
+            by_15m_regime
+        ),
+        "calibration_status": (
+            "READY_FOR_REVIEW"
+            if tuning_ready
+            else "COLLECTING_DATA"
+        ),
+        "minimum_resolved_for_tuning": 30,
+        "resolved_needed_for_tuning": max(
+            0,
+            30 - resolved_count,
+        ),
+        "auto_tuning_enabled": False,
         "calibration_note": (
             "Outcome data is observational forward-test data. "
-            "Do not auto-tune thresholds until sample size is sufficient."
+            "Threshold changes remain manual and evidence-based; "
+            "the engine will not auto-fit itself to a small sample."
         ),
     }
 
