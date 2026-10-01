@@ -59,10 +59,14 @@ TOP-DOWN PROCESS
 - Do not force a directional view.
 
 OUTPUT STYLE
-- Vietnamese.
+- ALL explanatory string values MUST be written in Vietnamese. English is allowed only for standard technical acronyms/tokens such as BOS, CHoCH, FVG, EMA, VWAP, RSI, ATR, BSL, SSL, DBR, RBR, RBD, DBD, LONG, SHORT, WAIT.
 - Compact, professional, trading-desk style.
 - Explain why, not just the label.
 - Never use certainty language such as "chắc chắn", "sẽ tăng", or "sẽ giảm".
+- Never use unsupported probability language such as "xác suất cao", "high probability", or percentage-like confidence.
+- Do not invent or nominate AI targets. Entry, SL and TP belong to the deterministic Python trade plan only.
+- In bullish_scenario and bearish_scenario, describe confirmation/invalidation CONDITIONS only; do not propose new price targets.
+- When describing whether price is inside/near/above/below a zone, use the supplied price_vs_active_demand / price_vs_active_supply fields instead of inferring location from raw numbers.
 """
 
 
@@ -597,6 +601,122 @@ def _compact_event(event):
     }
 
 
+def _zone_relation(
+    current_price,
+    zone,
+    atr,
+    side,
+):
+    if not zone:
+        return "none"
+
+    try:
+        price = float(
+            current_price
+        )
+
+        lower = float(
+            zone["lower"]
+        )
+
+        upper = float(
+            zone["upper"]
+        )
+
+        atr_value = max(
+            float(atr or 0.0),
+            1e-9,
+        )
+
+    except (
+        TypeError,
+        ValueError,
+        KeyError,
+    ):
+        return "unknown"
+
+    width = max(
+        upper - lower,
+        1e-9,
+    )
+
+    if (
+        lower
+        <= price
+        <= upper
+    ):
+        position = (
+            price - lower
+        ) / width
+
+        if side == "demand":
+            if position <= 0.33:
+                return (
+                    "inside_near_distal"
+                )
+
+            if position >= 0.67:
+                return (
+                    "inside_near_proximal"
+                )
+
+        else:
+            if position <= 0.33:
+                return (
+                    "inside_near_proximal"
+                )
+
+            if position >= 0.67:
+                return (
+                    "inside_near_distal"
+                )
+
+        return "inside_middle"
+
+    near_threshold = (
+        0.25 * atr_value
+    )
+
+    if price > upper:
+        distance = (
+            price - upper
+        )
+
+        if side == "demand":
+            return (
+                "above_near_proximal"
+                if distance
+                <= near_threshold
+                else "above_far"
+            )
+
+        return (
+            "above_beyond_distal"
+            if distance
+            <= near_threshold
+            else "above_far"
+        )
+
+    distance = (
+        lower - price
+    )
+
+    if side == "supply":
+        return (
+            "below_near_proximal"
+            if distance
+            <= near_threshold
+            else "below_far"
+        )
+
+    return (
+        "below_beyond_distal"
+        if distance
+        <= near_threshold
+        else "below_far"
+    )
+
+
 def _timeframe_packet(
     timeframe,
     analysis,
@@ -633,6 +753,34 @@ def _timeframe_packet(
                 analysis.get(
                     "nearest_supply"
                 )
+            )
+        ),
+        "price_vs_active_demand": (
+            _zone_relation(
+                analysis.get(
+                    "current_price"
+                ),
+                analysis.get(
+                    "nearest_demand"
+                ),
+                analysis.get(
+                    "atr"
+                ),
+                "demand",
+            )
+        ),
+        "price_vs_active_supply": (
+            _zone_relation(
+                analysis.get(
+                    "current_price"
+                ),
+                analysis.get(
+                    "nearest_supply"
+                ),
+                analysis.get(
+                    "atr"
+                ),
+                "supply",
             )
         ),
         "reference_demand": [
@@ -901,7 +1049,7 @@ def _python_facts_text(
         "VVV_USDT HYBRID PRICE ACTION",
         "=" * 38,
         (
-            "Nguon gia/chart: "
+            "Nguồn giá/chart: "
             "MEXC OHLC -> Python"
         ),
         (
@@ -1090,14 +1238,14 @@ def _ai_text(
 ):
     lines = [
         "",
-        "AI NHAN DINH",
+        "AI NHẬN ĐỊNH",
         "=" * 38,
         (
             "AI bias: "
             f"{result['ai_bias']}"
         ),
         (
-            "Tong quan: "
+            "Tổng quan: "
             f"{result['market_context']}"
         ),
         "",
@@ -1135,7 +1283,7 @@ def _ai_text(
     ]:
         lines.append("")
         lines.append(
-            "Xung dot:"
+            "Xung đột:"
         )
 
         lines.extend(
@@ -1149,7 +1297,7 @@ def _ai_text(
         [
             "",
             (
-                "Kich ban uu tien: "
+                "Kịch bản ưu tiên: "
                 f"{result['preferred_scenario']}"
             ),
             (
@@ -1354,6 +1502,8 @@ def _request_analysis(
                         "Analyze this exact "
                         "machine-generated market packet. "
                         "Do not add numerical levels. "
+                        "IMPORTANT: every explanatory JSON string MUST be Vietnamese; "
+                        "standard technical acronyms may remain English. "
                         "Return a concise Vietnamese trading-desk review.\n\n"
                         "MARKET PACKET:\n"
                         + json.dumps(
