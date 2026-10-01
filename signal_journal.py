@@ -637,9 +637,33 @@ def _update_signal(
             not in targets_hit
         ]
 
-        # OHLC has no intrabar event order. If a candle can hit both
-        # stop and a new target after entry, label it ambiguous rather
-        # than fabricating which happened first.
+        # OHLC has no intrabar event order. On the entry candle we
+        # cannot know whether the zone was touched before a stop/target.
+        # Do not fabricate sequence.
+        if (
+            newly_entered
+            and (
+                stop_hit
+                or newly_hit
+            )
+        ):
+            signal[
+                "outcome"
+            ] = (
+                "AMBIGUOUS_ENTRY_BAR"
+            )
+
+            signal[
+                "closed_at"
+            ] = (
+                timestamp
+                .isoformat()
+            )
+
+            break
+
+        # After entry, a candle hitting both stop and a new target is
+        # also ambiguous because OHLC has no intrabar ordering.
         if (
             stop_hit
             and newly_hit
@@ -1014,8 +1038,13 @@ def _stats(
         "tp3_plus": target_count(
             3
         ),
-        "ambiguous": count_outcome(
-            "AMBIGUOUS_SAME_BAR"
+        "ambiguous": (
+            count_outcome(
+                "AMBIGUOUS_SAME_BAR"
+            )
+            + count_outcome(
+                "AMBIGUOUS_ENTRY_BAR"
+            )
         ),
         "expired_no_entry": (
             count_outcome(
@@ -1100,6 +1129,25 @@ def update_signal_journal(
     )
 
     if signature:
+        last_seen_signature = (
+            journal.get(
+                "last_seen_signature"
+            )
+        )
+
+        if last_seen_signature is None:
+            for prior in reversed(
+                signals
+            ):
+                last_seen_signature = (
+                    prior.get(
+                        "signature"
+                    )
+                )
+
+                if last_seen_signature:
+                    break
+
         matching = None
 
         for signal in reversed(
@@ -1110,18 +1158,21 @@ def update_signal_journal(
                     "signature"
                 )
                 == signature
-                and signal.get(
-                    "outcome"
-                )
-                in (
-                    "OPEN",
-                    "ENTERED",
-                )
             ):
                 matching = signal
                 break
 
-        if matching:
+        if (
+            last_seen_signature
+            != signature
+        ):
+            signals.append(
+                _new_signal(
+                    report
+                )
+            )
+
+        elif matching:
             matching[
                 "status"
             ] = report.get(
@@ -1151,12 +1202,14 @@ def update_signal_journal(
                 )
             )
 
-        else:
-            signals.append(
-                _new_signal(
-                    report
-                )
-            )
+        journal[
+            "last_seen_signature"
+        ] = signature
+
+    else:
+        journal[
+            "last_seen_signature"
+        ] = None
 
     journal[
         "updated_at_utc"
