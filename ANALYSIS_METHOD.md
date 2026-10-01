@@ -46,9 +46,10 @@ Python owns:
 ## 2. AI interpretation layer
 
 Default AI route:
-- OpenRouter Free Models Router: openrouter/free
-- OpenRouter OpenAI-compatible Chat Completions API (`/api/v1/chat/completions`)
-- The router selects a currently available free model that supports the requested features.
+- Primary: NVIDIA Nemotron 3 Super (free), `nvidia/nemotron-3-super-120b-a12b:free`.
+- Fallback: OpenRouter Free Models Router, `openrouter/free`.
+- OpenRouter OpenAI-compatible Chat Completions API (`/api/v1/chat/completions`).
+- Structured output is required; provider routing is constrained to endpoints that honor the requested parameters.
 
 The model receives structured JSON, not an invented chart.
 
@@ -86,8 +87,10 @@ If OPENROUTER_API_KEY is absent or the AI step fails:
 Required GitHub Actions secret:
 - OPENROUTER_API_KEY
 
-Optional model override:
+Optional model overrides:
 - OPENROUTER_MODEL
+- Default: nvidia/nemotron-3-super-120b-a12b:free
+- OPENROUTER_FALLBACK_MODEL
 - Default: openrouter/free
 
 Telegram secrets remain:
