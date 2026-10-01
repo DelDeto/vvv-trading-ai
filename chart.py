@@ -339,6 +339,11 @@ def _draw_zone(
         "N/A",
     )
 
+    grade = zone.get(
+        "grade",
+        "NA",
+    )
+
     pattern = zone.get(
         "pattern"
     )
@@ -362,7 +367,7 @@ def _draw_zone(
         )
         / 2,
         (
-            f"{tier} {label} · {quality}"
+            f"{tier} {label} · {quality} · {grade}"
             f"{pattern_text}\n"
             f"{_fmt(lower)} – {_fmt(upper)}"
             f" · M{mitigations}"
@@ -1064,6 +1069,23 @@ def _draw_side_panel(
         )
     )
 
+    regime = analysis.get(
+        "regime",
+        "N/A",
+    )
+
+    alignment = (
+        trade_plan.get(
+            "mtf_alignment",
+            {},
+        ).get(
+            "label",
+            "N/A",
+        )
+        if trade_plan
+        else "N/A"
+    )
+
     vwap_relation = (
         vwap_info.get(
             "relation",
@@ -1096,6 +1118,7 @@ def _draw_side_panel(
 
     hold_change = None
     funding = None
+    participation = "N/A"
 
     if market_snapshot:
         hold_change = (
@@ -1107,6 +1130,16 @@ def _draw_side_panel(
         funding = (
             market_snapshot.get(
                 "funding_rate"
+            )
+        )
+
+        participation = (
+            market_snapshot.get(
+                "participation_context",
+                {},
+            ).get(
+                "regime",
+                "N/A",
             )
         )
 
@@ -1133,9 +1166,12 @@ def _draw_side_panel(
 
     panel_text = (
         f"Bias: {bias}\n"
+        f"Regime: {regime}\n"
+        f"MTF: {alignment}\n"
         f"Execution: "
         f"{'READY' if ready else 'WAIT'}\n"
-        f"OI: {oi_text}\n"
+        f"HoldVol: {oi_text}\n"
+        f"Participation: {participation}\n"
         f"Funding: {funding_text}\n"
         f"VWAP: {vwap_relation}\n"
         f"Confluence: {confluence}/5"
