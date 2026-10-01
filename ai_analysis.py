@@ -1,9 +1,13 @@
 import json
 import math
 import os
+import re
 from pathlib import Path
 
 from openai import OpenAI
+from signal_journal import (
+    attach_ai_review,
+)
 
 
 OUTPUT_DIR = Path("output")
@@ -566,6 +570,12 @@ def _compact_zone(zone):
         "quality": zone.get(
             "quality"
         ),
+        "grade": zone.get(
+            "grade"
+        ),
+        "quality_score": zone.get(
+            "quality_score"
+        ),
         "pattern": zone.get(
             "pattern"
         ),
@@ -726,6 +736,9 @@ def _timeframe_packet(
         "timeframe": timeframe,
         "trend": analysis.get(
             "trend"
+        ),
+        "regime": analysis.get(
+            "regime"
         ),
         "atr": analysis.get(
             "atr"
@@ -938,6 +951,16 @@ def _build_model_input(
         "python_status": (
             report.get(
                 "status"
+            )
+        ),
+        "mtf_alignment": (
+            report.get(
+                "mtf_alignment"
+            )
+        ),
+        "data_integrity": (
+            report.get(
+                "data_integrity"
             )
         ),
         "trade_plan": (
@@ -1417,9 +1440,54 @@ def _parse_json_content(
         raise
 
 
-def _validate_result(
+def _result_strings(
     result,
 ):
+    values = []
+
+    def walk(
+        value,
+    ):
+        if isinstance(
+            value,
+            str,
+        ):
+            values.append(
+                value
+            )
+
+        elif isinstance(
+            value,
+            list,
+        ):
+            for item in value:
+                walk(item)
+
+        elif isinstance(
+            value,
+            dict,
+        ):
+            for item in (
+                value.values()
+            ):
+                walk(item)
+
+    walk(result)
+
+    return values
+
+
+def _validate_result(
+    result,
+    model_input,
+):
+    """
+    Deterministic guardrail after the LLM and before Telegram.
+
+    Hard failures cause the workflow to try the fallback model.
+    The Python execution gate always wins over AI wording.
+    """
+
     if not isinstance(
         result,
         dict,
@@ -1478,7 +1546,152 @@ def _validate_result(
                 )
             )
 
-    return result
+    strings = (
+        _result_strings(
+            result
+        )
+    )
+
+    combined = " ".join(
+        strings
+    )
+
+    lower = combined.lower()
+
+    # AI is not allowed to publish a new numerical trading level.
+    # Technical timeframe tokens such as 4H/1H/15M are unaffected.
+    decimal_level = re.search(
+        r"(?<![A-Za-z])\d+\.\d{2,}",
+        combined,
+    )
+
+    if decimal_level:
+        raise ValueError(
+            (
+                "AI output contains a numerical "
+                "price-like level."
+            )
+        )
+
+    if "%" in combined:
+        raise ValueError(
+            (
+                "AI output contains unsupported "
+                "percentage/confidence wording."
+            )
+        )
+
+    probability_phrases = [
+        "xác suất cao",
+        "xác suất thấp",
+        "high probability",
+        "low probability",
+        "confidence score",
+    ]
+
+    if any(
+        phrase in lower
+        for phrase
+        in probability_phrases
+    ):
+        raise ValueError(
+            (
+                "AI output contains unsupported "
+                "probability language."
+            )
+        )
+
+    vietnamese_markers = [
+        "giá",
+        "xu hướng",
+        "cấu trúc",
+        "thanh khoản",
+        "không",
+        "đang",
+        "cần",
+        "vùng",
+        "tăng",
+        "giảm",
+        "khung",
+        "chờ",
+        "xung đột",
+        "ưu tiên",
+    ]
+
+    marker_hits = sum(
+        marker in lower
+        for marker
+        in vietnamese_markers
+    )
+
+    if marker_hits < 2:
+        raise ValueError(
+            (
+                "AI output does not appear to be "
+                "Vietnamese as required."
+            )
+        )
+
+    trade_plan = (
+        model_input.get(
+            "trade_plan",
+            {},
+        )
+        or {}
+    )
+
+    execution_ready = bool(
+        trade_plan.get(
+            "execution_ready",
+            False,
+        )
+    )
+
+    if not execution_ready:
+        # Do not merely trust the model wording: replace the execution
+        # line with deterministic Python-gated language.
+        result[
+            "execution_comment"
+        ] = (
+            "Python execution gate = WAIT. "
+            "Chưa thực thi; chỉ theo dõi "
+            "điều kiện xác nhận."
+        )
+
+    alignment = (
+        model_input.get(
+            "mtf_alignment",
+            {},
+        )
+        or {}
+    )
+
+    context_conflict = (
+        alignment.get(
+            "label"
+        )
+        == "CONFLICT"
+        and result.get(
+            "ai_bias"
+        )
+        in (
+            "BULLISH",
+            "BEARISH",
+        )
+    )
+
+    return {
+        "passed": True,
+        "execution_gate_enforced": (
+            not execution_ready
+        ),
+        "context_conflict_flag": (
+            context_conflict
+        ),
+        "numeric_level_check": "passed",
+        "language_check": "passed",
+        "probability_check": "passed",
+    }
 
 
 def _request_analysis(
@@ -1600,15 +1813,17 @@ def _request_analysis(
         )
     )
 
-    result = (
+    validation = (
         _validate_result(
-            result
+            result,
+            model_input,
         )
     )
 
     return (
         result,
         routed_model,
+        validation,
     )
 
 
@@ -1669,6 +1884,7 @@ def main():
 
     result = None
     routed_model = None
+    validation = None
     errors = []
 
     for candidate_model in (
@@ -1678,6 +1894,7 @@ def main():
             (
                 result,
                 routed_model,
+                validation,
             ) = _request_analysis(
                 client,
                 candidate_model,
@@ -1742,6 +1959,9 @@ def main():
             )
         ),
         "analysis": result,
+        "validation": (
+            validation
+        ),
         "technical_context": {
             timeframe: (
                 model_input[
@@ -1757,6 +1977,20 @@ def main():
             ]
         },
     }
+
+    try:
+        attach_ai_review(
+            report,
+            result,
+        )
+
+    except Exception as exc:
+        print(
+            (
+                "Signal journal AI attach "
+                f"warning: {exc}"
+            )
+        )
 
     AI_JSON_PATH.write_text(
         json.dumps(
