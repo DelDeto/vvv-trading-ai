@@ -1169,6 +1169,101 @@ def _ai_text(
     return "\n".join(lines)
 
 
+def _parse_json_content(
+    content,
+):
+    if not content:
+        raise ValueError(
+            "OpenRouter returned empty AI content."
+        )
+
+    if isinstance(
+        content,
+        list,
+    ):
+        parts = []
+
+        for item in content:
+            if isinstance(
+                item,
+                dict,
+            ):
+                text_value = (
+                    item.get("text")
+                    or item.get(
+                        "content"
+                    )
+                )
+
+                if text_value:
+                    parts.append(
+                        str(text_value)
+                    )
+            else:
+                parts.append(
+                    str(item)
+                )
+
+        content = "\n".join(
+            parts
+        )
+
+    content = str(
+        content
+    ).strip()
+
+    if content.startswith(
+        "```"
+    ):
+        lines = (
+            content.splitlines()
+        )
+
+        if lines:
+            lines = lines[1:]
+
+        if (
+            lines
+            and lines[-1]
+            .strip()
+            .startswith(
+                "```"
+            )
+        ):
+            lines = lines[:-1]
+
+        content = "\n".join(
+            lines
+        ).strip()
+
+    try:
+        return json.loads(
+            content
+        )
+
+    except json.JSONDecodeError:
+        start = content.find(
+            "{"
+        )
+
+        end = content.rfind(
+            "}"
+        )
+
+        if (
+            start >= 0
+            and end > start
+        ):
+            return json.loads(
+                content[
+                    start:
+                    end + 1
+                ]
+            )
+
+        raise
+
+
 def main():
     api_key = os.getenv(
         "OPENROUTER_API_KEY"
@@ -1212,29 +1307,37 @@ def main():
     )
 
     response = (
-        client.responses.create(
+        client.chat.completions.create(
             model=MODEL,
-            instructions=(
-                SYSTEM_PROMPT
-            ),
-            input=(
-                "Analyze this exact "
-                "machine-generated market packet. "
-                "Do not add numerical levels.\n\n"
-                + json.dumps(
-                    model_input,
-                    ensure_ascii=False,
-                    separators=(
-                        ",",
-                        ":",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        SYSTEM_PROMPT
                     ),
-                )
-            ),
-            text={
-                "format": {
-                    "type": (
-                        "json_schema"
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Analyze this exact "
+                        "machine-generated market packet. "
+                        "Do not add numerical levels.\n\n"
+                        + json.dumps(
+                            model_input,
+                            ensure_ascii=False,
+                            separators=(
+                                ",",
+                                ":",
+                            ),
+                        )
                     ),
+                },
+            ],
+            response_format={
+                "type": (
+                    "json_schema"
+                ),
+                "json_schema": {
                     "name": (
                         "vvv_pa_analysis"
                     ),
@@ -1242,14 +1345,39 @@ def main():
                     "schema": (
                         OUTPUT_SCHEMA
                     ),
-                }
+                },
             },
-            max_output_tokens=2200,
+            max_tokens=2200,
+            temperature=0.2,
         )
     )
 
-    result = json.loads(
-        response.output_text
+    message = (
+        response
+        .choices[0]
+        .message
+    )
+
+    result = (
+        _parse_json_content(
+            message.content
+        )
+    )
+
+    routed_model = (
+        getattr(
+            response,
+            "model",
+            None,
+        )
+        or MODEL
+    )
+
+    print(
+        (
+            "OpenRouter routed model: "
+            f"{routed_model}"
+        )
     )
 
     report = payload[
@@ -1257,7 +1385,8 @@ def main():
     ]
 
     artifact = {
-        "model": MODEL,
+        "model": routed_model,
+        "router": MODEL,
         "method": (
             ANALYSIS_METHOD
         ),
@@ -1311,7 +1440,7 @@ def main():
         (
             "AI Price Action analysis "
             "completed via OpenRouter "
-            f"with {MODEL}."
+            f"with {routed_model}."
         )
     )
 
