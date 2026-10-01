@@ -2,8 +2,11 @@ name: VVVUSDT Hourly MEXC SMC
 
 on:
   workflow_dispatch:
+  # GitHub documents that scheduled jobs near the start of the hour
+  # can be delayed or dropped under load. Run at minute 23 instead.
   schedule:
-    - cron: "5 * * * *"
+    - cron: "23 * * * *"
+      timezone: "Asia/Ho_Chi_Minh"
 
 permissions:
   contents: write
