@@ -46,10 +46,10 @@ Python owns:
 ## 2. AI interpretation layer
 
 Default AI route:
-- Primary: NVIDIA Nemotron 3 Super (free), `nvidia/nemotron-3-super-120b-a12b:free`.
-- Fallback: OpenRouter Free Models Router, `openrouter/free`.
+- Primary: InclusionAI Ling 3.0 Flash Fin (free), `inclusionai/ling-3.0-flash-fin:free`.
+- Fallback: Space Bunny Alpha (free), `stealth/space-bunny-alpha`.
 - OpenRouter OpenAI-compatible Chat Completions API (`/api/v1/chat/completions`).
-- Structured output is required; provider routing is constrained to endpoints that honor the requested parameters.
+- JSON structure is requested in the prompt and validated locally in Python, so the workflow does not depend on provider-side JSON-schema support.
 
 The model receives structured JSON, not an invented chart.
 
@@ -89,9 +89,9 @@ Required GitHub Actions secret:
 
 Optional model overrides:
 - OPENROUTER_MODEL
-- Default: nvidia/nemotron-3-super-120b-a12b:free
+- Default: inclusionai/ling-3.0-flash-fin:free
 - OPENROUTER_FALLBACK_MODEL
-- Default: openrouter/free
+- Default: stealth/space-bunny-alpha
 
 Telegram secrets remain:
 - TELEGRAM_BOT_TOKEN
