@@ -12,8 +12,12 @@ AI_JSON_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.json"
 AI_TEXT_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 
 MODEL = os.getenv(
-    "OPENAI_MODEL",
-    "gpt-5.6-terra",
+    "OPENROUTER_MODEL",
+    "openrouter/free",
+)
+
+OPENROUTER_BASE_URL = (
+    "https://openrouter.ai/api/v1"
 )
 
 ANALYSIS_METHOD = "PA-MTF Hybrid V1"
@@ -1167,13 +1171,13 @@ def _ai_text(
 
 def main():
     api_key = os.getenv(
-        "OPENAI_API_KEY"
+        "OPENROUTER_API_KEY"
     )
 
     if not api_key:
         print(
             "AI analysis skipped: "
-            "OPENAI_API_KEY is not configured."
+            "OPENROUTER_API_KEY is not configured."
         )
 
         return 0
@@ -1196,15 +1200,20 @@ def main():
     )
 
     client = OpenAI(
-        api_key=api_key
+        api_key=api_key,
+        base_url=(
+            OPENROUTER_BASE_URL
+        ),
+        default_headers={
+            "X-Title": (
+                "VVV Trading AI"
+            ),
+        },
     )
 
     response = (
         client.responses.create(
             model=MODEL,
-            reasoning={
-                "effort": "medium",
-            },
             instructions=(
                 SYSTEM_PROMPT
             ),
@@ -1301,7 +1310,8 @@ def main():
     print(
         (
             "AI Price Action analysis "
-            f"completed with {MODEL}."
+            "completed via OpenRouter "
+            f"with {MODEL}."
         )
     )
 
