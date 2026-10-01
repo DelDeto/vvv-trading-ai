@@ -1118,7 +1118,7 @@ def _market_snapshot_lines(
             )
 
         lines.append(
-            "Open interest/holdVol: "
+            "MEXC holdVol (OI proxy): "
             + oi_text
         )
 
