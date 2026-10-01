@@ -11,6 +11,7 @@ from trade_plan import build_trade_plan
 from smc_analysis import (
     analyze_smc,
     derive_overall_status,
+    derive_mtf_alignment,
 )
 
 
@@ -69,6 +70,10 @@ def _zone_text(zone):
         "quality"
     )
 
+    grade = zone.get(
+        "grade"
+    )
+
     pattern = zone.get(
         "pattern"
     )
@@ -83,6 +88,11 @@ def _zone_text(zone):
         suffix += (
             f" [{quality}"
         )
+
+        if grade:
+            suffix += (
+                f", {grade}"
+            )
 
         if pattern:
             suffix += (
@@ -332,6 +342,12 @@ def _print_summary(
 
     print(
         f"[{timeframe}] "
+        f"Regime: "
+        f"{analysis.get('regime', '-').upper()}"
+    )
+
+    print(
+        f"[{timeframe}] "
         f"Current: "
         f"{_fmt(analysis['current_price'])}"
     )
@@ -468,6 +484,15 @@ def _compact_zone(zone):
     return {
         "lower": zone.get("lower"),
         "upper": zone.get("upper"),
+        "quality": zone.get(
+            "quality"
+        ),
+        "grade": zone.get(
+            "grade"
+        ),
+        "mitigations": zone.get(
+            "mitigations"
+        ),
     }
 
 
@@ -498,6 +523,11 @@ def _make_state(report):
                 "status"
             ]
         ),
+        "mtf_alignment": (
+            report.get(
+                "mtf_alignment"
+            )
+        ),
         "trade_plan": (
             report.get(
                 "trade_plan"
@@ -519,6 +549,11 @@ def _make_state(report):
         ] = {
             "trend": (
                 analysis.get("trend")
+            ),
+            "regime": (
+                analysis.get(
+                    "regime"
+                )
             ),
             "bsl": _compact_liquidity(
                 analysis.get("bsl")
@@ -760,6 +795,36 @@ def _compare_state(
         )
 
     if (
+        (
+            previous.get(
+                "mtf_alignment",
+                {},
+            )
+            or {}
+        ).get(
+            "label"
+        )
+        !=
+        (
+            current.get(
+                "mtf_alignment",
+                {},
+            )
+            or {}
+        ).get(
+            "label"
+        )
+    ):
+        changes.append(
+            (
+                "MTF alignment changed: "
+                f"{(previous.get('mtf_alignment') or {}).get('label')} "
+                "-> "
+                f"{(current.get('mtf_alignment') or {}).get('label')}"
+            )
+        )
+
+    if (
         _trade_plan_signature(
             previous.get(
                 "trade_plan"
@@ -817,6 +882,23 @@ def _compare_state(
                     f"{previous_tf.get('trend')} "
                     "-> "
                     f"{current_tf.get('trend')}"
+                )
+            )
+
+        if (
+            previous_tf.get(
+                "regime"
+            )
+            != current_tf.get(
+                "regime"
+            )
+        ):
+            changes.append(
+                (
+                    f"{timeframe} regime: "
+                    f"{previous_tf.get('regime')} "
+                    "-> "
+                    f"{current_tf.get('regime')}"
                 )
             )
 
@@ -1119,6 +1201,21 @@ def _build_hourly_update(
         )
     )
 
+    alignment = (
+        report.get(
+            "mtf_alignment",
+            {}
+        )
+        or {}
+    )
+
+    lines.append(
+        (
+            "MTF Alignment: "
+            f"{alignment.get('label', 'NEUTRAL')}"
+        )
+    )
+
     snapshot = report.get(
         "market_snapshot"
     )
@@ -1128,6 +1225,21 @@ def _build_hourly_update(
             snapshot
         )
     )
+
+    participation = (
+        (snapshot or {}).get(
+            "participation_context",
+            {},
+        )
+    )
+
+    if participation:
+        lines.append(
+            (
+                "Participation: "
+                f"{participation.get('regime', 'NEUTRAL_MIXED')}"
+            )
+        )
 
     trade_plan = report.get(
         "trade_plan",
@@ -1189,7 +1301,15 @@ def _build_hourly_update(
                 "Entry zone: "
                 f"{_fmt(entry['lower'])}-"
                 f"{_fmt(entry['upper'])} "
-                f"[{entry['source']}]"
+                f"[{entry['source']}"
+                + (
+                    f", grade {entry.get('zone_grade')}"
+                    if entry.get(
+                        "zone_grade"
+                    )
+                    else ""
+                )
+                + "]"
             )
         )
 
@@ -1251,6 +1371,14 @@ def _build_hourly_update(
                 f"[{timeframe}] "
                 f"Trend: "
                 f"{analysis['trend'].upper()}"
+            )
+        )
+
+        lines.append(
+            (
+                f"[{timeframe}] "
+                "Regime: "
+                f"{analysis.get('regime', '-').upper()}"
             )
         )
 
@@ -1373,6 +1501,158 @@ def _build_hourly_update(
     return "\n".join(lines)
 
 
+def _participation_context(
+    previous_state,
+    market_snapshot,
+    current_price,
+):
+    """
+    Price + MEXC holdVol context. This is descriptive only and never
+    acts as a standalone LONG/SHORT signal.
+    """
+
+    previous_snapshot = (
+        previous_state.get(
+            "market_snapshot",
+            {},
+        )
+        if previous_state
+        else {}
+    )
+
+    previous_hold = (
+        previous_snapshot.get(
+            "hold_vol"
+        )
+        if previous_snapshot
+        else None
+    )
+
+    previous_price = (
+        previous_state.get(
+            "current_price"
+        )
+        if previous_state
+        else None
+    )
+
+    current_hold = (
+        market_snapshot.get(
+            "hold_vol"
+        )
+    )
+
+    hold_change_pct = None
+    price_change_pct = None
+
+    if (
+        previous_hold
+        not in (None, 0)
+        and current_hold
+        is not None
+    ):
+        hold_change_pct = (
+            (
+                current_hold
+                - previous_hold
+            )
+            / previous_hold
+            * 100
+        )
+
+    if (
+        previous_price
+        not in (None, 0)
+        and current_price
+        is not None
+    ):
+        price_change_pct = (
+            (
+                current_price
+                - previous_price
+            )
+            / previous_price
+            * 100
+        )
+
+    threshold = 0.10
+
+    price_up = (
+        price_change_pct
+        is not None
+        and price_change_pct
+        >= threshold
+    )
+
+    price_down = (
+        price_change_pct
+        is not None
+        and price_change_pct
+        <= -threshold
+    )
+
+    hold_up = (
+        hold_change_pct
+        is not None
+        and hold_change_pct
+        >= threshold
+    )
+
+    hold_down = (
+        hold_change_pct
+        is not None
+        and hold_change_pct
+        <= -threshold
+    )
+
+    if price_up and hold_up:
+        regime = "PRICE_UP_HOLD_UP"
+        note = (
+            "Giá tăng cùng holdVol tăng; "
+            "mức tham gia vị thế đang mở rộng."
+        )
+
+    elif price_down and hold_up:
+        regime = "PRICE_DOWN_HOLD_UP"
+        note = (
+            "Giá giảm cùng holdVol tăng; "
+            "mức tham gia vị thế đang mở rộng theo nhịp giảm."
+        )
+
+    elif price_up and hold_down:
+        regime = "PRICE_UP_HOLD_DOWN"
+        note = (
+            "Giá tăng nhưng holdVol giảm; "
+            "có thể phản ánh đóng vị thế/short covering."
+        )
+
+    elif price_down and hold_down:
+        regime = "PRICE_DOWN_HOLD_DOWN"
+        note = (
+            "Giá giảm nhưng holdVol giảm; "
+            "có thể phản ánh đóng vị thế/long liquidation."
+        )
+
+    else:
+        regime = "NEUTRAL_MIXED"
+        note = (
+            "Biến động giá/holdVol chưa đủ rõ "
+            "để tạo bối cảnh participation."
+        )
+
+    return {
+        "regime": regime,
+        "price_change_pct": (
+            price_change_pct
+        ),
+        "hold_vol_change_pct": (
+            hold_change_pct
+        ),
+        "note": note,
+        "signal_weight": "context_only",
+    }
+
+
 def main():
 
     print("=" * 50)
@@ -1409,48 +1689,40 @@ def main():
         get_contract_snapshot()
     )
 
-    previous_snapshot = (
-        previous_state.get(
-            "market_snapshot",
-            {},
-        )
-        if previous_state
-        else {}
+    closed_analysis_price = float(
+        df_15m.iloc[-1][
+            "close"
+        ]
     )
 
-    previous_hold = (
-        previous_snapshot.get(
-            "hold_vol"
-        )
-        if previous_snapshot
-        else None
-    )
-
-    current_hold = (
+    live_price = (
         market_snapshot.get(
-            "hold_vol"
+            "last_price"
         )
     )
 
-    hold_change_pct = None
-
-    if (
-        previous_hold
-        not in (None, 0)
-        and current_hold is not None
-    ):
-        hold_change_pct = (
-            (
-                current_hold
-                - previous_hold
-            )
-            / previous_hold
-            * 100
+    if live_price is None:
+        live_price = (
+            closed_analysis_price
         )
+
+    participation = (
+        _participation_context(
+            previous_state,
+            market_snapshot,
+            live_price,
+        )
+    )
 
     market_snapshot[
         "hold_vol_change_pct"
-    ] = hold_change_pct
+    ] = participation.get(
+        "hold_vol_change_pct"
+    )
+
+    market_snapshot[
+        "participation_context"
+    ] = participation
 
     # Rule-based SMC analysis
     smc_4h = analyze_smc(
@@ -1480,24 +1752,28 @@ def main():
         smc_15m,
     )
 
+    mtf_alignment = (
+        derive_mtf_alignment(
+            smc_4h,
+            smc_1h,
+            smc_15m,
+        )
+    )
+
     analysis_price = float(
         df_15m.iloc[-1]["close"]
     )
 
-    current_price = (
-        market_snapshot.get(
-            "last_price"
-        )
-    )
-
-    if current_price is None:
-        current_price = analysis_price
+    current_price = live_price
 
     trade_plan = build_trade_plan(
         smc_4h,
         smc_1h,
         smc_15m,
         status,
+        mtf_alignment=(
+            mtf_alignment
+        ),
     )
 
     generated_at = (
@@ -1541,6 +1817,13 @@ def main():
         status,
     )
 
+    print(
+        "MTF ALIGNMENT:",
+        mtf_alignment.get(
+            "label"
+        ),
+    )
+
     os.makedirs(
         "output",
         exist_ok=True,
@@ -1581,6 +1864,9 @@ def main():
             "ai_raw_context_bars": 64,
         },
         "status": status,
+        "mtf_alignment": (
+            mtf_alignment
+        ),
         "trade_plan": (
             trade_plan
         ),
