@@ -934,6 +934,16 @@ def build_trade_plan(
             "source": (
                 entry_zone["source"]
             ),
+            "zone_grade": (
+                entry_zone.get(
+                    "zone_grade"
+                )
+            ),
+            "zone_quality": (
+                entry_zone.get(
+                    "zone_quality"
+                )
+            ),
         },
         "entry_mid": entry_mid,
         "stop_loss": (
