@@ -29,7 +29,7 @@ OPENROUTER_BASE_URL = (
     "https://openrouter.ai/api/v1"
 )
 
-ANALYSIS_METHOD = "PA-MTF Hybrid V1"
+ANALYSIS_METHOD = "PA-MTF Hybrid V2"
 
 
 SYSTEM_PROMPT = """
@@ -1647,6 +1647,13 @@ def _validate_result(
         "chờ",
         "xung đột",
         "ưu tiên",
+        "thiên",
+        "tín hiệu",
+        "động lượng",
+        "hỗ trợ",
+        "xác nhận",
+        "điều kiện",
+        "rủi ro",
     ]
 
     marker_hits = sum(
