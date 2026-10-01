@@ -558,7 +558,7 @@ def _liquidity_targets(
                 * rr_multiple
             )
 
-        if not any(
+        duplicate = any(
             abs(
                 value
                 - item[0]
@@ -566,6 +566,25 @@ def _liquidity_targets(
             < 1e-8
             for item
             in deduped
+        )
+
+        if deduped:
+            last_price = float(
+                deduped[-1][0]
+            )
+
+            extends_path = (
+                value > last_price
+                if direction == "long"
+                else value < last_price
+            )
+
+        else:
+            extends_path = True
+
+        if (
+            not duplicate
+            and extends_path
         ):
             deduped.append(
                 (
