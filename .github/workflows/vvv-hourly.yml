@@ -32,6 +32,10 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Compile Python modules
+        run: |
+          python -m py_compile main.py mexc_data.py smc_analysis.py trade_plan.py chart.py ai_analysis.py telegram_notify.py signal_journal.py self_check.py walk_forward_backtest.py
+
       - name: Analyze MEXC SMC and create charts
         run: |
           python main.py
