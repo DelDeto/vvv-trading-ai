@@ -1529,6 +1529,115 @@ def _result_strings(
     return values
 
 
+def _sanitize_ai_numeric_text(
+    value,
+):
+    """
+    AI prose is qualitative only. Preserve standard timeframe/setup
+    tokens, but remove every other explicit numeric expression instead
+    of rejecting an otherwise useful review.
+    """
+
+    if isinstance(
+        value,
+        str,
+    ):
+        protected = {
+            "4H": "__TF_4H__",
+            "1H": "__TF_1H__",
+            "15M": "__TF_15M__",
+            "4/4": "__SIG_4_4__",
+            "3/4": "__SIG_3_4__",
+            "2/4": "__SIG_2_4__",
+            "1/4": "__SIG_1_4__",
+            "0/4": "__SIG_0_4__",
+        }
+
+        text_value = value
+
+        for token, placeholder in (
+            protected.items()
+        ):
+            text_value = (
+                text_value.replace(
+                    token,
+                    placeholder,
+                )
+            )
+
+        pattern = (
+            r"(?<![A-Za-z_])"
+            r"[-+]?\d+(?:[\.,]\d+)?"
+            r"(?:%|R)?"
+            r"(?![A-Za-z_])"
+        )
+
+        sanitized, count = (
+            re.subn(
+                pattern,
+                "mức định lượng từ Python",
+                text_value,
+            )
+        )
+
+        for token, placeholder in (
+            protected.items()
+        ):
+            sanitized = (
+                sanitized.replace(
+                    placeholder,
+                    token,
+                )
+            )
+
+        return sanitized, count
+
+    if isinstance(
+        value,
+        list,
+    ):
+        output = []
+        total = 0
+
+        for item in value:
+            cleaned, count = (
+                _sanitize_ai_numeric_text(
+                    item
+                )
+            )
+
+            output.append(
+                cleaned
+            )
+
+            total += count
+
+        return output, total
+
+    if isinstance(
+        value,
+        dict,
+    ):
+        output = {}
+        total = 0
+
+        for key, item in (
+            value.items()
+        ):
+            cleaned, count = (
+                _sanitize_ai_numeric_text(
+                    item
+                )
+            )
+
+            output[key] = cleaned
+            total += count
+
+        return output, total
+
+    return value, 0
+
+
 def _validate_result(
     result,
     model_input,
@@ -1598,6 +1707,19 @@ def _validate_result(
                 )
             )
 
+    sanitized_result, (
+        numeric_sanitizations
+    ) = (
+        _sanitize_ai_numeric_text(
+            result
+        )
+    )
+
+    result.clear()
+    result.update(
+        sanitized_result
+    )
+
     strings = (
         _result_strings(
             result
@@ -1609,29 +1731,6 @@ def _validate_result(
     )
 
     lower = combined.lower()
-
-    # AI is not allowed to publish a new numerical trading level.
-    # Technical timeframe tokens such as 4H/1H/15M are unaffected.
-    decimal_level = re.search(
-        r"(?<![A-Za-z])\d+\.\d{2,}",
-        combined,
-    )
-
-    if decimal_level:
-        raise ValueError(
-            (
-                "AI output contains a numerical "
-                "price-like level."
-            )
-        )
-
-    if "%" in combined:
-        raise ValueError(
-            (
-                "AI output contains unsupported "
-                "percentage/confidence wording."
-            )
-        )
 
     probability_phrases = [
         "xác suất cao",
@@ -1747,7 +1846,14 @@ def _validate_result(
         "context_conflict_flag": (
             context_conflict
         ),
-        "numeric_level_check": "passed",
+        "numeric_level_check": (
+            "sanitized"
+            if numeric_sanitizations
+            else "passed"
+        ),
+        "numeric_sanitizations": (
+            numeric_sanitizations
+        ),
         "language_check": "passed",
         "probability_check": "passed",
     }
