@@ -46,10 +46,11 @@ Python owns:
 ## 2. AI interpretation layer
 
 Default AI route:
-- Primary: InclusionAI Ling 3.0 Flash Fin (free), `inclusionai/ling-3.0-flash-fin:free`.
-- Fallback: Space Bunny Alpha (free), `stealth/space-bunny-alpha`.
+- Primary: Qwen3.8 27B (free), `qwen/qwen3.8-27b:free`.
+- Fallback: OpenRouter Free Models Router, `openrouter/free`.
 - OpenRouter OpenAI-compatible Chat Completions API (`/api/v1/chat/completions`).
-- JSON structure is requested in the prompt and validated locally in Python, so the workflow does not depend on provider-side JSON-schema support.
+- Structured output is enforced with JSON Schema and provider routing requires support for the requested parameters.
+- Model reasoning is disabled for this task to keep the hourly response short and deterministic; the model still receives Python-derived PA/SMC features plus the most recent 64 real candles per timeframe.
 
 The model receives structured JSON, not an invented chart.
 
@@ -89,9 +90,9 @@ Required GitHub Actions secret:
 
 Optional model overrides:
 - OPENROUTER_MODEL
-- Default: inclusionai/ling-3.0-flash-fin:free
+- Default: qwen/qwen3.8-27b:free
 - OPENROUTER_FALLBACK_MODEL
-- Default: stealth/space-bunny-alpha
+- Default: openrouter/free
 
 Telegram secrets remain:
 - TELEGRAM_BOT_TOKEN
