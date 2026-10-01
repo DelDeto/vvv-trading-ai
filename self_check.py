@@ -80,16 +80,32 @@ def main():
             "closed_candles_only is not enabled"
         )
 
-    if int(
+    actual_history = (
         integrity.get(
-            "history_bars",
-            0,
+            "actual_history_bars",
+            {},
         )
-        or 0
-    ) < 360:
-        _fail(
-            "History is shorter than zone max_age"
-        )
+        or {}
+    )
+
+    for timeframe in [
+        "4H",
+        "1H",
+        "15M",
+    ]:
+        if int(
+            actual_history.get(
+                timeframe,
+                0,
+            )
+            or 0
+        ) < 360:
+            _fail(
+                (
+                    f"{timeframe} history is shorter "
+                    "than the 360-bar zone horizon"
+                )
+            )
 
     now = datetime.now(
         timezone.utc
