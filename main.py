@@ -1244,6 +1244,27 @@ def _build_hourly_update(
             )
         )
 
+    evaluation = (
+        report.get(
+            "evaluation_summary",
+            {},
+        )
+        or {}
+    )
+
+    if evaluation.get(
+        "total_signals",
+        0,
+    ):
+        lines.append(
+            (
+                "Forward eval: "
+                f"{evaluation.get('total_signals', 0)} signals | "
+                f"{evaluation.get('resolved', 0)} resolved | "
+                f"{evaluation.get('calibration_status', 'COLLECTING_DATA')}"
+            )
+        )
+
     trade_plan = report.get(
         "trade_plan",
         {},
