@@ -47,7 +47,7 @@ Python owns:
 
 Default AI route:
 - OpenRouter Free Models Router: openrouter/free
-- OpenRouter OpenAI-compatible API
+- OpenRouter OpenAI-compatible Chat Completions API (`/api/v1/chat/completions`)
 - The router selects a currently available free model that supports the requested features.
 
 The model receives structured JSON, not an invented chart.
