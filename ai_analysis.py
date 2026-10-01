@@ -1031,6 +1031,13 @@ def _zone_line(
         )
 
     if zone.get(
+        "grade"
+    ):
+        bits.append(
+            zone["grade"]
+        )
+
+    if zone.get(
         "pattern"
     ):
         bits.append(
@@ -1086,6 +1093,13 @@ def _python_facts_text(
         (
             "Python status: "
             f"{report.get('status', 'WAIT')}"
+        ),
+        (
+            "MTF Alignment: "
+            f"{(report.get('mtf_alignment') or {}).get('label', 'NEUTRAL')}"
+        ),
+        (
+            "Data mode: CLOSED CANDLES ONLY"
         ),
     ]
 
@@ -1144,6 +1158,22 @@ def _python_facts_text(
         "hold_vol_change_pct"
     )
 
+    participation = (
+        snapshot.get(
+            "participation_context",
+            {},
+        )
+        or {}
+    )
+
+    if participation:
+        lines.append(
+            (
+                "Participation: "
+                f"{participation.get('regime', 'NEUTRAL_MIXED')}"
+            )
+        )
+
     if hold_vol is not None:
         text = (
             "MEXC holdVol: "
@@ -1173,7 +1203,8 @@ def _python_facts_text(
         lines.append(
             (
                 f"[{timeframe}] "
-                f"Trend {str(analysis.get('trend', '-')).upper()}"
+                f"Trend {str(analysis.get('trend', '-')).upper()} "
+                f"| Regime {str(analysis.get('regime', '-')).upper()}"
             )
         )
 
