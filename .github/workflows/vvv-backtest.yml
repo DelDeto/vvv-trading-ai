@@ -30,6 +30,10 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Compile Python modules
+        run: |
+          python -m py_compile mexc_data.py smc_analysis.py trade_plan.py signal_journal.py walk_forward_backtest.py
+
       - name: Run no-lookahead walk-forward backtest
         run: |
           python walk_forward_backtest.py
