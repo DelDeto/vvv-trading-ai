@@ -12,6 +12,8 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 OUTPUT_DIR = Path("output")
 REPORT_PATH = OUTPUT_DIR / "VVVUSDT_SMC_report.json"
 UPDATE_PATH = OUTPUT_DIR / "VVVUSDT_hourly_update.txt"
+AI_UPDATE_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
+AI_JSON_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.json"
 
 CHARTS = [
     ("4H", OUTPUT_DIR / "VVVUSDT_4H.png"),
@@ -135,25 +137,74 @@ def _short_caption(report, timeframe):
         else "-"
     )
 
-    return (
-        f"VVV_USDT {timeframe} | "
-        f"MEXC\n"
-        f"Price: {price_text}\n"
-        f"Status: {status}\n"
-        f"Execution: {execution}"
-    )
+    ai_bias = None
+
+    if AI_JSON_PATH.exists():
+        try:
+            ai_payload = json.loads(
+                AI_JSON_PATH.read_text(
+                    encoding="utf-8"
+                )
+            )
+
+            ai_bias = (
+                ai_payload
+                .get(
+                    "analysis",
+                    {},
+                )
+                .get(
+                    "ai_bias"
+                )
+            )
+
+        except Exception:
+            ai_bias = None
+
+    lines = [
+        (
+            f"VVV_USDT {timeframe} | "
+            "MEXC"
+        ),
+        f"Price: {price_text}",
+        f"Python: {status}",
+        f"Execution: {execution}",
+    ]
+
+    if ai_bias:
+        lines.append(
+            f"AI bias: {ai_bias}"
+        )
+
+    return "\n".join(lines)
 
 
 def _send_text_update():
-    if not UPDATE_PATH.exists():
+    source = (
+        AI_UPDATE_PATH
+        if AI_UPDATE_PATH.exists()
+        else UPDATE_PATH
+    )
+
+    if not source.exists():
         print(
-            "No hourly update file found; "
+            "No hourly or AI update file found; "
             "skipping Telegram text update."
         )
         return
 
-    text = UPDATE_PATH.read_text(
+    text = source.read_text(
         encoding="utf-8"
+    )
+
+    mode = (
+        "hybrid AI"
+        if source == AI_UPDATE_PATH
+        else "Python fallback"
+    )
+
+    print(
+        f"Telegram text mode: {mode}"
     )
 
     for chunk in _split_message(text):
