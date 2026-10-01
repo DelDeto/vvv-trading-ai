@@ -1,1 +1,0 @@
-"""Crypto Market Setup Hub."""
