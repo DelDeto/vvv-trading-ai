@@ -69,16 +69,19 @@ def main():
     df_15m = get_closed_klines(
         "15m",
         1500,
+        min_required=360,
     )
 
     df_1h = get_closed_klines(
         "1h",
-        500,
+        800,
+        min_required=360,
     )
 
     df_4h = get_closed_klines(
         "4h",
         420,
+        min_required=360,
     )
 
     signals = []
@@ -87,7 +90,7 @@ def main():
 
     # Evaluate once per hour, matching the production workflow cadence.
     for position in range(
-        120,
+        360,
         len(df_15m) - 96,
         4,
     ):
@@ -125,9 +128,9 @@ def main():
         )
 
         if (
-            len(h15) < 100
-            or len(h1) < 60
-            or len(h4) < 30
+            len(h15) < 360
+            or len(h1) < 360
+            or len(h4) < 360
         ):
             continue
 
