@@ -36,6 +36,14 @@ jobs:
         run: |
           python main.py
 
+      - name: AI Price Action review
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-5.6-terra
+        run: |
+          python ai_analysis.py
+
       - name: Upload charts, report and hourly update
         uses: actions/upload-artifact@v4
         with:
