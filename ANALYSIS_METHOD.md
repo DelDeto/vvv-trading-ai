@@ -212,7 +212,7 @@ Every hourly run executes `self_check.py` before AI.
 
 It validates:
 - closed-candle-only mode
-- enough history for the zone-policy horizon
+- actual returned history of at least 360 closed bars per timeframe for the zone-policy horizon
 - exact status vocabulary
 - no forming candle in the chart/AI packet
 - no READY state during MTF CONFLICT
@@ -241,7 +241,7 @@ Each unique setup records:
 - TP hits
 - stop / timeout / no-entry outcome
 
-Same-bar entry plus stop/target is marked AMBIGUOUS_SAME_BAR instead of guessing intrabar order.
+If the entry candle also reaches stop/target, it is marked AMBIGUOUS_ENTRY_BAR. Later candles that reach both stop and a new target are marked AMBIGUOUS_SAME_BAR. Intrabar order is never guessed.
 
 Calibration summaries are written to:
 - `output/VVVUSDT_signal_stats.json`
