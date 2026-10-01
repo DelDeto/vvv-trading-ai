@@ -598,6 +598,9 @@ def _timeframe_packet(
         "trend": analysis.get(
             "trend"
         ),
+        "atr": analysis.get(
+            "atr"
+        ),
         "current_price": (
             analysis.get(
                 "current_price"
