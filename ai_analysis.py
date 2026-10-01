@@ -13,6 +13,11 @@ AI_TEXT_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 
 MODEL = os.getenv(
     "OPENROUTER_MODEL",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+)
+
+FALLBACK_MODEL = os.getenv(
+    "OPENROUTER_FALLBACK_MODEL",
     "openrouter/free",
 )
 
@@ -1264,6 +1269,116 @@ def _parse_json_content(
         raise
 
 
+def _request_analysis(
+    client,
+    model,
+    model_input,
+):
+    response = (
+        client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        SYSTEM_PROMPT
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Analyze this exact "
+                        "machine-generated market packet. "
+                        "Do not add numerical levels.\n\n"
+                        + json.dumps(
+                            model_input,
+                            ensure_ascii=False,
+                            separators=(
+                                ",",
+                                ":",
+                            ),
+                        )
+                    ),
+                },
+            ],
+            response_format={
+                "type": (
+                    "json_schema"
+                ),
+                "json_schema": {
+                    "name": (
+                        "vvv_pa_analysis"
+                    ),
+                    "strict": True,
+                    "schema": (
+                        OUTPUT_SCHEMA
+                    ),
+                },
+            },
+            max_tokens=3200,
+            temperature=0.1,
+            extra_body={
+                "provider": {
+                    "require_parameters": True,
+                },
+            },
+        )
+    )
+
+    if not response.choices:
+        raise ValueError(
+            (
+                "OpenRouter returned "
+                "no choices."
+            )
+        )
+
+    choice = response.choices[0]
+
+    finish_reason = getattr(
+        choice,
+        "finish_reason",
+        None,
+    )
+
+    message = choice.message
+
+    content = getattr(
+        message,
+        "content",
+        None,
+    )
+
+    routed_model = (
+        getattr(
+            response,
+            "model",
+            None,
+        )
+        or model
+    )
+
+    print(
+        (
+            "OpenRouter response: "
+            f"requested={model} "
+            f"routed={routed_model} "
+            f"finish={finish_reason}"
+        )
+    )
+
+    result = (
+        _parse_json_content(
+            content
+        )
+    )
+
+    return (
+        result,
+        routed_model,
+    )
+
+
 def main():
     api_key = os.getenv(
         "OPENROUTER_API_KEY"
@@ -1306,79 +1421,74 @@ def main():
         },
     )
 
-    response = (
-        client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        SYSTEM_PROMPT
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        "Analyze this exact "
-                        "machine-generated market packet. "
-                        "Do not add numerical levels.\n\n"
-                        + json.dumps(
-                            model_input,
-                            ensure_ascii=False,
-                            separators=(
-                                ",",
-                                ":",
-                            ),
-                        )
-                    ),
-                },
-            ],
-            response_format={
-                "type": (
-                    "json_schema"
-                ),
-                "json_schema": {
-                    "name": (
-                        "vvv_pa_analysis"
-                    ),
-                    "strict": True,
-                    "schema": (
-                        OUTPUT_SCHEMA
-                    ),
-                },
-            },
-            max_tokens=2200,
-            temperature=0.2,
-        )
-    )
+    candidate_models = [
+        MODEL,
+    ]
 
-    message = (
-        response
-        .choices[0]
-        .message
-    )
-
-    result = (
-        _parse_json_content(
-            message.content
+    if (
+        FALLBACK_MODEL
+        and FALLBACK_MODEL
+        != MODEL
+    ):
+        candidate_models.append(
+            FALLBACK_MODEL
         )
-    )
 
-    routed_model = (
-        getattr(
-            response,
-            "model",
-            None,
-        )
-        or MODEL
-    )
+    result = None
+    routed_model = None
+    errors = []
 
-    print(
-        (
-            "OpenRouter routed model: "
-            f"{routed_model}"
+    for candidate_model in (
+        candidate_models
+    ):
+        try:
+            (
+                result,
+                routed_model,
+            ) = _request_analysis(
+                client,
+                candidate_model,
+                model_input,
+            )
+
+            break
+
+        except Exception as exc:
+            errors.append(
+                (
+                    candidate_model,
+                    type(exc).__name__,
+                    str(exc),
+                )
+            )
+
+            print(
+                (
+                    "OpenRouter AI attempt failed: "
+                    f"{candidate_model} | "
+                    f"{type(exc).__name__}: "
+                    f"{exc}"
+                )
+            )
+
+    if result is None:
+        raise RuntimeError(
+            (
+                "All OpenRouter AI attempts failed: "
+                + " | ".join(
+                    (
+                        f"{model}: "
+                        f"{error_type}"
+                    )
+                    for (
+                        model,
+                        error_type,
+                        _,
+                    )
+                    in errors
+                )
+            )
         )
-    )
 
     report = payload[
         "report"
@@ -1386,7 +1496,10 @@ def main():
 
     artifact = {
         "model": routed_model,
-        "router": MODEL,
+        "requested_model": MODEL,
+        "fallback_model": (
+            FALLBACK_MODEL
+        ),
         "method": (
             ANALYSIS_METHOD
         ),
