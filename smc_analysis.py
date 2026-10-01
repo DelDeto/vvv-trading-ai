@@ -2738,6 +2738,7 @@ def _infer_market_regime(
     last_event,
     bullish_setup,
     bearish_setup,
+    current_index,
 ):
     """
     Add transition/pullback context on top of the structural trend.
@@ -2779,6 +2780,23 @@ def _infer_market_regime(
         else None
     )
 
+    event_age = (
+        current_index
+        - int(
+            last_event.get(
+                "index",
+                current_index,
+            )
+        )
+        if last_event
+        else None
+    )
+
+    event_is_recent = (
+        event_age is not None
+        and 0 <= event_age <= 20
+    )
+
     if trend == "bullish":
         if (
             event_direction
@@ -2814,7 +2832,8 @@ def _infer_market_regime(
         return "BEARISH_TREND"
 
     if (
-        event_kind == "CHoCH"
+        event_is_recent
+        and event_kind == "CHoCH"
         and event_direction
         in (
             "bullish",
@@ -3054,6 +3073,7 @@ def analyze_smc(
             last_event,
             bullish_setup,
             bearish_setup,
+            current_index,
         )
     )
 
