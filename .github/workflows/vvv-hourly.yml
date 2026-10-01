@@ -2,10 +2,11 @@ name: VVVUSDT Hourly MEXC SMC
 
 on:
   workflow_dispatch:
-  # GitHub documents that scheduled jobs near the start of the hour
-  # can be delayed or dropped under load. Run at minute 23 instead.
+  # Redundant trigger opportunities reduce the impact of GitHub
+  # scheduled-event delays/drops. A persisted gate below ensures
+  # Telegram is still delivered at most about once per hour.
   schedule:
-    - cron: "23 * * * *"
+    - cron: "8,23,38,53 * * * *"
       timezone: "Asia/Ho_Chi_Minh"
 
 permissions:
@@ -31,23 +32,37 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Check hourly delivery gate
+        id: delivery_gate
+        env:
+          VVV_RUN_EVENT: ${{ github.event_name }}
+        run: |
+          python schedule_gate.py | tee /tmp/vvv-gate.txt
+          RUN_VALUE=$(grep '^run=' /tmp/vvv-gate.txt | tail -1 | cut -d= -f2)
+          echo "run=${RUN_VALUE:-true}" >> "$GITHUB_OUTPUT"
+
       - name: Install dependencies
+        if: steps.delivery_gate.outputs.run == 'true'
         run: |
           pip install -r requirements.txt
 
       - name: Compile Python modules
+        if: steps.delivery_gate.outputs.run == 'true'
         run: |
           python -m py_compile main.py mexc_data.py smc_analysis.py trade_plan.py chart.py ai_analysis.py telegram_notify.py signal_journal.py self_check.py walk_forward_backtest.py
 
       - name: Analyze MEXC SMC and create charts
+        if: steps.delivery_gate.outputs.run == 'true'
         run: |
           python main.py
 
       - name: Validate deterministic invariants
+        if: steps.delivery_gate.outputs.run == 'true'
         run: |
           python self_check.py
 
       - name: AI Price Action review via OpenRouter
+        if: steps.delivery_gate.outputs.run == 'true'
         continue-on-error: true
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -57,6 +72,7 @@ jobs:
           python ai_analysis.py
 
       - name: Upload charts, report and hourly update
+        if: steps.delivery_gate.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: VVVUSDT-MEXC-SMC
@@ -64,17 +80,20 @@ jobs:
           retention-days: 30
 
       - name: Send Telegram update
+        if: steps.delivery_gate.outputs.run == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VVV_RUN_EVENT: ${{ github.event_name }}
         run: |
           python telegram_notify.py
 
       - name: Persist state for next hourly run
+        if: steps.delivery_gate.outputs.run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add state.json signal_history.json
+          git add state.json signal_history.json telegram_state.json
 
           if git diff --cached --quiet; then
             echo "No state changes to commit."
