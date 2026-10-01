@@ -1,0 +1,91 @@
+# PA-MTF Hybrid V1
+
+This repository uses a hybrid architecture for VVV_USDT market analysis.
+
+## 1. Deterministic Python layer — source of truth
+
+The Python layer is responsible for every numerical market fact and every chart.
+
+Data source:
+- MEXC Futures OHLC and contract snapshot.
+- The same exact OHLC packet used to build the PNG charts is persisted for the AI layer.
+- AI never creates, edits, interpolates, or replaces candles.
+
+Core Price Action / SMC calculations:
+- HH / HL / LH / LL trend context.
+- BOS and CHoCH from confirmed swing breaks.
+- Supply / Demand V3 using DBR, RBR, RBD, DBD price-action origins.
+- Zone freshness and mitigation count.
+- BSL / SSL liquidity pools.
+- Liquidity sweep.
+- Displacement.
+- Fair Value Gap (FVG).
+- Retest.
+- ATR-based volatility context.
+- Rule-based setup and execution gate.
+
+Supplementary technical confirmation:
+- EMA20 / EMA50 relationship.
+- Anchored VWAP relationship.
+- RSI14 regime.
+- Relative-volume regime.
+- 20-bar range location.
+- MEXC holdVol/open-position proxy.
+- Funding rate.
+
+Python owns:
+- Candles.
+- Chart rendering.
+- Supply/Demand boundaries.
+- BSL/SSL.
+- FVG boundaries.
+- BOS/CHoCH.
+- Entry / SL / TP from the rule-based Trade Map.
+- WAIT / execution_ready gate.
+
+## 2. AI interpretation layer
+
+Default model:
+- gpt-5.6-terra
+- reasoning effort: medium
+- OpenAI Responses API
+
+The model receives structured JSON, not an invented chart.
+
+Top-down reasoning order:
+1. 4H — macro structure and major location.
+2. 1H — intermediate structure and decision area.
+3. 15M — execution structure and timing.
+
+Evidence hierarchy:
+1. Market structure and BOS/CHoCH.
+2. Active Supply/Demand location and zone freshness.
+3. BSL/SSL and liquidity sweep.
+4. Displacement, FVG and retest.
+5. EMA, anchored VWAP, ATR, RSI and relative volume.
+6. holdVol and funding as secondary context only.
+
+Rules:
+- AI cannot invent numerical levels.
+- AI cannot promote Historical/Reference zones to active zones.
+- AI cannot override Python execution_ready.
+- When timeframes conflict, the report must explicitly mention the conflict.
+- If the evidence is incomplete, WAIT is preferred over forcing a direction.
+- AI bias is qualitative and is not a probability.
+
+## 3. Telegram delivery
+
+Hourly workflow:
+MEXC -> Python analysis -> PNG charts -> exact AI input packet -> AI qualitative review -> Telegram.
+
+If OPENAI_API_KEY is absent or the AI step fails:
+- The deterministic Python pipeline still completes.
+- Telegram automatically falls back to the Python hourly update.
+- Charts remain unaffected.
+
+Required GitHub Actions secret:
+- OPENAI_API_KEY
+
+Telegram secrets remain:
+- TELEGRAM_BOT_TOKEN
+- TELEGRAM_CHAT_ID
