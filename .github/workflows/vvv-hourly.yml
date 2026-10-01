@@ -2,6 +2,9 @@ name: VVVUSDT Hourly MEXC SMC
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/vvv-heartbeat.txt'
   # Redundant trigger opportunities reduce the impact of GitHub
   # scheduled-event delays/drops. A persisted gate below ensures
   # Telegram is still delivered at most about once per hour.
