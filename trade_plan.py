@@ -183,6 +183,16 @@ def _candidate_entry_zones(
                         == "long"
                         else "supply"
                     ),
+                    "zone_grade": (
+                        zone.get(
+                            "grade"
+                        )
+                    ),
+                    "zone_quality": (
+                        zone.get(
+                            "quality"
+                        )
+                    ),
                     "priority": 1,
                 }
             )
@@ -603,6 +613,7 @@ def build_trade_plan(
     analysis_1h,
     analysis_15m,
     status,
+    mtf_alignment=None,
 ):
     """
     Build a rule-based execution map from the active 15M SMC setup.
@@ -778,6 +789,42 @@ def build_trade_plan(
 
     blockers = []
 
+    mtf_alignment = (
+        mtf_alignment
+        or {}
+    )
+
+    if (
+        mtf_alignment.get(
+            "label"
+        )
+        == "CONFLICT"
+    ):
+        blockers.append(
+            (
+                "Higher-timeframe alignment "
+                "is CONFLICT"
+            )
+        )
+
+    entry_grade = (
+        entry_zone.get(
+            "zone_grade"
+        )
+    )
+
+    # Grade C is retained for calibration/reference but is too weak
+    # to pass the deterministic execution gate. B remains observable
+    # until the forward outcome journal provides enough evidence for
+    # stricter A+/A-only gating.
+    if entry_grade == "C":
+        blockers.append(
+            (
+                "Entry Supply/Demand zone "
+                "is grade C"
+            )
+        )
+
     if score < 3:
         blockers.append(
             (
@@ -862,6 +909,12 @@ def build_trade_plan(
         "blockers": blockers,
         "higher_tf_conflict": (
             higher_tf_conflict
+        ),
+        "mtf_alignment": (
+            mtf_alignment
+        ),
+        "entry_zone_grade": (
+            entry_grade
         ),
         "first_target_rr": (
             first_rr
