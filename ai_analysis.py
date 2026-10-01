@@ -13,12 +13,12 @@ AI_TEXT_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 
 MODEL = os.getenv(
     "OPENROUTER_MODEL",
-    "nvidia/nemotron-3-super-120b-a12b:free",
+    "inclusionai/ling-3.0-flash-fin:free",
 )
 
 FALLBACK_MODEL = os.getenv(
     "OPENROUTER_FALLBACK_MODEL",
-    "openrouter/free",
+    "stealth/space-bunny-alpha",
 )
 
 OPENROUTER_BASE_URL = (
@@ -1269,11 +1269,84 @@ def _parse_json_content(
         raise
 
 
+def _validate_result(
+    result,
+):
+    if not isinstance(
+        result,
+        dict,
+    ):
+        raise ValueError(
+            "AI result is not a JSON object."
+        )
+
+    required = set(
+        OUTPUT_SCHEMA[
+            "required"
+        ]
+    )
+
+    missing = (
+        required
+        - set(
+            result.keys()
+        )
+    )
+
+    if missing:
+        raise ValueError(
+            (
+                "AI result missing fields: "
+                + ", ".join(
+                    sorted(missing)
+                )
+            )
+        )
+
+    if result.get(
+        "ai_bias"
+    ) not in {
+        "BULLISH",
+        "BEARISH",
+        "MIXED",
+        "WAIT",
+    }:
+        raise ValueError(
+            "AI result has invalid ai_bias."
+        )
+
+    for key in [
+        "confluence",
+        "conflicts",
+    ]:
+        if not isinstance(
+            result.get(key),
+            list,
+        ):
+            raise ValueError(
+                (
+                    f"AI result field "
+                    f"{key} must be a list."
+                )
+            )
+
+    return result
+
+
 def _request_analysis(
     client,
     model,
     model_input,
 ):
+    schema_text = json.dumps(
+        OUTPUT_SCHEMA,
+        ensure_ascii=False,
+        separators=(
+            ",",
+            ":",
+        ),
+    )
+
     response = (
         client.chat.completions.create(
             model=model,
@@ -1289,7 +1362,12 @@ def _request_analysis(
                     "content": (
                         "Analyze this exact "
                         "machine-generated market packet. "
-                        "Do not add numerical levels.\n\n"
+                        "Do not add numerical levels. "
+                        "Return EXACTLY one valid JSON object, "
+                        "with no markdown and no text before or after it. "
+                        "The JSON must follow this schema exactly:\n"
+                        + schema_text
+                        + "\n\nMARKET PACKET:\n"
                         + json.dumps(
                             model_input,
                             ensure_ascii=False,
@@ -1301,27 +1379,8 @@ def _request_analysis(
                     ),
                 },
             ],
-            response_format={
-                "type": (
-                    "json_schema"
-                ),
-                "json_schema": {
-                    "name": (
-                        "vvv_pa_analysis"
-                    ),
-                    "strict": True,
-                    "schema": (
-                        OUTPUT_SCHEMA
-                    ),
-                },
-            },
-            max_tokens=3200,
+            max_tokens=5200,
             temperature=0.1,
-            extra_body={
-                "provider": {
-                    "require_parameters": True,
-                },
-            },
         )
     )
 
@@ -1367,9 +1426,23 @@ def _request_analysis(
         )
     )
 
+    if (
+        finish_reason
+        == "length"
+    ):
+        raise ValueError(
+            "OpenRouter response hit output length limit."
+        )
+
     result = (
         _parse_json_content(
             content
+        )
+    )
+
+    result = (
+        _validate_result(
+            result
         )
     )
 
