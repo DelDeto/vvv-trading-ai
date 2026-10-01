@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-01T10:02:05.050633+00:00",
-  "current_price": 27.709,
+  "generated_at_utc": "2026-10-01T10:08:15.914673+00:00",
+  "current_price": 27.611,
   "status": "DEVELOPING SHORT",
   "trade_plan": {
     "active": true,
@@ -9,53 +9,53 @@
       "1H active setup is opposite the 15M direction"
     ],
     "higher_tf_conflict": true,
-    "first_target_rr": 1.0419030990833826,
+    "first_target_rr": 1.5468437961274697,
     "direction": "short",
     "setup_state": "developing",
     "setup_score": 4,
     "entry_zone": {
-      "lower": 27.869714285714288,
-      "upper": 27.922285714285714,
+      "lower": 27.867942857142857,
+      "upper": 27.924057142857144,
       "source": "retest"
     },
     "entry_mid": 27.896,
-    "stop_loss": 28.223285714285712,
-    "risk": 0.3272857142857113,
+    "stop_loss": 28.225057142857143,
+    "risk": 0.3290571428571418,
     "targets": [
       {
         "name": "TP1",
-        "price": 27.555,
+        "price": 27.387,
         "source": "15M SSL",
-        "rr": 1.0419030990833826
+        "rr": 1.5468437961274697
       },
       {
         "name": "TP2",
-        "price": 27.387,
-        "source": "1H SSL",
-        "rr": 1.5552160628546638
+        "price": 27.155,
+        "source": "4H SSL",
+        "rr": 2.251888512633504
       },
       {
         "name": "TP3",
-        "price": 27.155,
-        "source": "4H SSL",
-        "rr": 2.264076822348339
+        "price": 27.56694285714286,
+        "source": "1R",
+        "rr": 1.0
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 27.776,
+    "last_price": 27.611,
     "high_24h": 28.384,
     "low_24h": 26.742,
-    "change_rate_24h": -0.0157,
-    "change_value_24h": -0.445,
-    "hold_vol": 5422925.0,
+    "change_rate_24h": -0.0216,
+    "change_value_24h": -0.61,
+    "hold_vol": 5432955.0,
     "funding_rate": 5e-05,
-    "index_price": 27.728,
-    "fair_price": 27.728,
-    "timestamp": 1790848920010,
-    "hold_vol_change_pct": 0.010290708836196443
+    "index_price": 27.553,
+    "fair_price": 27.596,
+    "timestamp": 1790849291873,
+    "hold_vol_change_pct": 0.18495553598841952
   },
   "timeframes": {
     "4H": {
@@ -161,8 +161,8 @@
         "time": "2026-10-01T09:30:00+00:00"
       },
       "ssl": {
-        "price": 27.555,
-        "time": "2026-10-01T08:15:00+00:00"
+        "price": 27.387,
+        "time": "2026-10-01T07:15:00+00:00"
       },
       "last_event": {
         "time": "2026-10-01T07:15:00+00:00",
