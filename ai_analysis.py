@@ -13,12 +13,12 @@ AI_TEXT_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 
 MODEL = os.getenv(
     "OPENROUTER_MODEL",
-    "inclusionai/ling-3.0-flash-fin:free",
+    "qwen/qwen3.8-27b:free",
 )
 
 FALLBACK_MODEL = os.getenv(
     "OPENROUTER_FALLBACK_MODEL",
-    "stealth/space-bunny-alpha",
+    "openrouter/free",
 )
 
 OPENROUTER_BASE_URL = (
@@ -745,8 +745,8 @@ def _timeframe_packet(
                 analysis,
             )
         ),
-        "ohlc_last_160": candles[
-            -160:
+        "ohlc_recent": candles[
+            -64:
         ],
     }
 
@@ -1338,15 +1338,6 @@ def _request_analysis(
     model,
     model_input,
 ):
-    schema_text = json.dumps(
-        OUTPUT_SCHEMA,
-        ensure_ascii=False,
-        separators=(
-            ",",
-            ":",
-        ),
-    )
-
     response = (
         client.chat.completions.create(
             model=model,
@@ -1363,11 +1354,8 @@ def _request_analysis(
                         "Analyze this exact "
                         "machine-generated market packet. "
                         "Do not add numerical levels. "
-                        "Return EXACTLY one valid JSON object, "
-                        "with no markdown and no text before or after it. "
-                        "The JSON must follow this schema exactly:\n"
-                        + schema_text
-                        + "\n\nMARKET PACKET:\n"
+                        "Return a concise Vietnamese trading-desk review.\n\n"
+                        "MARKET PACKET:\n"
                         + json.dumps(
                             model_input,
                             ensure_ascii=False,
@@ -1379,8 +1367,30 @@ def _request_analysis(
                     ),
                 },
             ],
-            max_tokens=5200,
+            response_format={
+                "type": (
+                    "json_schema"
+                ),
+                "json_schema": {
+                    "name": (
+                        "vvv_pa_analysis"
+                    ),
+                    "strict": True,
+                    "schema": (
+                        OUTPUT_SCHEMA
+                    ),
+                },
+            },
+            max_tokens=1800,
             temperature=0.1,
+            extra_body={
+                "reasoning": {
+                    "enabled": False,
+                },
+                "provider": {
+                    "require_parameters": True,
+                },
+            },
         )
     )
 
