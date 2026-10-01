@@ -132,6 +132,67 @@ def get_klines(interval="4h", limit=200):
 
 
 
+def get_closed_klines(
+    interval="4h",
+    limit=420,
+):
+    """
+    Return only fully closed MEXC candles.
+
+    The exchange can include the currently-forming candle in the
+    kline response. Signal generation must never use that candle,
+    because its OHLC values can still change and would create
+    repainting BOS/CHoCH/FVG/zone/setup signals.
+    """
+
+    if interval not in INTERVAL_SECONDS:
+        raise ValueError(
+            f"Unsupported interval: {interval}"
+        )
+
+    raw = get_klines(
+        interval,
+        limit + 4,
+    )
+
+    now = pd.Timestamp.now(
+        tz="UTC"
+    )
+
+    candle_delta = pd.to_timedelta(
+        INTERVAL_SECONDS[interval],
+        unit="s",
+    )
+
+    close_times = (
+        raw.index + candle_delta
+    )
+
+    closed = raw.loc[
+        close_times <= now
+    ].tail(limit)
+
+    if closed.empty:
+        raise RuntimeError(
+            (
+                "No fully closed MEXC candles "
+                f"available for {interval}."
+            )
+        )
+
+    dropped = len(raw) - len(closed)
+
+    print(
+        (
+            f"Closed-candle filter: {interval} | "
+            f"{len(closed)} closed | "
+            f"{dropped} forming/extra excluded"
+        )
+    )
+
+    return closed
+
+
 def get_contract_snapshot():
     """
     Public MEXC Futures ticker snapshot for VVV_USDT.
