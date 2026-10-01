@@ -1864,6 +1864,22 @@ def _request_analysis(
     model,
     model_input,
 ):
+    extra_body = {
+        "provider": {
+            "require_parameters": True,
+        },
+    }
+
+    # A fixed model can safely use the explicit reasoning setting.
+    # The OpenRouter free router may select an endpoint where reasoning
+    # is mandatory, so do not force reasoning=False for routed fallback.
+    if model != "openrouter/free":
+        extra_body[
+            "reasoning"
+        ] = {
+            "enabled": False,
+        }
+
     response = (
         client.chat.completions.create(
             model=model,
@@ -1911,14 +1927,7 @@ def _request_analysis(
             },
             max_tokens=1800,
             temperature=0.1,
-            extra_body={
-                "reasoning": {
-                    "enabled": False,
-                },
-                "provider": {
-                    "require_parameters": True,
-                },
-            },
+            extra_body=extra_body,
         )
     )
 
