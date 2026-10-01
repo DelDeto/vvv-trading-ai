@@ -45,10 +45,10 @@ Python owns:
 
 ## 2. AI interpretation layer
 
-Default model:
-- gpt-5.6-terra
-- reasoning effort: medium
-- OpenAI Responses API
+Default AI route:
+- OpenRouter Free Models Router: openrouter/free
+- OpenRouter OpenAI-compatible API
+- The router selects a currently available free model that supports the requested features.
 
 The model receives structured JSON, not an invented chart.
 
@@ -78,13 +78,17 @@ Rules:
 Hourly workflow:
 MEXC -> Python analysis -> PNG charts -> exact AI input packet -> AI qualitative review -> Telegram.
 
-If OPENAI_API_KEY is absent or the AI step fails:
+If OPENROUTER_API_KEY is absent or the AI step fails:
 - The deterministic Python pipeline still completes.
 - Telegram automatically falls back to the Python hourly update.
 - Charts remain unaffected.
 
 Required GitHub Actions secret:
-- OPENAI_API_KEY
+- OPENROUTER_API_KEY
+
+Optional model override:
+- OPENROUTER_MODEL
+- Default: openrouter/free
 
 Telegram secrets remain:
 - TELEGRAM_BOT_TOKEN
