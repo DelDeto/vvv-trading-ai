@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-01T09:43:12.937126+00:00",
-  "current_price": 27.969,
+  "generated_at_utc": "2026-10-01T09:49:13.816309+00:00",
+  "current_price": 27.952,
   "status": "DEVELOPING SHORT",
   "trade_plan": {
     "active": true,
@@ -9,7 +9,7 @@
       "1H active setup is opposite the 15M direction"
     ],
     "higher_tf_conflict": true,
-    "first_target_rr": 4.001712878706781,
+    "first_target_rr": 4.019570944674399,
     "direction": "short",
     "setup_state": "developing",
     "setup_score": 4,
@@ -19,43 +19,43 @@
       "source": "supply"
     },
     "entry_mid": 28.089,
-    "stop_loss": 28.222442857142855,
-    "risk": 0.13344285714285675,
+    "stop_loss": 28.22185,
+    "risk": 0.13285000000000124,
     "targets": [
       {
         "name": "TP1",
         "price": 27.555,
         "source": "15M SSL",
-        "rr": 4.001712878706781
+        "rr": 4.019570944674399
       },
       {
         "name": "TP2",
         "price": 27.387,
         "source": "1H SSL",
-        "rr": 5.260678728187562
+        "rr": 5.28415506210005
       },
       {
         "name": "TP3",
         "price": 27.155,
         "source": "4H SSL",
-        "rr": 6.999250615565787
+        "rr": 7.03048550997357
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 27.969,
+    "last_price": 27.952,
     "high_24h": 28.384,
     "low_24h": 26.742,
-    "change_rate_24h": -0.0089,
-    "change_value_24h": -0.252,
-    "hold_vol": 5417505.0,
+    "change_rate_24h": -0.0095,
+    "change_value_24h": -0.269,
+    "hold_vol": 5419579.0,
     "funding_rate": 5e-05,
-    "index_price": 27.966,
-    "fair_price": 27.969,
-    "timestamp": 1790847791190,
-    "hold_vol_change_pct": 3.074813504681219
+    "index_price": 27.928,
+    "fair_price": 27.952,
+    "timestamp": 1790848152087,
+    "hold_vol_change_pct": 0.038283305691457596
   },
   "timeframes": {
     "4H": {
@@ -171,7 +171,7 @@
         "level": 27.896
       },
       "last_sweep": {
-        "index": 199,
+        "index": 198,
         "time": "2026-10-01T09:30:00+00:00",
         "type": "BSL",
         "direction": "bearish",
@@ -179,7 +179,7 @@
         "extreme": 28.189
       },
       "last_displacement": {
-        "index": 190,
+        "index": 189,
         "time": "2026-10-01T07:15:00+00:00",
         "direction": "bearish",
         "strength": 2.4067268763625242,
@@ -189,12 +189,12 @@
         "low": 27.387
       },
       "last_retest": {
-        "index": 195,
+        "index": 194,
         "time": "2026-10-01T08:30:00+00:00",
         "direction": "bearish",
         "structure_kind": "CHoCH",
         "level": 27.896,
-        "source_index": 190
+        "source_index": 189
       },
       "setup": {
         "direction": "bearish",
