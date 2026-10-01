@@ -8,6 +8,9 @@ from mexc_data import (
 )
 from chart import create_chart
 from trade_plan import build_trade_plan
+from signal_journal import (
+    update_signal_journal,
+)
 from smc_analysis import (
     analyze_smc,
     derive_overall_status,
@@ -1875,6 +1878,17 @@ def main():
         ),
         "timeframes": analyses,
     }
+
+    evaluation_summary = (
+        update_signal_journal(
+            report,
+            df_15m,
+        )
+    )
+
+    report[
+        "evaluation_summary"
+    ] = evaluation_summary
 
     current_state = (
         _make_state(
