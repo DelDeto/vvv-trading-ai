@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-01T13:32:24.645948+00:00",
-  "current_price": 27.374,
+  "generated_at_utc": "2026-10-01T13:43:17.553087+00:00",
+  "current_price": 27.514,
   "status": "DEVELOPING SHORT",
   "mtf_alignment": {
     "label": "CONFLICT",
@@ -76,22 +76,22 @@
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 27.374,
+    "last_price": 27.514,
     "high_24h": 28.384,
     "low_24h": 27.155,
-    "change_rate_24h": -0.03,
-    "change_value_24h": -0.847,
-    "hold_vol": 5483452.0,
+    "change_rate_24h": -0.025,
+    "change_value_24h": -0.707,
+    "hold_vol": 5509101.0,
     "funding_rate": 5e-05,
-    "index_price": 27.341,
-    "fair_price": 27.347,
-    "timestamp": 1790861540090,
-    "hold_vol_change_pct": 0.10590305954139832,
+    "index_price": 27.523,
+    "fair_price": 27.524,
+    "timestamp": 1790862192095,
+    "hold_vol_change_pct": 0.4677527951370779,
     "participation_context": {
-      "regime": "PRICE_DOWN_HOLD_UP",
-      "price_change_pct": -0.4654206966766058,
-      "hold_vol_change_pct": 0.10590305954139832,
-      "note": "Giá giảm cùng holdVol tăng; mức tham gia vị thế đang mở rộng theo nhịp giảm.",
+      "regime": "PRICE_UP_HOLD_UP",
+      "price_change_pct": 0.5114342076422904,
+      "hold_vol_change_pct": 0.4677527951370779,
+      "note": "Giá tăng cùng holdVol tăng; mức tham gia vị thế đang mở rộng.",
       "signal_weight": "context_only"
     }
   },
