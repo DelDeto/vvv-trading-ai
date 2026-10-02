@@ -72,6 +72,7 @@ jobs:
       - name: AI Price Action review via OpenRouter
         if: steps.delivery_gate.outputs.run == 'true'
         continue-on-error: true
+        timeout-minutes: 2
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: qwen/qwen3.8-27b:free
