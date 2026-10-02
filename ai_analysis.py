@@ -2061,6 +2061,8 @@ def main():
         base_url=(
             OPENROUTER_BASE_URL
         ),
+        timeout=35.0,
+        max_retries=0,
         default_headers={
             "X-Title": (
                 "VVV Trading AI"
