@@ -2,14 +2,19 @@ name: VVVUSDT Hourly MEXC SMC
 
 on:
   workflow_dispatch:
+    inputs:
+      source:
+        description: Trigger source
+        required: false
+        default: manual
+        type: string
   push:
     paths:
       - '.github/vvv-heartbeat.txt'
-  # Redundant trigger opportunities reduce the impact of GitHub
-  # scheduled-event delays/drops. A persisted gate below ensures
-  # Telegram is still delivered at most about once per hour.
   schedule:
-    - cron: "8,23,38,53 * * * *"
+    # Multiple off-hour opportunities. The gate below allows only one
+    # automatic Telegram delivery per local hour.
+    - cron: "7,17,27,37,47,57 * * * *"
       timezone: "Asia/Ho_Chi_Minh"
 
 permissions:
@@ -24,7 +29,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -39,6 +43,7 @@ jobs:
         id: delivery_gate
         env:
           VVV_RUN_EVENT: ${{ github.event_name }}
+          VVV_RUN_SOURCE: ${{ inputs.source }}
         run: |
           python schedule_gate.py | tee /tmp/vvv-gate.txt
           RUN_VALUE=$(grep '^run=' /tmp/vvv-gate.txt | tail -1 | cut -d= -f2)
@@ -88,6 +93,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           VVV_RUN_EVENT: ${{ github.event_name }}
+          VVV_RUN_SOURCE: ${{ inputs.source }}
         run: |
           python telegram_notify.py
 
