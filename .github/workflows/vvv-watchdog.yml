@@ -3,7 +3,8 @@ name: VVV Hourly Delivery Watchdog
 on:
   workflow_dispatch:
   schedule:
-    - cron: "5,20,35,50 * * * *"
+    # Staggered independently from the main worker.
+    - cron: "12,22,32,42,52 * * * *"
       timezone: "Asia/Ho_Chi_Minh"
 
 permissions:
@@ -17,51 +18,82 @@ concurrency:
 jobs:
   check-delivery:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check last successful Telegram delivery
+      - name: Check current local hourly slot
         id: health
         shell: bash
         run: |
           python - <<'PY' | tee /tmp/vvv-watchdog.txt
           import json
-          from datetime import datetime, timezone
+          from datetime import datetime
           from pathlib import Path
+          from zoneinfo import ZoneInfo
 
-          path = Path("telegram_state.json")
-          stale = True
-          age = None
+          state_path = Path("telegram_state.json")
+          current_slot = datetime.now(
+              ZoneInfo("Asia/Ho_Chi_Minh")
+          ).strftime("%Y-%m-%dT%H")
+
+          last_auto_slot = None
+          last_sent = None
+          last_event = None
+
           try:
-              data = json.loads(path.read_text(encoding="utf-8"))
-              raw = data.get("last_sent_utc")
-              if raw:
-                  last = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-                  if last.tzinfo is None:
-                      last = last.replace(tzinfo=timezone.utc)
-                  age = (datetime.now(timezone.utc) - last).total_seconds() / 60
-                  stale = age >= 70
+              data = json.loads(
+                  state_path.read_text(
+                      encoding="utf-8"
+                  )
+              )
+              last_auto_slot = data.get(
+                  "last_auto_slot"
+              )
+              last_sent = data.get(
+                  "last_sent_utc"
+              )
+              last_event = data.get(
+                  "last_event"
+              )
           except Exception as exc:
               print(f"reason=state_error:{exc}")
 
-          print(f"stale={'true' if stale else 'false'}")
-          print(f"age_minutes={age if age is not None else 'unknown'}")
-          PY
-          STALE=$(grep '^stale=' /tmp/vvv-watchdog.txt | tail -1 | cut -d= -f2)
-          AGE=$(grep '^age_minutes=' /tmp/vvv-watchdog.txt | tail -1 | cut -d= -f2)
-          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
-          echo "age_minutes=$AGE" >> "$GITHUB_OUTPUT"
+          missing = (
+              last_auto_slot
+              != current_slot
+          )
 
-      - name: Recover stale VVV delivery
-        if: steps.health.outputs.stale == 'true'
+          print(
+              f"missing={'true' if missing else 'false'}"
+          )
+          print(
+              f"current_slot={current_slot}"
+          )
+          print(
+              f"last_auto_slot={last_auto_slot or 'none'}"
+          )
+          print(
+              f"last_sent_utc={last_sent or 'none'}"
+          )
+          print(
+              f"last_event={last_event or 'none'}"
+          )
+          PY
+
+          MISSING=$(grep '^missing=' /tmp/vvv-watchdog.txt | tail -1 | cut -d= -f2)
+          echo "missing=$MISSING" >> "$GITHUB_OUTPUT"
+
+      - name: Recover missing hourly delivery
+        if: steps.health.outputs.missing == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "VVV delivery is stale. Dispatching recovery run."
-          gh workflow run vvv-hourly.yml --ref main
+          echo "Automatic VVV delivery is missing for the current local hour."
+          gh workflow run vvv-hourly.yml --ref main -f source=watchdog
 
       - name: Healthy
-        if: steps.health.outputs.stale != 'true'
+        if: steps.health.outputs.missing != 'true'
         run: |
-          echo "VVV delivery is healthy."
+          echo "Automatic VVV delivery already completed for the current local hour."
