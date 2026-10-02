@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 import requests
@@ -17,6 +18,8 @@ AI_UPDATE_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 AI_JSON_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.json"
 TELEGRAM_STATE_PATH = Path("telegram_state.json")
 RUN_EVENT = os.getenv("VVV_RUN_EVENT", "")
+RUN_SOURCE = os.getenv("VVV_RUN_SOURCE", "")
+LOCAL_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 
 CHARTS = [
     ("4H", OUTPUT_DIR / "VVVUSDT_4H.png"),
@@ -46,6 +49,34 @@ def _load_delivery_state():
 
 
 def _save_delivery_state():
+    previous = _load_delivery_state()
+
+    event_label = (
+        RUN_SOURCE
+        or RUN_EVENT
+        or "unknown"
+    )
+
+    last_auto_slot = (
+        previous.get(
+            "last_auto_slot"
+        )
+    )
+
+    is_auto_delivery = (
+        RUN_EVENT == "schedule"
+        or RUN_SOURCE == "watchdog"
+    )
+
+    if is_auto_delivery:
+        last_auto_slot = (
+            datetime.now(
+                LOCAL_TZ
+            ).strftime(
+                "%Y-%m-%dT%H"
+            )
+        )
+
     TELEGRAM_STATE_PATH.write_text(
         json.dumps(
             {
@@ -54,8 +85,9 @@ def _save_delivery_state():
                         timezone.utc
                     ).isoformat()
                 ),
-                "last_event": (
-                    RUN_EVENT or "unknown"
+                "last_event": event_label,
+                "last_auto_slot": (
+                    last_auto_slot
                 ),
             },
             ensure_ascii=False,
