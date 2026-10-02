@@ -471,11 +471,13 @@
       "hold_vol": 2707467.0,
       "ai_bias": null,
       "entered_at": "2026-10-02T14:00:00+00:00",
-      "last_evaluated_at": "2026-10-02T14:45:00+00:00",
-      "bars_observed": 4,
-      "mfe_r": 0.9381711314569867,
+      "last_evaluated_at": "2026-10-02T16:00:00+00:00",
+      "bars_observed": 9,
+      "mfe_r": 1.94190120944953,
       "mae_r": 0.6465468520402411,
-      "targets_hit": [],
+      "targets_hit": [
+        1
+      ],
       "outcome": "ENTERED",
       "closed_at": null
     },
@@ -527,6 +529,63 @@
       "funding_rate": 0.000201,
       "hold_vol": 2840747.0,
       "ai_bias": null,
+      "entered_at": "2026-10-02T15:00:00+00:00",
+      "last_evaluated_at": "2026-10-02T16:00:00+00:00",
+      "bars_observed": 1,
+      "mfe_r": 0.1327868852459068,
+      "mae_r": 1.4081967213114797,
+      "targets_hit": [],
+      "outcome": "AMBIGUOUS_ENTRY_BAR",
+      "closed_at": "2026-10-02T15:00:00+00:00"
+    },
+    {
+      "id": "2026-10-02T16:18:39.944904+00:00",
+      "signature": "short|29.413|29.736|30.357143|(26.403, 26.192, 25.9)",
+      "created_at": "2026-10-02T16:00:00+00:00",
+      "generated_at_utc": "2026-10-02T16:18:39.944904+00:00",
+      "status": "DEVELOPING SHORT",
+      "direction": "short",
+      "execution_ready": false,
+      "mtf_alignment": "CONFLICT",
+      "regimes": {
+        "4H": "BEARISH_TO_BULLISH_TRANSITION",
+        "1H": "BULLISH_TREND",
+        "15M": "BEARISH_TREND"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 29.413,
+        "upper": 29.736,
+        "source": "supply",
+        "grade": "A"
+      },
+      "entry_mid": 29.5745,
+      "stop_loss": 30.357142857142858,
+      "risk": 0.7826428571428572,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 26.403,
+          "source": "15M SSL",
+          "rr": 4.052295336314686
+        },
+        {
+          "name": "TP2",
+          "price": 26.192,
+          "source": "1H SSL",
+          "rr": 4.321894679200511
+        },
+        {
+          "name": "TP3",
+          "price": 25.9,
+          "source": "4H SSL",
+          "rr": 4.694989504426396
+        }
+      ],
+      "participation_regime": "PRICE_DOWN_HOLD_UP",
+      "funding_rate": 0.000189,
+      "hold_vol": 2974966.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -537,27 +596,27 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": "long|29.504|29.819|29.3565|(30.193, 30.318, 31.8)",
-  "updated_at_utc": "2026-10-02T15:04:08.498548+00:00",
+  "last_seen_signature": "short|29.413|29.736|30.357143|(26.403, 26.192, 25.9)",
+  "updated_at_utc": "2026-10-02T16:18:39.946931+00:00",
   "stats": {
-    "total_signals": 9,
-    "entered": 8,
-    "resolved": 7,
+    "total_signals": 10,
+    "entered": 9,
+    "resolved": 8,
     "stops": 1,
-    "tp1_plus": 5,
+    "tp1_plus": 6,
     "tp2_plus": 5,
     "tp3_plus": 5,
-    "ambiguous": 1,
+    "ambiguous": 2,
     "expired_no_entry": 0,
     "timeout_entered": 0,
-    "avg_mfe_r": 6.252568019481078,
-    "avg_mae_r": 0.3315545979409681,
+    "avg_mfe_r": 5.684117902120786,
+    "avg_mae_r": 0.4511815005376916,
     "by_zone_grade": {
       "NA": {
         "total": 5,
         "entered": 5,
         "stop": 1,
-        "tp1_plus": 2
+        "tp1_plus": 3
       },
       "A+": {
         "total": 3,
@@ -567,6 +626,12 @@
       },
       "B": {
         "total": 1,
+        "entered": 1,
+        "stop": 0,
+        "tp1_plus": 0
+      },
+      "A": {
+        "total": 1,
         "entered": 0,
         "stop": 0,
         "tp1_plus": 0
@@ -574,14 +639,14 @@
     },
     "by_mtf_alignment": {
       "CONFLICT": {
-        "total": 5,
+        "total": 6,
         "entered": 5,
         "stop": 0,
-        "tp1_plus": 4
+        "tp1_plus": 5
       },
       "ALIGNED": {
         "total": 4,
-        "entered": 3,
+        "entered": 4,
         "stop": 1,
         "tp1_plus": 1
       }
@@ -600,21 +665,21 @@
         "tp1_plus": 2
       },
       "BEARISH_TREND": {
-        "total": 1,
+        "total": 2,
         "entered": 1,
         "stop": 1,
         "tp1_plus": 0
       },
       "BEARISH_PULLBACK": {
         "total": 2,
-        "entered": 1,
+        "entered": 2,
         "stop": 0,
-        "tp1_plus": 0
+        "tp1_plus": 1
       }
     },
     "calibration_status": "COLLECTING_DATA",
     "minimum_resolved_for_tuning": 30,
-    "resolved_needed_for_tuning": 23,
+    "resolved_needed_for_tuning": 22,
     "auto_tuning_enabled": false,
     "calibration_note": "Outcome data is observational forward-test data. Threshold changes remain manual and evidence-based; the engine will not auto-fit itself to a small sample."
   }
