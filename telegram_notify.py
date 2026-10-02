@@ -64,7 +64,10 @@ def _save_delivery_state():
     )
 
     is_auto_delivery = (
-        RUN_EVENT == "schedule"
+        RUN_EVENT in (
+            "schedule",
+            "push",
+        )
         or RUN_SOURCE == "watchdog"
     )
 
