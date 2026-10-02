@@ -1,0 +1,67 @@
+name: VVV Hourly Delivery Watchdog
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5,20,35,50 * * * *"
+      timezone: "Asia/Ho_Chi_Minh"
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: vvv-delivery-watchdog
+  cancel-in-progress: true
+
+jobs:
+  check-delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check last successful Telegram delivery
+        id: health
+        shell: bash
+        run: |
+          python - <<'PY' | tee /tmp/vvv-watchdog.txt
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          path = Path("telegram_state.json")
+          stale = True
+          age = None
+          try:
+              data = json.loads(path.read_text(encoding="utf-8"))
+              raw = data.get("last_sent_utc")
+              if raw:
+                  last = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                  if last.tzinfo is None:
+                      last = last.replace(tzinfo=timezone.utc)
+                  age = (datetime.now(timezone.utc) - last).total_seconds() / 60
+                  stale = age >= 70
+          except Exception as exc:
+              print(f"reason=state_error:{exc}")
+
+          print(f"stale={'true' if stale else 'false'}")
+          print(f"age_minutes={age if age is not None else 'unknown'}")
+          PY
+          STALE=$(grep '^stale=' /tmp/vvv-watchdog.txt | tail -1 | cut -d= -f2)
+          AGE=$(grep '^age_minutes=' /tmp/vvv-watchdog.txt | tail -1 | cut -d= -f2)
+          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
+          echo "age_minutes=$AGE" >> "$GITHUB_OUTPUT"
+
+      - name: Recover stale VVV delivery
+        if: steps.health.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "VVV delivery is stale. Dispatching recovery run."
+          gh workflow run vvv-hourly.yml --ref main
+
+      - name: Healthy
+        if: steps.health.outputs.stale != 'true'
+        run: |
+          echo "VVV delivery is healthy."
