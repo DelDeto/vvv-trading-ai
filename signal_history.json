@@ -471,8 +471,8 @@
       "hold_vol": 2707467.0,
       "ai_bias": null,
       "entered_at": "2026-10-02T14:00:00+00:00",
-      "last_evaluated_at": "2026-10-03T07:30:00+00:00",
-      "bars_observed": 71,
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 81,
       "mfe_r": 6.246185147507617,
       "mae_r": 0.6465468520402411,
       "targets_hit": [
@@ -587,8 +587,8 @@
       "hold_vol": 2974966.0,
       "ai_bias": null,
       "entered_at": "2026-10-02T16:30:00+00:00",
-      "last_evaluated_at": "2026-10-03T07:30:00+00:00",
-      "bars_observed": 62,
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 72,
       "mfe_r": 3.105503331203799,
       "mae_r": 0.05558090718262054,
       "targets_hit": [],
@@ -644,8 +644,8 @@
       "hold_vol": 3143633.0,
       "ai_bias": null,
       "entered_at": "2026-10-02T17:45:00+00:00",
-      "last_evaluated_at": "2026-10-03T07:30:00+00:00",
-      "bars_observed": 56,
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 66,
       "mfe_r": 12.29121514232055,
       "mae_r": 0.2199826614650977,
       "targets_hit": [],
@@ -701,8 +701,8 @@
       "hold_vol": 3340812.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-02T19:00:00+00:00",
-      "last_evaluated_at": "2026-10-03T07:30:00+00:00",
-      "bars_observed": 51,
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 61,
       "mfe_r": 2.722564107995904,
       "mae_r": 0.09193843937676963,
       "targets_hit": [],
@@ -759,8 +759,8 @@
       "hold_vol": 3322894.0,
       "ai_bias": "BEARISH",
       "entered_at": null,
-      "last_evaluated_at": "2026-10-03T07:30:00+00:00",
-      "bars_observed": 47,
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 57,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -817,8 +817,8 @@
       "hold_vol": 3447668.0,
       "ai_bias": "WAIT",
       "entered_at": null,
-      "last_evaluated_at": "2026-10-03T07:30:00+00:00",
-      "bars_observed": 11,
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 21,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -874,6 +874,64 @@
       "funding_rate": 5e-05,
       "hold_vol": 3497226.0,
       "ai_bias": "WAIT",
+      "entered_at": "2026-10-03T08:30:00+00:00",
+      "last_evaluated_at": "2026-10-03T10:00:00+00:00",
+      "bars_observed": 10,
+      "mfe_r": 0.0843373493975901,
+      "mae_r": 0.39696717906107143,
+      "targets_hit": [],
+      "outcome": "ENTERED",
+      "closed_at": null,
+      "ai_reviewed_at_utc": "2026-10-03T07:56:26.186293+00:00"
+    },
+    {
+      "id": "2026-10-03T10:28:23.545038+00:00",
+      "signature": "long|27.575965|27.598035|27.132486|(27.781, 28.255, 30.318)",
+      "created_at": "2026-10-03T10:00:00+00:00",
+      "generated_at_utc": "2026-10-03T10:28:23.545038+00:00",
+      "status": "DEVELOPING LONG",
+      "direction": "long",
+      "execution_ready": false,
+      "mtf_alignment": "CONFLICT",
+      "regimes": {
+        "4H": "BULLISH_TRANSITION",
+        "1H": "BEARISH_TREND",
+        "15M": "BEARISH_TO_BULLISH_TRANSITION"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 27.5759652,
+        "upper": 27.5980348,
+        "source": "CHoCH reclaim",
+        "grade": null
+      },
+      "entry_mid": 27.587,
+      "stop_loss": 27.132485714285714,
+      "risk": 0.45451428571428565,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 27.781,
+          "source": "15M BSL",
+          "rr": 0.4268292682926809
+        },
+        {
+          "name": "TP2",
+          "price": 28.255,
+          "source": "1H BSL",
+          "rr": 1.4697007794820203
+        },
+        {
+          "name": "TP3",
+          "price": 30.318,
+          "source": "4H BSL",
+          "rr": 6.008612019109886
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_DOWN",
+      "funding_rate": 5e-05,
+      "hold_vol": 3492038.0,
+      "ai_bias": "WAIT",
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -882,14 +940,14 @@
       "targets_hit": [],
       "outcome": "OPEN",
       "closed_at": null,
-      "ai_reviewed_at_utc": "2026-10-03T07:56:26.186293+00:00"
+      "ai_reviewed_at_utc": "2026-10-03T10:28:37.467183+00:00"
     }
   ],
-  "last_seen_signature": "short|27.424286|27.453714|28.126714|(27.327, 26.403, 25.9)",
-  "updated_at_utc": "2026-10-03T07:56:08.542410+00:00",
+  "last_seen_signature": "long|27.575965|27.598035|27.132486|(27.781, 28.255, 30.318)",
+  "updated_at_utc": "2026-10-03T10:28:23.551410+00:00",
   "stats": {
-    "total_signals": 15,
-    "entered": 12,
+    "total_signals": 16,
+    "entered": 13,
     "resolved": 8,
     "stops": 1,
     "tp1_plus": 6,
@@ -898,12 +956,12 @@
     "ambiguous": 2,
     "expired_no_entry": 0,
     "timeout_entered": 0,
-    "avg_mfe_r": 6.131718969888785,
-    "avg_mae_r": 0.3690112927386427,
+    "avg_mfe_r": 5.666535768312539,
+    "avg_mae_r": 0.37116174553267567,
     "by_zone_grade": {
       "NA": {
-        "total": 9,
-        "entered": 6,
+        "total": 10,
+        "entered": 7,
         "stop": 1,
         "tp1_plus": 3
       },
@@ -928,7 +986,7 @@
     },
     "by_mtf_alignment": {
       "CONFLICT": {
-        "total": 9,
+        "total": 10,
         "entered": 8,
         "stop": 0,
         "tp1_plus": 5
@@ -941,7 +999,7 @@
       },
       "PARTIAL": {
         "total": 2,
-        "entered": 0,
+        "entered": 1,
         "stop": 0,
         "tp1_plus": 0
       }
@@ -949,7 +1007,7 @@
     "by_15m_regime": {
       "BEARISH_TRANSITION": {
         "total": 7,
-        "entered": 5,
+        "entered": 6,
         "stop": 0,
         "tp1_plus": 3
       },
@@ -970,6 +1028,12 @@
         "entered": 2,
         "stop": 0,
         "tp1_plus": 1
+      },
+      "BEARISH_TO_BULLISH_TRANSITION": {
+        "total": 1,
+        "entered": 0,
+        "stop": 0,
+        "tp1_plus": 0
       }
     },
     "calibration_status": "COLLECTING_DATA",
