@@ -1,16 +1,16 @@
 {
-  "generated_at_utc": "2026-10-03T14:49:17.639918+00:00",
-  "current_price": 28.147,
+  "generated_at_utc": "2026-10-03T15:56:34.294712+00:00",
+  "current_price": 27.984,
   "status": "DEVELOPING LONG",
   "mtf_alignment": {
-    "label": "PARTIAL",
+    "label": "ALIGNED",
     "direction": "bullish",
     "supporters": [
+      "1H active setup",
+      "1H regime",
       "4H regime"
     ],
-    "conflicts": [
-      "1H regime"
-    ],
+    "conflicts": [],
     "notes": []
   },
   "trade_plan": {
@@ -18,23 +18,22 @@
     "execution_ready": false,
     "blockers": [
       "15M setup has fewer than 3/4 signals",
-      "15M displacement is missing",
-      "First liquidity target is only 0.76R"
+      "15M displacement is missing"
     ],
     "higher_tf_conflict": false,
     "mtf_alignment": {
-      "label": "PARTIAL",
+      "label": "ALIGNED",
       "direction": "bullish",
       "supporters": [
+        "1H active setup",
+        "1H regime",
         "4H regime"
       ],
-      "conflicts": [
-        "1H regime"
-      ],
+      "conflicts": [],
       "notes": []
     },
     "entry_zone_grade": null,
-    "first_target_rr": 0.7567879838243734,
+    "first_target_rr": 2.2105263157894672,
     "direction": "long",
     "setup_state": "watch",
     "setup_score": 2,
@@ -46,48 +45,48 @@
       "zone_quality": null
     },
     "entry_mid": 27.945,
-    "stop_loss": 27.7719,
-    "risk": 0.17310000000000159,
+    "stop_loss": 27.771285714285714,
+    "risk": 0.17371428571428638,
     "targets": [
       {
         "name": "TP1",
-        "price": 28.076,
+        "price": 28.329,
         "source": "15M BSL",
-        "rr": 0.7567879838243734
+        "rr": 2.2105263157894672
       },
       {
         "name": "TP2",
-        "price": 30.318,
-        "source": "4H BSL",
-        "rr": 13.70883882149035
+        "price": 29.618,
+        "source": "1H BSL",
+        "rr": 9.630756578947322
       },
       {
         "name": "TP3",
-        "price": 30.368400000000022,
-        "source": "14R",
-        "rr": 14.0
+        "price": 30.318,
+        "source": "4H BSL",
+        "rr": 13.660361842105218
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 28.147,
-    "high_24h": 30.193,
+    "last_price": 27.984,
+    "high_24h": 29.736,
     "low_24h": 27.144,
-    "change_rate_24h": -0.0428,
-    "change_value_24h": -1.261,
-    "hold_vol": 3735076.0,
+    "change_rate_24h": -0.0484,
+    "change_value_24h": -1.424,
+    "hold_vol": 3848786.0,
     "funding_rate": 5e-05,
-    "index_price": 28.088,
-    "fair_price": 28.148,
-    "timestamp": 1791038952992,
-    "hold_vol_change_pct": 3.476289313263867,
+    "index_price": 27.948,
+    "fair_price": 27.984,
+    "timestamp": 1791042992008,
+    "hold_vol_change_pct": 3.044382497170071,
     "participation_context": {
-      "regime": "PRICE_UP_HOLD_UP",
-      "price_change_pct": 0.903387703889582,
-      "hold_vol_change_pct": 3.476289313263867,
-      "note": "Giá tăng cùng holdVol tăng; mức tham gia vị thế đang mở rộng.",
+      "regime": "PRICE_DOWN_HOLD_UP",
+      "price_change_pct": -0.5791025686573941,
+      "hold_vol_change_pct": 3.044382497170071,
+      "note": "Giá giảm cùng holdVol tăng; mức tham gia vị thế đang mở rộng theo nhịp giảm.",
       "signal_weight": "context_only"
     }
   },
@@ -143,23 +142,23 @@
     },
     "1H": {
       "trend": "bearish",
-      "regime": "BEARISH_TREND",
+      "regime": "BEARISH_TO_BULLISH_TRANSITION",
       "bsl": {
-        "price": 28.076,
-        "time": "2026-10-03T11:00:00+00:00"
+        "price": 29.618,
+        "time": "2026-10-02T18:00:00+00:00"
       },
       "ssl": {
         "price": 27.144,
         "time": "2026-10-03T07:00:00+00:00"
       },
       "last_event": {
-        "time": "2026-10-03T07:00:00+00:00",
-        "direction": "bearish",
-        "kind": "BOS",
-        "level": 27.327
+        "time": "2026-10-03T14:00:00+00:00",
+        "direction": "bullish",
+        "kind": "CHoCH",
+        "level": 28.076
       },
       "last_sweep": {
-        "index": 414,
+        "index": 413,
         "time": "2026-10-03T08:00:00+00:00",
         "type": "SSL",
         "direction": "bullish",
@@ -170,7 +169,7 @@
       "last_retest": null,
       "setup": {
         "direction": "bullish",
-        "score": 1,
+        "score": 2,
         "confirmed": false
       },
       "nearest_supply": {
@@ -189,11 +188,11 @@
       }
     },
     "15M": {
-      "trend": "mixed",
-      "regime": "BULLISH_TRANSITION",
+      "trend": "bullish",
+      "regime": "BULLISH_TREND",
       "bsl": {
-        "price": 28.076,
-        "time": "2026-10-03T11:30:00+00:00"
+        "price": 28.329,
+        "time": "2026-10-03T14:45:00+00:00"
       },
       "ssl": {
         "price": 27.785,
@@ -208,12 +207,12 @@
       "last_sweep": null,
       "last_displacement": null,
       "last_retest": {
-        "index": 419,
+        "index": 415,
         "time": "2026-10-03T14:30:00+00:00",
         "direction": "bullish",
         "structure_kind": "BOS",
         "level": 27.945,
-        "source_index": 418
+        "source_index": 414
       },
       "setup": {
         "direction": "bullish",
