@@ -701,13 +701,13 @@
       "hold_vol": 3340812.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-02T19:00:00+00:00",
-      "last_evaluated_at": "2026-10-03T17:45:00+00:00",
-      "bars_observed": 92,
+      "last_evaluated_at": "2026-10-03T18:45:00+00:00",
+      "bars_observed": 96,
       "mfe_r": 2.722564107995904,
       "mae_r": 0.09193843937676963,
       "targets_hit": [],
-      "outcome": "ENTERED",
-      "closed_at": null,
+      "outcome": "TIMEOUT_ENTERED",
+      "closed_at": "2026-10-03T18:45:00+00:00",
       "ai_reviewed_at_utc": "2026-10-02T19:02:22.958576+00:00"
     },
     {
@@ -759,13 +759,13 @@
       "hold_vol": 3322894.0,
       "ai_bias": "BEARISH",
       "entered_at": null,
-      "last_evaluated_at": "2026-10-03T17:45:00+00:00",
-      "bars_observed": 88,
+      "last_evaluated_at": "2026-10-03T19:45:00+00:00",
+      "bars_observed": 96,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
-      "outcome": "OPEN",
-      "closed_at": null,
+      "outcome": "EXPIRED_NO_ENTRY",
+      "closed_at": "2026-10-03T19:45:00+00:00",
       "ai_reviewed_at_utc": "2026-10-02T20:01:20.443928+00:00"
     },
     {
@@ -933,8 +933,8 @@
       "hold_vol": 3492038.0,
       "ai_bias": "WAIT",
       "entered_at": null,
-      "last_evaluated_at": "2026-10-03T17:45:00+00:00",
-      "bars_observed": 31,
+      "last_evaluated_at": "2026-10-03T21:00:00+00:00",
+      "bars_observed": 44,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -991,8 +991,8 @@
       "hold_vol": 3509779.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-03T17:45:00+00:00",
-      "bars_observed": 29,
+      "last_evaluated_at": "2026-10-03T21:00:00+00:00",
+      "bars_observed": 42,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -1048,9 +1048,9 @@
       "hold_vol": 3609596.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-03T11:45:00+00:00",
-      "last_evaluated_at": "2026-10-03T17:45:00+00:00",
-      "bars_observed": 25,
-      "mfe_r": 3.8560794044664166,
+      "last_evaluated_at": "2026-10-03T21:00:00+00:00",
+      "bars_observed": 38,
+      "mfe_r": 7.990074441687164,
       "mae_r": 0.45161290322580566,
       "targets_hit": [
         1
@@ -1166,37 +1166,97 @@
       "hold_vol": 3848786.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-03T15:45:00+00:00",
-      "last_evaluated_at": "2026-10-03T17:45:00+00:00",
-      "bars_observed": 9,
-      "mfe_r": 0.6562500000000019,
-      "mae_r": 0.4893092105263188,
-      "targets_hit": [],
+      "last_evaluated_at": "2026-10-03T21:00:00+00:00",
+      "bars_observed": 22,
+      "mfe_r": 5.635690789473658,
+      "mae_r": 0.7771381578947428,
+      "targets_hit": [
+        1
+      ],
       "outcome": "ENTERED",
       "closed_at": null,
       "ai_reviewed_at_utc": "2026-10-03T15:56:52.599922+00:00"
+    },
+    {
+      "id": "2026-10-03T21:29:08.330367+00:00",
+      "signature": "long|28.041|28.159|27.763743|(28.924, 29.618, 30.318)",
+      "created_at": "2026-10-03T21:00:00+00:00",
+      "generated_at_utc": "2026-10-03T21:29:08.330367+00:00",
+      "status": "DEVELOPING LONG",
+      "direction": "long",
+      "execution_ready": true,
+      "mtf_alignment": "ALIGNED",
+      "regimes": {
+        "4H": "BULLISH_TREND",
+        "1H": "BULLISH_TREND",
+        "15M": "BULLISH_TRANSITION"
+      },
+      "setup_score": 3,
+      "entry_zone": {
+        "lower": 28.041,
+        "upper": 28.159,
+        "source": "bullish FVG",
+        "grade": null
+      },
+      "entry_mid": 28.1,
+      "stop_loss": 27.76374285714286,
+      "risk": 0.3362571428571428,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 28.924,
+          "source": "15M BSL",
+          "rr": 2.4505055654685988
+        },
+        {
+          "name": "TP2",
+          "price": 29.618,
+          "source": "1H BSL",
+          "rr": 4.514402243181231
+        },
+        {
+          "name": "TP3",
+          "price": 30.318,
+          "source": "4H BSL",
+          "rr": 6.596142408021073
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_UP",
+      "funding_rate": 5e-05,
+      "hold_vol": 3963686.0,
+      "ai_bias": "BULLISH",
+      "entered_at": null,
+      "last_evaluated_at": null,
+      "bars_observed": 0,
+      "mfe_r": 0.0,
+      "mae_r": 0.0,
+      "targets_hit": [],
+      "outcome": "OPEN",
+      "closed_at": null,
+      "ai_reviewed_at_utc": "2026-10-03T21:29:25.901441+00:00"
     }
   ],
-  "last_seen_signature": null,
-  "updated_at_utc": "2026-10-03T18:02:35.412421+00:00",
+  "last_seen_signature": "long|28.041|28.159|27.763743|(28.924, 29.618, 30.318)",
+  "updated_at_utc": "2026-10-03T21:29:08.336371+00:00",
   "stats": {
-    "total_signals": 20,
+    "total_signals": 21,
     "entered": 17,
-    "resolved": 14,
+    "resolved": 15,
     "stops": 3,
-    "tp1_plus": 7,
+    "tp1_plus": 8,
     "tp2_plus": 5,
     "tp3_plus": 5,
     "ambiguous": 3,
-    "expired_no_entry": 0,
-    "timeout_entered": 3,
-    "avg_mfe_r": 4.684469176667775,
-    "avg_mae_r": 0.45907117884178167,
+    "expired_no_entry": 1,
+    "timeout_entered": 4,
+    "avg_mfe_r": 5.220553637061563,
+    "avg_mae_r": 0.4760022933928654,
     "by_zone_grade": {
       "NA": {
-        "total": 13,
+        "total": 14,
         "entered": 10,
         "stop": 3,
-        "tp1_plus": 3
+        "tp1_plus": 4
       },
       "A+": {
         "total": 3,
@@ -1231,10 +1291,10 @@
         "tp1_plus": 6
       },
       "ALIGNED": {
-        "total": 5,
+        "total": 6,
         "entered": 5,
         "stop": 1,
-        "tp1_plus": 1
+        "tp1_plus": 2
       },
       "PARTIAL": {
         "total": 3,
@@ -1275,7 +1335,7 @@
         "tp1_plus": 0
       },
       "BULLISH_TRANSITION": {
-        "total": 3,
+        "total": 4,
         "entered": 2,
         "stop": 0,
         "tp1_plus": 1
@@ -1284,12 +1344,12 @@
         "total": 1,
         "entered": 1,
         "stop": 0,
-        "tp1_plus": 0
+        "tp1_plus": 1
       }
     },
     "calibration_status": "COLLECTING_DATA",
     "minimum_resolved_for_tuning": 30,
-    "resolved_needed_for_tuning": 16,
+    "resolved_needed_for_tuning": 15,
     "auto_tuning_enabled": false,
     "calibration_note": "Outcome data is observational forward-test data. Threshold changes remain manual and evidence-based; the engine will not auto-fit itself to a small sample."
   }
