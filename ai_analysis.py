@@ -1105,6 +1105,54 @@ def _python_facts_text(
         ),
     ]
 
+    status_explanation = (
+        report.get(
+            "status_explanation",
+            {},
+        )
+        or {}
+    )
+
+    if status_explanation:
+        lines.append(
+            (
+                "Status logic: 15M "
+                f"{status_explanation.get('current_score_15m', 0)}/4"
+            )
+        )
+
+        if status_explanation.get(
+            "changed",
+            False,
+        ):
+            lines.append(
+                (
+                    "Status transition: "
+                    f"{status_explanation.get('previous_status')} -> "
+                    f"{status_explanation.get('current_status')}"
+                )
+            )
+
+            for reason in (
+                status_explanation.get(
+                    "reasons",
+                    [],
+                )
+            ):
+                lines.append(
+                    f"Status reason: {reason}"
+                )
+
+        elif status_explanation.get(
+            "reasons"
+        ):
+            lines.append(
+                (
+                    "Status reason: "
+                    f"{status_explanation['reasons'][-1]}"
+                )
+            )
+
     trade_plan = (
         report.get(
             "trade_plan",
