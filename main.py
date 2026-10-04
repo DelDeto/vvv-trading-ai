@@ -618,7 +618,49 @@ def _make_state(report):
                         "confirmed"
                     )
                 ),
+                "signals": {
+                    "sweep": bool(
+                        analysis.get(
+                            "setup",
+                            {},
+                        ).get(
+                            "sweep"
+                        )
+                    ),
+                    "displacement": bool(
+                        analysis.get(
+                            "setup",
+                            {},
+                        ).get(
+                            "displacement"
+                        )
+                    ),
+                    "structure": bool(
+                        analysis.get(
+                            "setup",
+                            {},
+                        ).get(
+                            "structure"
+                        )
+                    ),
+                    "retest": bool(
+                        analysis.get(
+                            "setup",
+                            {},
+                        ).get(
+                            "retest"
+                        )
+                    ),
+                },
             },
+            "last_structure_signal": (
+                analysis.get(
+                    "setup",
+                    {},
+                ).get(
+                    "structure"
+                )
+            ),
             "nearest_supply": (
                 _compact_zone(
                     analysis.get(
@@ -983,6 +1025,451 @@ def _compare_state(
     )
 
 
+def _setup_signal_flags(
+    timeframe_state,
+):
+    setup = (
+        timeframe_state.get(
+            "setup",
+            {},
+        )
+        or {}
+    )
+
+    stored = (
+        setup.get(
+            "signals"
+        )
+        or {}
+    )
+
+    flags = {
+        "sweep": bool(
+            stored.get(
+                "sweep",
+                timeframe_state.get(
+                    "last_sweep"
+                )
+                is not None,
+            )
+        ),
+        "displacement": bool(
+            stored.get(
+                "displacement",
+                timeframe_state.get(
+                    "last_displacement"
+                )
+                is not None,
+            )
+        ),
+        "structure": bool(
+            stored.get(
+                "structure",
+                timeframe_state.get(
+                    "last_structure_signal"
+                )
+                is not None,
+            )
+        ),
+        "retest": bool(
+            stored.get(
+                "retest",
+                timeframe_state.get(
+                    "last_retest"
+                )
+                is not None,
+            )
+        ),
+    }
+
+    # Legacy states did not persist the active structure signal.
+    # Infer it only when the setup score cannot be explained by the
+    # other three saved signals and the latest structure points in
+    # the setup direction.
+    if (
+        "signals" not in setup
+        and not flags["structure"]
+    ):
+        score = int(
+            setup.get(
+                "score",
+                0,
+            )
+            or 0
+        )
+
+        known = sum(
+            flags[name]
+            for name in [
+                "sweep",
+                "displacement",
+                "retest",
+            ]
+        )
+
+        event = (
+            timeframe_state.get(
+                "last_event"
+            )
+            or {}
+        )
+
+        if (
+            score > known
+            and event.get(
+                "direction"
+            )
+            == setup.get(
+                "direction"
+            )
+        ):
+            flags[
+                "structure"
+            ] = True
+
+    return flags
+
+
+def _status_explanation(
+    previous_state,
+    current_state,
+):
+    current_status = (
+        current_state.get(
+            "status",
+            "WAIT",
+        )
+    )
+
+    previous_status = (
+        previous_state.get(
+            "status"
+        )
+        if previous_state
+        else None
+    )
+
+    current_15 = (
+        current_state
+        .get(
+            "timeframes",
+            {},
+        )
+        .get(
+            "15M",
+            {},
+        )
+    )
+
+    previous_15 = (
+        previous_state
+        .get(
+            "timeframes",
+            {},
+        )
+        .get(
+            "15M",
+            {},
+        )
+        if previous_state
+        else {}
+    )
+
+    current_setup = (
+        current_15.get(
+            "setup",
+            {},
+        )
+        or {}
+    )
+
+    previous_setup = (
+        previous_15.get(
+            "setup",
+            {},
+        )
+        or {}
+    )
+
+    current_score = int(
+        current_setup.get(
+            "score",
+            0,
+        )
+        or 0
+    )
+
+    previous_score = (
+        int(
+            previous_setup.get(
+                "score",
+                0,
+            )
+            or 0
+        )
+        if previous_state
+        else None
+    )
+
+    current_direction = (
+        current_setup.get(
+            "direction"
+        )
+    )
+
+    previous_direction = (
+        previous_setup.get(
+            "direction"
+        )
+        if previous_state
+        else None
+    )
+
+    current_confirmed = bool(
+        current_setup.get(
+            "confirmed",
+            False,
+        )
+    )
+
+    previous_confirmed = (
+        bool(
+            previous_setup.get(
+                "confirmed",
+                False,
+            )
+        )
+        if previous_state
+        else None
+    )
+
+    current_flags = (
+        _setup_signal_flags(
+            current_15
+        )
+    )
+
+    previous_flags = (
+        _setup_signal_flags(
+            previous_15
+        )
+        if previous_state
+        else {
+            key: False
+            for key in [
+                "sweep",
+                "displacement",
+                "structure",
+                "retest",
+            ]
+        }
+    )
+
+    labels = {
+        "sweep": "liquidity sweep",
+        "displacement": "displacement",
+        "structure": "BOS/CHoCH",
+        "retest": "retest",
+    }
+
+    gained = [
+        labels[key]
+        for key in labels
+        if (
+            current_flags[key]
+            and not previous_flags[key]
+        )
+    ]
+
+    lost = [
+        labels[key]
+        for key in labels
+        if (
+            previous_flags[key]
+            and not current_flags[key]
+        )
+    ]
+
+    active = [
+        labels[key]
+        for key in labels
+        if current_flags[key]
+    ]
+
+    reasons = []
+
+    changed = (
+        previous_status is not None
+        and previous_status
+        != current_status
+    )
+
+    if changed:
+        reasons.append(
+            (
+                f"Status đổi: "
+                f"{previous_status} -> "
+                f"{current_status}."
+            )
+        )
+
+    if (
+        previous_score is not None
+        and previous_score
+        != current_score
+    ):
+        reasons.append(
+            (
+                "Điểm setup 15M đổi "
+                f"{previous_score}/4 -> "
+                f"{current_score}/4."
+            )
+        )
+
+    if gained:
+        reasons.append(
+            (
+                "Tín hiệu mới có hiệu lực: "
+                + ", ".join(
+                    gained
+                )
+                + "."
+            )
+        )
+
+    if lost:
+        reasons.append(
+            (
+                "Tín hiệu không còn active "
+                "trong cửa sổ setup: "
+                + ", ".join(
+                    lost
+                )
+                + "."
+            )
+        )
+
+    if (
+        previous_direction
+        and previous_direction
+        != current_direction
+    ):
+        reasons.append(
+            (
+                "Hướng setup 15M đổi "
+                f"{previous_direction.upper()} -> "
+                f"{str(current_direction).upper()}."
+            )
+        )
+
+    if (
+        previous_confirmed is not None
+        and previous_confirmed
+        != current_confirmed
+    ):
+        reasons.append(
+            (
+                "Chuỗi setup 15M "
+                + (
+                    "đã đạt điều kiện CONFIRMED."
+                    if current_confirmed
+                    else "không còn đạt điều kiện CONFIRMED."
+                )
+            )
+        )
+
+    if current_status == "WAIT":
+        if current_score < 2:
+            reasons.append(
+                (
+                    "WAIT vì setup 15M hiện chỉ "
+                    f"{current_score}/4; "
+                    "DEVELOPING cần tối thiểu 2/4."
+                )
+            )
+        else:
+            reasons.append(
+                (
+                    "WAIT vì setup 15M chưa tạo "
+                    "được hướng LONG/SHORT hợp lệ."
+                )
+            )
+
+    elif current_status.startswith(
+        "DEVELOPING"
+    ):
+        reasons.append(
+            (
+                "DEVELOPING vì setup 15M có "
+                f"{current_score}/4 tín hiệu, "
+                "đủ ngưỡng theo dõi nhưng chuỗi "
+                "chưa CONFIRMED."
+            )
+        )
+
+    elif current_status.startswith(
+        "CONFIRMED"
+    ):
+        reasons.append(
+            (
+                "CONFIRMED vì chuỗi 15M đã đạt "
+                "thứ tự xác nhận của engine."
+            )
+        )
+
+    alignment = (
+        current_state.get(
+            "mtf_alignment",
+            {},
+        )
+        or {}
+    )
+
+    if (
+        current_status == "WAIT"
+        and alignment.get(
+            "label"
+        )
+        in (
+            "ALIGNED",
+            "PARTIAL",
+        )
+    ):
+        reasons.append(
+            (
+                "Lưu ý: WAIT phản ánh thiếu "
+                "trigger 15M gần đây, không đồng "
+                "nghĩa xu hướng khung lớn đã đảo."
+            )
+        )
+
+    return {
+        "changed": changed,
+        "previous_status": (
+            previous_status
+        ),
+        "current_status": (
+            current_status
+        ),
+        "previous_score_15m": (
+            previous_score
+        ),
+        "current_score_15m": (
+            current_score
+        ),
+        "previous_direction_15m": (
+            previous_direction
+        ),
+        "current_direction_15m": (
+            current_direction
+        ),
+        "gained_signals": gained,
+        "lost_signals": lost,
+        "active_signals": active,
+        "reasons": reasons,
+    }
+
+
 def _invalidation_and_targets(
     status,
     analyses,
@@ -1203,6 +1690,50 @@ def _build_hourly_update(
             f"{status}"
         )
     )
+
+    status_explanation = (
+        report.get(
+            "status_explanation",
+            {},
+        )
+        or {}
+    )
+
+    if status_explanation:
+        lines.append(
+            (
+                "Status logic: 15M "
+                f"{status_explanation.get('current_score_15m', 0)}/4"
+            )
+        )
+
+        if status_explanation.get(
+            "changed",
+            False,
+        ):
+            lines.append(
+                "WHY STATUS CHANGED:"
+            )
+
+            for reason in (
+                status_explanation.get(
+                    "reasons",
+                    [],
+                )
+            ):
+                lines.append(
+                    f"- {reason}"
+                )
+
+        elif status_explanation.get(
+            "reasons"
+        ):
+            lines.append(
+                (
+                    "Status reason: "
+                    f"{status_explanation['reasons'][-1]}"
+                )
+            )
 
     alignment = (
         report.get(
@@ -1933,6 +2464,17 @@ def main():
         previous_state,
         current_state,
     )
+
+    status_explanation = (
+        _status_explanation(
+            previous_state,
+            current_state,
+        )
+    )
+
+    report[
+        "status_explanation"
+    ] = status_explanation
 
     update_text = (
         _build_hourly_update(
