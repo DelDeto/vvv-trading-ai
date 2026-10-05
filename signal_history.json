@@ -1696,13 +1696,13 @@
       "funding_rate": 8.2e-05,
       "hold_vol": 4642747.0,
       "ai_bias": "WAIT",
-      "entered_at": null,
-      "last_evaluated_at": "2026-10-05T13:45:00+00:00",
-      "bars_observed": 74,
-      "mfe_r": 0.0,
-      "mae_r": 0.0,
+      "entered_at": "2026-10-05T15:00:00+00:00",
+      "last_evaluated_at": "2026-10-05T15:30:00+00:00",
+      "bars_observed": 81,
+      "mfe_r": 0.3691833077789858,
+      "mae_r": 0.561856907985884,
       "targets_hit": [],
-      "outcome": "OPEN",
+      "outcome": "ENTERED",
       "closed_at": null,
       "ai_reviewed_at_utc": "2026-10-04T19:34:36.662263+00:00"
     },
@@ -1754,14 +1754,14 @@
       "funding_rate": 0.000114,
       "hold_vol": 4689674.0,
       "ai_bias": "WAIT",
-      "entered_at": null,
-      "last_evaluated_at": "2026-10-05T13:45:00+00:00",
-      "bars_observed": 73,
-      "mfe_r": 0.0,
+      "entered_at": "2026-10-05T14:30:00+00:00",
+      "last_evaluated_at": "2026-10-05T14:15:00+00:00",
+      "bars_observed": 76,
+      "mfe_r": 0.465417705910376,
       "mae_r": 0.0,
       "targets_hit": [],
-      "outcome": "OPEN",
-      "closed_at": null,
+      "outcome": "AMBIGUOUS_ENTRY_BAR",
+      "closed_at": "2026-10-05T14:30:00+00:00",
       "ai_reviewed_at_utc": "2026-10-04T19:59:42.963405+00:00"
     },
     {
@@ -2102,8 +2102,8 @@
       "hold_vol": 4741946.0,
       "ai_bias": "WAIT",
       "entered_at": null,
-      "last_evaluated_at": "2026-10-05T13:45:00+00:00",
-      "bars_observed": 13,
+      "last_evaluated_at": "2026-10-05T15:30:00+00:00",
+      "bars_observed": 20,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -2160,9 +2160,9 @@
       "hold_vol": 4690878.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-05T13:00:00+00:00",
-      "last_evaluated_at": "2026-10-05T13:45:00+00:00",
-      "bars_observed": 4,
-      "mfe_r": 0.3850542226688455,
+      "last_evaluated_at": "2026-10-05T15:30:00+00:00",
+      "bars_observed": 11,
+      "mfe_r": 1.0818887911903898,
       "mae_r": 0.08243311141816165,
       "targets_hit": [
         1
@@ -2219,6 +2219,65 @@
       "funding_rate": 8.4e-05,
       "hold_vol": 4620933.0,
       "ai_bias": null,
+      "entered_at": "2026-10-05T14:00:00+00:00",
+      "last_evaluated_at": "2026-10-05T15:30:00+00:00",
+      "bars_observed": 7,
+      "mfe_r": 5.350921697953662,
+      "mae_r": 0.3038502734088804,
+      "targets_hit": [
+        1
+      ],
+      "outcome": "ENTERED",
+      "closed_at": null
+    },
+    {
+      "id": "2026-10-05T15:57:44.088502+00:00",
+      "signature": "short|28.950493|29.005507|29.487507|(27.711, 27.692, 27.449479)",
+      "created_at": "2026-10-05T15:30:00+00:00",
+      "generated_at_utc": "2026-10-05T15:57:44.088502+00:00",
+      "status": "DEVELOPING SHORT",
+      "direction": "short",
+      "execution_ready": false,
+      "mtf_alignment": "PARTIAL",
+      "regimes": {
+        "4H": "BULLISH_TREND",
+        "1H": "BEARISH_TRANSITION",
+        "15M": "BEARISH_TREND"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 28.95049285714286,
+        "upper": 29.005507142857144,
+        "source": "retest",
+        "grade": null
+      },
+      "entry_mid": 28.978,
+      "stop_loss": 29.487507142857144,
+      "risk": 0.5095071428571423,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 27.711,
+          "source": "15M SSL",
+          "rr": 2.486716855224245
+        },
+        {
+          "name": "TP2",
+          "price": 27.692,
+          "source": "1H SSL",
+          "rr": 2.524007794647494
+        },
+        {
+          "name": "TP3",
+          "price": 27.449478571428575,
+          "source": "3R",
+          "rr": 3.0
+        }
+      ],
+      "participation_regime": "PRICE_DOWN_HOLD_DOWN",
+      "funding_rate": 5e-05,
+      "hold_vol": 4491549.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -2229,31 +2288,31 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": "short|29.362586|29.403414|29.636414|(28.795, 27.692, 27.6091)",
-  "updated_at_utc": "2026-10-05T14:04:47.586096+00:00",
+  "last_seen_signature": "short|28.950493|29.005507|29.487507|(27.711, 27.692, 27.449479)",
+  "updated_at_utc": "2026-10-05T15:57:44.091278+00:00",
   "stats": {
-    "total_signals": 38,
-    "entered": 31,
-    "resolved": 30,
+    "total_signals": 39,
+    "entered": 34,
+    "resolved": 31,
     "stops": 15,
-    "tp1_plus": 11,
+    "tp1_plus": 12,
     "tp2_plus": 7,
     "tp3_plus": 7,
-    "ambiguous": 4,
+    "ambiguous": 5,
     "expired_no_entry": 3,
     "timeout_entered": 4,
-    "avg_mfe_r": 3.194180930913689,
-    "avg_mae_r": 0.7830051556066936,
+    "avg_mfe_r": 3.114763709955557,
+    "avg_mae_r": 0.7393784413294784,
     "by_zone_grade": {
       "NA": {
-        "total": 28,
-        "entered": 22,
+        "total": 29,
+        "entered": 24,
         "stop": 12,
-        "tp1_plus": 7
+        "tp1_plus": 8
       },
       "A+": {
         "total": 5,
-        "entered": 4,
+        "entered": 5,
         "stop": 1,
         "tp1_plus": 3
       },
@@ -2279,18 +2338,18 @@
     "by_mtf_alignment": {
       "CONFLICT": {
         "total": 17,
-        "entered": 12,
+        "entered": 13,
         "stop": 1,
-        "tp1_plus": 9
+        "tp1_plus": 10
       },
       "ALIGNED": {
         "total": 14,
-        "entered": 12,
+        "entered": 14,
         "stop": 9,
         "tp1_plus": 2
       },
       "PARTIAL": {
-        "total": 7,
+        "total": 8,
         "entered": 7,
         "stop": 5,
         "tp1_plus": 0
@@ -2310,10 +2369,10 @@
         "tp1_plus": 2
       },
       "BEARISH_TREND": {
-        "total": 9,
-        "entered": 8,
+        "total": 10,
+        "entered": 9,
         "stop": 4,
-        "tp1_plus": 1
+        "tp1_plus": 2
       },
       "BEARISH_PULLBACK": {
         "total": 2,
@@ -2335,7 +2394,7 @@
       },
       "BULLISH_TREND": {
         "total": 5,
-        "entered": 3,
+        "entered": 5,
         "stop": 3,
         "tp1_plus": 1
       },
