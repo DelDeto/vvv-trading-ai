@@ -2160,16 +2160,16 @@
       "hold_vol": 4690878.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-05T13:00:00+00:00",
-      "last_evaluated_at": "2026-10-06T11:30:00+00:00",
-      "bars_observed": 91,
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 96,
       "mfe_r": 1.6109261818029617,
       "mae_r": 0.08243311141816165,
       "targets_hit": [
         1,
         2
       ],
-      "outcome": "ENTERED",
-      "closed_at": null,
+      "outcome": "TIMEOUT_ENTERED",
+      "closed_at": "2026-10-06T12:45:00+00:00",
       "ai_reviewed_at_utc": "2026-10-05T13:12:51.981059+00:00"
     },
     {
@@ -2282,8 +2282,8 @@
       "hold_vol": 4491549.0,
       "ai_bias": null,
       "entered_at": "2026-10-06T01:00:00+00:00",
-      "last_evaluated_at": "2026-10-06T11:30:00+00:00",
-      "bars_observed": 80,
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 85,
       "mfe_r": 2.57111213918213,
       "mae_r": 0.6633861855294289,
       "targets_hit": [
@@ -2342,8 +2342,8 @@
       "hold_vol": 4399464.0,
       "ai_bias": "WAIT",
       "entered_at": "2026-10-06T01:00:00+00:00",
-      "last_evaluated_at": "2026-10-06T11:30:00+00:00",
-      "bars_observed": 78,
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 83,
       "mfe_r": 2.571977505714727,
       "mae_r": 0.6636094633065416,
       "targets_hit": [
@@ -2517,8 +2517,8 @@
       "hold_vol": 3915120.0,
       "ai_bias": null,
       "entered_at": "2026-10-06T05:00:00+00:00",
-      "last_evaluated_at": "2026-10-06T11:30:00+00:00",
-      "bars_observed": 28,
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 33,
       "mfe_r": 3.3327172587143705,
       "mae_r": 0.0,
       "targets_hit": [
@@ -2576,9 +2576,9 @@
       "hold_vol": 3797582.0,
       "ai_bias": null,
       "entered_at": "2026-10-06T09:15:00+00:00",
-      "last_evaluated_at": "2026-10-06T11:30:00+00:00",
-      "bars_observed": 10,
-      "mfe_r": 4.949760047990597,
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 15,
+      "mfe_r": 7.983653269346408,
       "mae_r": 0.0,
       "targets_hit": [],
       "outcome": "ENTERED",
@@ -2633,10 +2633,10 @@
       "hold_vol": 3782792.0,
       "ai_bias": null,
       "entered_at": "2026-10-06T11:15:00+00:00",
-      "last_evaluated_at": "2026-10-06T11:30:00+00:00",
-      "bars_observed": 3,
-      "mfe_r": 0.5026851047347877,
-      "mae_r": 0.0,
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 8,
+      "mfe_r": 0.5217373098705057,
+      "mae_r": 0.44259738084520606,
       "targets_hit": [],
       "outcome": "ENTERED",
       "closed_at": null
@@ -2689,6 +2689,63 @@
       "funding_rate": 5e-05,
       "hold_vol": 3770137.0,
       "ai_bias": null,
+      "entered_at": "2026-10-06T11:45:00+00:00",
+      "last_evaluated_at": "2026-10-06T12:45:00+00:00",
+      "bars_observed": 5,
+      "mfe_r": 0.5226455259487612,
+      "mae_r": 0.4433678338104678,
+      "targets_hit": [],
+      "outcome": "ENTERED",
+      "closed_at": null
+    },
+    {
+      "id": "2026-10-06T13:00:05.548766+00:00",
+      "signature": "long|27.942|28.286|27.758179|(28.903, 29.316, 29.537286)",
+      "created_at": "2026-10-06T12:45:00+00:00",
+      "generated_at_utc": "2026-10-06T13:00:05.548766+00:00",
+      "status": "DEVELOPING LONG",
+      "direction": "long",
+      "execution_ready": true,
+      "mtf_alignment": "PARTIAL",
+      "regimes": {
+        "4H": "BEARISH_PULLBACK",
+        "1H": "BULLISH_TRANSITION",
+        "15M": "BULLISH_TRANSITION"
+      },
+      "setup_score": 3,
+      "entry_zone": {
+        "lower": 27.942,
+        "upper": 28.286,
+        "source": "bullish FVG",
+        "grade": null
+      },
+      "entry_mid": 28.114,
+      "stop_loss": 27.758178571428573,
+      "risk": 0.35582142857142784,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 28.903,
+          "source": "15M BSL",
+          "rr": 2.2174043962661836
+        },
+        {
+          "name": "TP2",
+          "price": 29.316,
+          "source": "1H BSL",
+          "rr": 3.3780989661748486
+        },
+        {
+          "name": "TP3",
+          "price": 29.537285714285712,
+          "source": "4R",
+          "rr": 4.0
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_UP",
+      "funding_rate": 5e-05,
+      "hold_vol": 3777318.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -2699,25 +2756,25 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": "short|27.928|28.402|28.84615|(27.801, 27.668, 27.305)",
-  "updated_at_utc": "2026-10-06T11:57:07.391682+00:00",
+  "last_seen_signature": "long|27.942|28.286|27.758179|(28.903, 29.316, 29.537286)",
+  "updated_at_utc": "2026-10-06T13:00:05.551541+00:00",
   "stats": {
-    "total_signals": 46,
-    "entered": 41,
-    "resolved": 35,
+    "total_signals": 47,
+    "entered": 42,
+    "resolved": 36,
     "stops": 18,
     "tp1_plus": 15,
     "tp2_plus": 11,
     "tp3_plus": 8,
     "ambiguous": 5,
     "expired_no_entry": 4,
-    "timeout_entered": 4,
-    "avg_mfe_r": 3.0505897601893963,
-    "avg_mae_r": 0.752009134730534,
+    "timeout_entered": 5,
+    "avg_mfe_r": 3.0630897885763226,
+    "avg_mae_r": 0.755198565204942,
     "by_zone_grade": {
       "NA": {
-        "total": 34,
-        "entered": 29,
+        "total": 35,
+        "entered": 30,
         "stop": 14,
         "tp1_plus": 10
       },
@@ -2755,12 +2812,12 @@
       },
       "ALIGNED": {
         "total": 17,
-        "entered": 16,
+        "entered": 17,
         "stop": 10,
         "tp1_plus": 3
       },
       "PARTIAL": {
-        "total": 9,
+        "total": 10,
         "entered": 9,
         "stop": 5,
         "tp1_plus": 2
@@ -2798,7 +2855,7 @@
         "tp1_plus": 1
       },
       "BULLISH_TRANSITION": {
-        "total": 10,
+        "total": 11,
         "entered": 9,
         "stop": 7,
         "tp1_plus": 2
@@ -2811,7 +2868,7 @@
       },
       "BULLISH_TO_BEARISH_TRANSITION": {
         "total": 2,
-        "entered": 0,
+        "entered": 1,
         "stop": 0,
         "tp1_plus": 0
       }
