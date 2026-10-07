@@ -2814,8 +2814,8 @@
       "hold_vol": 3647887.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-07T07:45:00+00:00",
-      "bars_observed": 64,
+      "last_evaluated_at": "2026-10-07T08:45:00+00:00",
+      "bars_observed": 68,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -2871,8 +2871,8 @@
       "hold_vol": 3607508.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-07T07:45:00+00:00",
-      "bars_observed": 60,
+      "last_evaluated_at": "2026-10-07T08:45:00+00:00",
+      "bars_observed": 64,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -2928,8 +2928,8 @@
       "hold_vol": 3512478.0,
       "ai_bias": null,
       "entered_at": "2026-10-06T20:30:00+00:00",
-      "last_evaluated_at": "2026-10-07T07:45:00+00:00",
-      "bars_observed": 49,
+      "last_evaluated_at": "2026-10-07T08:45:00+00:00",
+      "bars_observed": 53,
       "mfe_r": 0.5730402082730696,
       "mae_r": 0.05467168064796036,
       "targets_hit": [
@@ -2987,8 +2987,8 @@
       "hold_vol": 3467027.0,
       "ai_bias": "BEARISH",
       "entered_at": null,
-      "last_evaluated_at": "2026-10-07T07:45:00+00:00",
-      "bars_observed": 45,
+      "last_evaluated_at": "2026-10-07T08:45:00+00:00",
+      "bars_observed": 49,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -3045,8 +3045,8 @@
       "hold_vol": 3465810.0,
       "ai_bias": null,
       "entered_at": "2026-10-06T21:00:00+00:00",
-      "last_evaluated_at": "2026-10-07T07:45:00+00:00",
-      "bars_observed": 44,
+      "last_evaluated_at": "2026-10-07T08:45:00+00:00",
+      "bars_observed": 48,
       "mfe_r": 4.138723493157856,
       "mae_r": 0.1706187541348946,
       "targets_hit": [
@@ -3160,6 +3160,64 @@
       "funding_rate": 5e-05,
       "hold_vol": 3110993.0,
       "ai_bias": "BULLISH",
+      "entered_at": "2026-10-07T08:00:00+00:00",
+      "last_evaluated_at": "2026-10-07T08:15:00+00:00",
+      "bars_observed": 3,
+      "mfe_r": 5.022421524663528,
+      "mae_r": 5.06427503736896,
+      "targets_hit": [],
+      "outcome": "STOP",
+      "closed_at": "2026-10-07T08:30:00+00:00",
+      "ai_reviewed_at_utc": "2026-10-07T08:03:43.440070+00:00"
+    },
+    {
+      "id": "2026-10-07T09:00:20.667749+00:00",
+      "signature": "short|26.663|26.762|27.070157|(26.53, 26.437, 25.9)",
+      "created_at": "2026-10-07T08:45:00+00:00",
+      "generated_at_utc": "2026-10-07T09:00:20.667749+00:00",
+      "status": "DEVELOPING SHORT",
+      "direction": "short",
+      "execution_ready": false,
+      "mtf_alignment": "ALIGNED",
+      "regimes": {
+        "4H": "BEARISH_TRANSITION",
+        "1H": "BEARISH_TREND",
+        "15M": "BULLISH_TO_BEARISH_TRANSITION"
+      },
+      "setup_score": 3,
+      "entry_zone": {
+        "lower": 26.663,
+        "upper": 26.762,
+        "source": "bearish FVG",
+        "grade": null
+      },
+      "entry_mid": 26.7125,
+      "stop_loss": 27.07015714285714,
+      "risk": 0.3576571428571427,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 26.53,
+          "source": "15M SSL",
+          "rr": 0.5102652180859494
+        },
+        {
+          "name": "TP2",
+          "price": 26.437,
+          "source": "1H SSL",
+          "rr": 0.7702907812749572
+        },
+        {
+          "name": "TP3",
+          "price": 25.9,
+          "source": "4H SSL",
+          "rr": 2.2717287106566557
+        }
+      ],
+      "participation_regime": "PRICE_DOWN_HOLD_DOWN",
+      "funding_rate": 5e-05,
+      "hold_vol": 3038165.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -3167,30 +3225,29 @@
       "mae_r": 0.0,
       "targets_hit": [],
       "outcome": "OPEN",
-      "closed_at": null,
-      "ai_reviewed_at_utc": "2026-10-07T08:03:43.440070+00:00"
+      "closed_at": null
     }
   ],
-  "last_seen_signature": "long|26.755|26.777|26.742107|(27.058, 27.238, 29.316)",
-  "updated_at_utc": "2026-10-07T08:03:25.729722+00:00",
+  "last_seen_signature": "short|26.663|26.762|27.070157|(26.53, 26.437, 25.9)",
+  "updated_at_utc": "2026-10-07T09:00:20.672373+00:00",
   "stats": {
-    "total_signals": 54,
-    "entered": 46,
-    "resolved": 44,
-    "stops": 20,
+    "total_signals": 55,
+    "entered": 47,
+    "resolved": 45,
+    "stops": 21,
     "tp1_plus": 19,
     "tp2_plus": 14,
     "tp3_plus": 11,
     "ambiguous": 6,
     "expired_no_entry": 4,
     "timeout_entered": 7,
-    "avg_mfe_r": 3.0820296215223144,
-    "avg_mae_r": 0.8182703155564843,
+    "avg_mfe_r": 3.123314555631702,
+    "avg_mae_r": 0.9086108415524944,
     "by_zone_grade": {
       "NA": {
-        "total": 40,
-        "entered": 34,
-        "stop": 15,
+        "total": 41,
+        "entered": 35,
+        "stop": 16,
         "tp1_plus": 14
       },
       "A+": {
@@ -3221,12 +3278,12 @@
     "by_mtf_alignment": {
       "CONFLICT": {
         "total": 23,
-        "entered": 17,
-        "stop": 4,
+        "entered": 18,
+        "stop": 5,
         "tp1_plus": 10
       },
       "ALIGNED": {
-        "total": 19,
+        "total": 20,
         "entered": 18,
         "stop": 10,
         "tp1_plus": 6
@@ -3277,12 +3334,12 @@
       },
       "BULLISH_TREND": {
         "total": 9,
-        "entered": 8,
-        "stop": 6,
+        "entered": 9,
+        "stop": 7,
         "tp1_plus": 1
       },
       "BULLISH_TO_BEARISH_TRANSITION": {
-        "total": 4,
+        "total": 5,
         "entered": 1,
         "stop": 0,
         "tp1_plus": 1
