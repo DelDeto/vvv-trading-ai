@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-07T17:04:05.145684+00:00",
-  "current_price": 25.7,
+  "generated_at_utc": "2026-10-07T18:02:54.629841+00:00",
+  "current_price": 25.361,
   "status": "DEVELOPING SHORT",
   "mtf_alignment": {
     "label": "ALIGNED",
@@ -15,8 +15,12 @@
   },
   "trade_plan": {
     "active": true,
-    "execution_ready": true,
-    "blockers": [],
+    "execution_ready": false,
+    "blockers": [
+      "15M setup has fewer than 3/4 signals",
+      "15M BOS/CHoCH is missing",
+      "First liquidity target is only 0.68R"
+    ],
     "higher_tf_conflict": false,
     "mtf_alignment": {
       "label": "ALIGNED",
@@ -30,59 +34,59 @@
       "notes": []
     },
     "entry_zone_grade": "B",
-    "first_target_rr": 1.769147931983462,
+    "first_target_rr": 0.6773338489675232,
     "direction": "short",
-    "setup_state": "developing",
-    "setup_score": 3,
+    "setup_state": "watch",
+    "setup_score": 2,
     "entry_zone": {
-      "lower": 25.8,
-      "upper": 26.147,
+      "lower": 25.515,
+      "upper": 25.732,
       "source": "supply",
       "zone_grade": "B",
       "zone_quality": "MEDIUM"
     },
-    "entry_mid": 25.9735,
-    "stop_loss": 26.510764285714288,
-    "risk": 0.5372642857142864,
+    "entry_mid": 25.6235,
+    "stop_loss": 26.510064285714286,
+    "risk": 0.8865642857142859,
     "targets": [
       {
         "name": "TP1",
         "price": 25.023,
         "source": "4H SSL",
-        "rr": 1.769147931983462
+        "rr": 0.6773338489675232
       },
       {
         "name": "TP2",
-        "price": 24.89897142857143,
-        "source": "2R",
-        "rr": 2.0
+        "price": 24.736935714285714,
+        "source": "1R",
+        "rr": 1.0
       },
       {
         "name": "TP3",
-        "price": 24.361707142857142,
-        "source": "3R",
-        "rr": 3.0
+        "price": 23.850371428571428,
+        "source": "2R",
+        "rr": 2.0
       }
     ],
-    "trigger": "Execution map is ready. Wait for price to trade into the entry zone and show a 15M hold/rejection in the setup direction."
+    "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 25.7,
-    "high_24h": 27.707,
-    "low_24h": 25.329,
-    "change_rate_24h": 0.002,
-    "change_value_24h": 0.053,
-    "hold_vol": 2565374.0,
+    "last_price": 25.361,
+    "high_24h": 27.557,
+    "low_24h": 25.17,
+    "change_rate_24h": -0.0111,
+    "change_value_24h": -0.286,
+    "hold_vol": 2535087.0,
     "funding_rate": 5e-05,
-    "index_price": 25.691,
-    "fair_price": 25.691,
-    "timestamp": 1791392641891,
-    "hold_vol_change_pct": -12.109569855339396,
+    "index_price": 25.355,
+    "fair_price": 25.361,
+    "timestamp": 1791396169299,
+    "hold_vol_change_pct": -1.1806075839234356,
     "participation_context": {
       "regime": "PRICE_DOWN_HOLD_DOWN",
-      "price_change_pct": -2.0504611631984155,
-      "hold_vol_change_pct": -12.109569855339396,
+      "price_change_pct": -1.3190661478599168,
+      "hold_vol_change_pct": -1.1806075839234356,
       "note": "Giá giảm nhưng holdVol giảm; có thể phản ánh đóng vị thế/long liquidation.",
       "signal_weight": "context_only"
     }
@@ -167,7 +171,7 @@
       },
       "last_sweep": null,
       "last_displacement": {
-        "index": 417,
+        "index": 416,
         "time": "2026-10-07T14:00:00+00:00",
         "direction": "bearish",
         "strength": 2.095841584158421,
@@ -177,12 +181,12 @@
         "low": 25.456
       },
       "last_retest": {
-        "index": 413,
+        "index": 412,
         "time": "2026-10-07T10:00:00+00:00",
         "direction": "bearish",
         "structure_kind": "BOS",
         "level": 26.437,
-        "source_index": 412
+        "source_index": 411
       },
       "setup": {
         "direction": "bearish",
@@ -196,7 +200,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 412,
+        "index": 411,
         "time": "2026-10-07T09:00:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
@@ -227,7 +231,7 @@
         "level": 26.011
       },
       "last_sweep": {
-        "index": 405,
+        "index": 401,
         "time": "2026-10-07T13:15:00+00:00",
         "type": "BSL",
         "direction": "bearish",
@@ -235,41 +239,34 @@
         "extreme": 26.489
       },
       "last_displacement": {
-        "index": 411,
-        "time": "2026-10-07T14:45:00+00:00",
+        "index": 417,
+        "time": "2026-10-07T17:15:00+00:00",
         "direction": "bearish",
-        "strength": 1.201072386058983,
-        "open": 25.8,
-        "close": 25.544,
-        "high": 25.818,
-        "low": 25.456
+        "strength": 1.1941841680129244,
+        "open": 25.515,
+        "close": 25.251,
+        "high": 25.579,
+        "low": 25.247
       },
       "last_retest": null,
       "setup": {
         "direction": "bearish",
-        "score": 3,
+        "score": 2,
         "confirmed": false,
         "signals": {
           "sweep": true,
           "displacement": true,
-          "structure": true,
+          "structure": false,
           "retest": false
         }
       },
-      "last_structure_signal": {
-        "index": 409,
-        "time": "2026-10-07T14:15:00+00:00",
-        "direction": "bearish",
-        "kind": "CHoCH",
-        "level": 26.011,
-        "close": 25.981
-      },
+      "last_structure_signal": null,
       "nearest_supply": {
-        "lower": 25.8,
-        "upper": 26.147,
+        "lower": 25.515,
+        "upper": 25.732,
         "quality": "MEDIUM",
         "grade": "B",
-        "mitigations": 1
+        "mitigations": 0
       },
       "nearest_demand": null
     }
