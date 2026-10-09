@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-09T09:28:42.307409+00:00",
-  "current_price": 22.707,
+  "generated_at_utc": "2026-10-09T10:26:11.694726+00:00",
+  "current_price": 22.601,
   "status": "DEVELOPING SHORT",
   "mtf_alignment": {
     "label": "ALIGNED",
@@ -32,7 +32,7 @@
       "notes": []
     },
     "entry_zone_grade": null,
-    "first_target_rr": 0.49955834723721587,
+    "first_target_rr": 0.5017744479495262,
     "direction": "short",
     "setup_state": "watch",
     "setup_score": 2,
@@ -44,24 +44,24 @@
       "zone_quality": null
     },
     "entry_mid": 22.7515,
-    "stop_loss": 23.26095,
-    "risk": 0.5094500000000011,
+    "stop_loss": 23.2587,
+    "risk": 0.507200000000001,
     "targets": [
       {
         "name": "TP1",
         "price": 22.497,
         "source": "15M SSL",
-        "rr": 0.49955834723721587
+        "rr": 0.5017744479495262
       },
       {
         "name": "TP2",
         "price": 21.297,
         "source": "4H SSL",
-        "rr": 2.8550397487486436
+        "rr": 2.8677050473186054
       },
       {
         "name": "TP3",
-        "price": 21.223149999999997,
+        "price": 21.229899999999997,
         "source": "3R",
         "rr": 3.0
       }
@@ -70,21 +70,21 @@
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 22.707,
-    "high_24h": 24.963,
+    "last_price": 22.601,
+    "high_24h": 24.903,
     "low_24h": 21.297,
-    "change_rate_24h": 0.0418,
-    "change_value_24h": 0.912,
-    "hold_vol": 1361017.0,
+    "change_rate_24h": 0.0369,
+    "change_value_24h": 0.806,
+    "hold_vol": 1386950.0,
     "funding_rate": 5e-05,
-    "index_price": 22.708,
-    "fair_price": 22.707,
-    "timestamp": 1791538116062,
-    "hold_vol_change_pct": 18.14650330649824,
+    "index_price": 22.609,
+    "fair_price": 22.599,
+    "timestamp": 1791541568122,
+    "hold_vol_change_pct": 1.9054133783780804,
     "participation_context": {
       "regime": "PRICE_DOWN_HOLD_UP",
-      "price_change_pct": -0.4035264704592252,
-      "hold_vol_change_pct": 18.14650330649824,
+      "price_change_pct": -0.4668164002290115,
+      "hold_vol_change_pct": 1.9054133783780804,
       "note": "Giá giảm cùng holdVol tăng; mức tham gia vị thế đang mở rộng theo nhịp giảm.",
       "signal_weight": "context_only"
     }
@@ -164,7 +164,7 @@
         "level": 24.617
       },
       "last_sweep": {
-        "index": 413,
+        "index": 412,
         "time": "2026-10-09T02:00:00+00:00",
         "type": "SSL",
         "direction": "bullish",
@@ -201,8 +201,8 @@
       }
     },
     "15M": {
-      "trend": "bullish",
-      "regime": "BULLISH_PULLBACK",
+      "trend": "mixed",
+      "regime": "BEARISH_TRANSITION",
       "bsl": {
         "price": 23.013,
         "time": "2026-10-09T07:30:00+00:00"
@@ -212,13 +212,13 @@
         "time": "2026-10-09T02:30:00+00:00"
       },
       "last_event": {
-        "time": "2026-10-09T08:15:00+00:00",
+        "time": "2026-10-09T10:00:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
-        "level": 22.859
+        "level": 22.643
       },
       "last_sweep": {
-        "index": 413,
+        "index": 409,
         "time": "2026-10-09T07:30:00+00:00",
         "type": "BSL",
         "direction": "bearish",
@@ -239,12 +239,12 @@
         }
       },
       "last_structure_signal": {
-        "index": 416,
-        "time": "2026-10-09T08:15:00+00:00",
+        "index": 419,
+        "time": "2026-10-09T10:00:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
-        "level": 22.859,
-        "close": 22.753
+        "level": 22.643,
+        "close": 22.637
       },
       "nearest_supply": {
         "lower": 23.111,
