@@ -1,7 +1,7 @@
 {
-  "generated_at_utc": "2026-10-10T17:49:46.206318+00:00",
-  "current_price": 22.488,
-  "status": "DEVELOPING SHORT",
+  "generated_at_utc": "2026-10-10T18:30:56.504116+00:00",
+  "current_price": 22.46,
+  "status": "WAIT",
   "mtf_alignment": {
     "label": "ALIGNED",
     "direction": "bearish",
@@ -12,77 +12,28 @@
     "notes": []
   },
   "trade_plan": {
-    "active": true,
-    "execution_ready": false,
-    "blockers": [
-      "15M setup has fewer than 3/4 signals",
-      "15M BOS/CHoCH is missing"
-    ],
-    "higher_tf_conflict": false,
-    "mtf_alignment": {
-      "label": "ALIGNED",
-      "direction": "bearish",
-      "supporters": [
-        "1H regime"
-      ],
-      "conflicts": [],
-      "notes": []
-    },
-    "entry_zone_grade": null,
-    "first_target_rr": 1.9554574253624133,
-    "direction": "short",
-    "setup_state": "watch",
-    "setup_score": 2,
-    "entry_zone": {
-      "lower": 22.571,
-      "upper": 22.641,
-      "source": "bearish FVG",
-      "zone_grade": null,
-      "zone_quality": null
-    },
-    "entry_mid": 22.606,
-    "stop_loss": 22.754814285714286,
-    "risk": 0.148814285714284,
-    "targets": [
-      {
-        "name": "TP1",
-        "price": 22.315,
-        "source": "15M SSL",
-        "rr": 1.9554574253624133
-      },
-      {
-        "name": "TP2",
-        "price": 22.091,
-        "source": "1H SSL",
-        "rr": 3.4606892579437893
-      },
-      {
-        "name": "TP3",
-        "price": 21.619,
-        "source": "4H SSL",
-        "rr": 6.6324277623116945
-      }
-    ],
-    "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
+    "active": false,
+    "status": "WAIT",
+    "reason": "No active 15M setup with at least 2/4 signals."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 22.488,
+    "last_price": 22.46,
     "high_24h": 23.029,
     "low_24h": 21.619,
-    "change_rate_24h": -0.0001,
-    "change_value_24h": -0.003,
-    "hold_vol": 1663434.0,
-    "funding_rate": -1e-06,
-    "index_price": 22.498,
-    "fair_price": 22.488,
-    "timestamp": 1791654580986,
-    "hold_vol_change_pct": 2.129987438157793,
+    "change_rate_24h": -0.0013,
+    "change_value_24h": -0.031,
+    "hold_vol": 1643664.0,
+    "funding_rate": -7e-06,
+    "index_price": 22.473,
+    "fair_price": 22.46,
+    "timestamp": 1791657054078,
+    "hold_vol_change_pct": -1.1885052247338939,
     "participation_context": {
-      "regime": "PRICE_DOWN_HOLD_UP",
-      "price_change_pct": -0.5131835073438314,
-      "hold_vol_change_pct": 2.129987438157793,
-      "note": "Giá giảm cùng holdVol tăng; mức tham gia vị thế đang mở rộng theo nhịp giảm.",
+      "regime": "PRICE_DOWN_HOLD_DOWN",
+      "price_change_pct": -0.12451085023122861,
+      "hold_vol_change_pct": -1.1885052247338939,
+      "note": "Giá giảm nhưng holdVol giảm; có thể phản ánh đóng vị thế/long liquidation.",
       "signal_weight": "context_only"
     }
   },
@@ -161,7 +112,7 @@
         "level": 22.497
       },
       "last_sweep": {
-        "index": 414,
+        "index": 413,
         "time": "2026-10-10T11:00:00+00:00",
         "type": "SSL",
         "direction": "bullish",
@@ -215,31 +166,22 @@
         "level": 22.701
       },
       "last_sweep": {
-        "index": 407,
+        "index": 404,
         "time": "2026-10-10T14:30:00+00:00",
         "type": "BSL",
         "direction": "bearish",
         "level": 22.701,
         "extreme": 22.745
       },
-      "last_displacement": {
-        "index": 408,
-        "time": "2026-10-10T14:45:00+00:00",
-        "direction": "bearish",
-        "strength": 1.711566617862393,
-        "open": 22.681,
-        "close": 22.514,
-        "high": 22.703,
-        "low": 22.514
-      },
+      "last_displacement": null,
       "last_retest": null,
       "setup": {
         "direction": "bearish",
-        "score": 2,
+        "score": 1,
         "confirmed": false,
         "signals": {
           "sweep": true,
-          "displacement": true,
+          "displacement": false,
           "structure": false,
           "retest": false
         }
