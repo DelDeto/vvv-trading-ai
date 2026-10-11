@@ -5313,10 +5313,10 @@
       "hold_vol": 1504410.0,
       "ai_bias": null,
       "entered_at": "2026-10-11T16:45:00+00:00",
-      "last_evaluated_at": "2026-10-11T18:30:00+00:00",
-      "bars_observed": 8,
+      "last_evaluated_at": "2026-10-11T20:15:00+00:00",
+      "bars_observed": 15,
       "mfe_r": 0.7870633323223657,
-      "mae_r": 0.0,
+      "mae_r": 0.031266370729825514,
       "targets_hit": [],
       "outcome": "ENTERED",
       "closed_at": null
@@ -5369,6 +5369,64 @@
       "funding_rate": 5e-05,
       "hold_vol": 1403298.0,
       "ai_bias": "BULLISH",
+      "entered_at": "2026-10-11T18:45:00+00:00",
+      "last_evaluated_at": "2026-10-11T20:15:00+00:00",
+      "bars_observed": 7,
+      "mfe_r": 0.4450633633764009,
+      "mae_r": 0.03517086091072184,
+      "targets_hit": [],
+      "outcome": "ENTERED",
+      "closed_at": null,
+      "ai_reviewed_at_utc": "2026-10-11T18:49:33.899560+00:00"
+    },
+    {
+      "id": "2026-10-11T20:38:07.577708+00:00",
+      "signature": "short|24.508|24.895|24.92225|(24.124, 22.134, 22.0525)",
+      "created_at": "2026-10-11T20:15:00+00:00",
+      "generated_at_utc": "2026-10-11T20:38:07.577708+00:00",
+      "status": "DEVELOPING SHORT",
+      "direction": "short",
+      "execution_ready": false,
+      "mtf_alignment": "CONFLICT",
+      "regimes": {
+        "4H": "BULLISH_TREND",
+        "1H": "BULLISH_TRANSITION",
+        "15M": "RANGE"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 24.508,
+        "upper": 24.895,
+        "source": "supply",
+        "grade": "A"
+      },
+      "entry_mid": 24.7015,
+      "stop_loss": 24.92225,
+      "risk": 0.2207499999999989,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 24.124,
+          "source": "15M SSL",
+          "rr": 2.6160815402038664
+        },
+        {
+          "name": "TP2",
+          "price": 22.134,
+          "source": "1H SSL",
+          "rr": 11.630804077010247
+        },
+        {
+          "name": "TP3",
+          "price": 22.052500000000013,
+          "source": "12R",
+          "rr": 12.0
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_DOWN",
+      "funding_rate": 5e-05,
+      "hold_vol": 1350528.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -5376,15 +5434,14 @@
       "mae_r": 0.0,
       "targets_hit": [],
       "outcome": "OPEN",
-      "closed_at": null,
-      "ai_reviewed_at_utc": "2026-10-11T18:49:33.899560+00:00"
+      "closed_at": null
     }
   ],
-  "last_seen_signature": "long|23.68|24.071|22.723979|(24.963, 25.071, 29.316)",
-  "updated_at_utc": "2026-10-11T18:49:16.502422+00:00",
+  "last_seen_signature": "short|24.508|24.895|24.92225|(24.124, 22.134, 22.0525)",
+  "updated_at_utc": "2026-10-11T20:38:07.580938+00:00",
   "stats": {
-    "total_signals": 92,
-    "entered": 76,
+    "total_signals": 93,
+    "entered": 77,
     "resolved": 75,
     "stops": 35,
     "tp1_plus": 30,
@@ -5393,12 +5450,12 @@
     "ambiguous": 13,
     "expired_no_entry": 15,
     "timeout_entered": 13,
-    "avg_mfe_r": 2.683445601227614,
-    "avg_mae_r": 1.0328565360138298,
+    "avg_mfe_r": 2.654375702034741,
+    "avg_mae_r": 1.020305635957034,
     "by_zone_grade": {
       "NA": {
         "total": 67,
-        "entered": 55,
+        "entered": 56,
         "stop": 26,
         "tp1_plus": 20
       },
@@ -5415,7 +5472,7 @@
         "tp1_plus": 4
       },
       "A": {
-        "total": 4,
+        "total": 5,
         "entered": 3,
         "stop": 0,
         "tp1_plus": 2
@@ -5429,14 +5486,14 @@
     },
     "by_mtf_alignment": {
       "CONFLICT": {
-        "total": 34,
+        "total": 35,
         "entered": 28,
         "stop": 13,
         "tp1_plus": 13
       },
       "ALIGNED": {
         "total": 41,
-        "entered": 33,
+        "entered": 34,
         "stop": 14,
         "tp1_plus": 14
       },
@@ -5486,7 +5543,7 @@
       },
       "BULLISH_TREND": {
         "total": 15,
-        "entered": 12,
+        "entered": 13,
         "stop": 8,
         "tp1_plus": 2
       },
@@ -5495,6 +5552,12 @@
         "entered": 2,
         "stop": 1,
         "tp1_plus": 1
+      },
+      "RANGE": {
+        "total": 1,
+        "entered": 0,
+        "stop": 0,
+        "tp1_plus": 0
       }
     },
     "calibration_status": "READY_FOR_REVIEW",
