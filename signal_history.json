@@ -5016,12 +5016,13 @@
       "hold_vol": 1773462.0,
       "ai_bias": "BEARISH",
       "entered_at": "2026-10-11T00:45:00+00:00",
-      "last_evaluated_at": "2026-10-11T05:15:00+00:00",
-      "bars_observed": 19,
-      "mfe_r": 1.7036506800286075,
+      "last_evaluated_at": "2026-10-11T06:30:00+00:00",
+      "bars_observed": 24,
+      "mfe_r": 2.7002306529865385,
       "mae_r": 0.9297701423685706,
       "targets_hit": [
-        1
+        1,
+        2
       ],
       "outcome": "ENTERED",
       "closed_at": null,
@@ -5075,6 +5076,64 @@
       "funding_rate": 5e-05,
       "hold_vol": 1599090.0,
       "ai_bias": "MIXED",
+      "entered_at": "2026-10-11T05:30:00+00:00",
+      "last_evaluated_at": "2026-10-11T06:30:00+00:00",
+      "bars_observed": 1,
+      "mfe_r": 0.2009115137752161,
+      "mae_r": 0.06623456498083435,
+      "targets_hit": [],
+      "outcome": "AMBIGUOUS_ENTRY_BAR",
+      "closed_at": "2026-10-11T05:30:00+00:00",
+      "ai_reviewed_at_utc": "2026-10-11T05:40:29.009301+00:00"
+    },
+    {
+      "id": "2026-10-11T06:58:31.043967+00:00",
+      "signature": "short|22.364493|22.387507|22.828507|(22.168, 22.091, 21.619)",
+      "created_at": "2026-10-11T06:30:00+00:00",
+      "generated_at_utc": "2026-10-11T06:58:31.043967+00:00",
+      "status": "CONFIRMED SHORT",
+      "direction": "short",
+      "execution_ready": false,
+      "mtf_alignment": "ALIGNED",
+      "regimes": {
+        "4H": "RANGE",
+        "1H": "BEARISH_TRANSITION",
+        "15M": "BEARISH_TREND"
+      },
+      "setup_score": 4,
+      "entry_zone": {
+        "lower": 22.36449285714286,
+        "upper": 22.387507142857142,
+        "source": "retest",
+        "grade": null
+      },
+      "entry_mid": 22.376,
+      "stop_loss": 22.82850714285714,
+      "risk": 0.4525071428571401,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 22.168,
+          "source": "15M SSL",
+          "rr": 0.45966125238749905
+        },
+        {
+          "name": "TP2",
+          "price": 22.091,
+          "source": "1H SSL",
+          "rr": 0.629824312165558
+        },
+        {
+          "name": "TP3",
+          "price": 21.619,
+          "source": "4H SSL",
+          "rr": 1.6729017695064141
+        }
+      ],
+      "participation_regime": "NEUTRAL_MIXED",
+      "funding_rate": 5e-05,
+      "hold_vol": 1627482.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -5082,29 +5141,28 @@
       "mae_r": 0.0,
       "targets_hit": [],
       "outcome": "OPEN",
-      "closed_at": null,
-      "ai_reviewed_at_utc": "2026-10-11T05:40:29.009301+00:00"
+      "closed_at": null
     }
   ],
-  "last_seen_signature": "short|22.364064|22.387936|22.828936|(22.315, 21.619, 21.470129)",
-  "updated_at_utc": "2026-10-11T05:40:13.238119+00:00",
+  "last_seen_signature": "short|22.364493|22.387507|22.828507|(22.168, 22.091, 21.619)",
+  "updated_at_utc": "2026-10-11T06:58:31.046921+00:00",
   "stats": {
-    "total_signals": 87,
-    "entered": 71,
-    "resolved": 70,
+    "total_signals": 88,
+    "entered": 72,
+    "resolved": 71,
     "stops": 33,
     "tp1_plus": 28,
-    "tp2_plus": 17,
+    "tp2_plus": 18,
     "tp3_plus": 13,
-    "ambiguous": 11,
+    "ambiguous": 12,
     "expired_no_entry": 15,
     "timeout_entered": 13,
-    "avg_mfe_r": 2.792558994371303,
-    "avg_mae_r": 1.083552781305769,
+    "avg_mfe_r": 2.77040527898744,
+    "avg_mae_r": 1.0694233616345894,
     "by_zone_grade": {
       "NA": {
-        "total": 63,
-        "entered": 51,
+        "total": 64,
+        "entered": 52,
         "stop": 24,
         "tp1_plus": 19
       },
@@ -5141,8 +5199,8 @@
         "tp1_plus": 12
       },
       "ALIGNED": {
-        "total": 38,
-        "entered": 30,
+        "total": 39,
+        "entered": 31,
         "stop": 13,
         "tp1_plus": 13
       },
@@ -5167,8 +5225,8 @@
         "tp1_plus": 4
       },
       "BEARISH_TREND": {
-        "total": 24,
-        "entered": 20,
+        "total": 25,
+        "entered": 21,
         "stop": 7,
         "tp1_plus": 9
       },
