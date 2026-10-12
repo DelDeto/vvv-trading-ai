@@ -5313,8 +5313,8 @@
       "hold_vol": 1504410.0,
       "ai_bias": null,
       "entered_at": "2026-10-11T16:45:00+00:00",
-      "last_evaluated_at": "2026-10-12T05:30:00+00:00",
-      "bars_observed": 52,
+      "last_evaluated_at": "2026-10-12T08:15:00+00:00",
+      "bars_observed": 63,
       "mfe_r": 1.2772891449998596,
       "mae_r": 0.0860790206512471,
       "targets_hit": [
@@ -5373,8 +5373,8 @@
       "hold_vol": 1403298.0,
       "ai_bias": "BULLISH",
       "entered_at": "2026-10-11T18:45:00+00:00",
-      "last_evaluated_at": "2026-10-12T05:30:00+00:00",
-      "bars_observed": 44,
+      "last_evaluated_at": "2026-10-12T08:15:00+00:00",
+      "bars_observed": 55,
       "mfe_r": 1.4367947994268406,
       "mae_r": 0.09682841954433195,
       "targets_hit": [
@@ -5607,8 +5607,8 @@
       "hold_vol": 1217808.0,
       "ai_bias": null,
       "entered_at": "2026-10-12T01:45:00+00:00",
-      "last_evaluated_at": "2026-10-12T05:30:00+00:00",
-      "bars_observed": 16,
+      "last_evaluated_at": "2026-10-12T08:15:00+00:00",
+      "bars_observed": 27,
       "mfe_r": 15.631534763031063,
       "mae_r": 0.0,
       "targets_hit": [
@@ -5666,21 +5666,21 @@
       "funding_rate": -0.000105,
       "hold_vol": 1280034.0,
       "ai_bias": null,
-      "entered_at": null,
-      "last_evaluated_at": null,
-      "bars_observed": 0,
-      "mfe_r": 0.0,
-      "mae_r": 0.0,
+      "entered_at": "2026-10-12T05:45:00+00:00",
+      "last_evaluated_at": "2026-10-12T08:15:00+00:00",
+      "bars_observed": 11,
+      "mfe_r": 1.3566865264517938,
+      "mae_r": 0.29646112985428663,
       "targets_hit": [],
-      "outcome": "OPEN",
+      "outcome": "ENTERED",
       "closed_at": null
     }
   ],
-  "last_seen_signature": "long|24.739971|24.790029|24.366971|(25.53, 25.761, 29.316)",
-  "updated_at_utc": "2026-10-12T05:49:56.974109+00:00",
+  "last_seen_signature": null,
+  "updated_at_utc": "2026-10-12T08:32:23.733328+00:00",
   "stats": {
     "total_signals": 97,
-    "entered": 81,
+    "entered": 82,
     "resolved": 78,
     "stops": 37,
     "tp1_plus": 34,
@@ -5689,12 +5689,12 @@
     "ambiguous": 14,
     "expired_no_entry": 15,
     "timeout_entered": 13,
-    "avg_mfe_r": 2.7769892203330233,
-    "avg_mae_r": 1.006471368392845,
+    "avg_mfe_r": 2.7596684557734963,
+    "avg_mae_r": 0.9978127069472529,
     "by_zone_grade": {
       "NA": {
         "total": 70,
-        "entered": 58,
+        "entered": 59,
         "stop": 27,
         "tp1_plus": 22
       },
@@ -5732,7 +5732,7 @@
       },
       "ALIGNED": {
         "total": 44,
-        "entered": 36,
+        "entered": 37,
         "stop": 14,
         "tp1_plus": 17
       },
@@ -5782,7 +5782,7 @@
       },
       "BULLISH_TREND": {
         "total": 18,
-        "entered": 15,
+        "entered": 16,
         "stop": 8,
         "tp1_plus": 4
       },
