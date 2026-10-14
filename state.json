@@ -1,16 +1,16 @@
 {
-  "generated_at_utc": "2026-10-14T15:23:33.326562+00:00",
-  "current_price": 22.561,
-  "status": "DEVELOPING SHORT",
+  "generated_at_utc": "2026-10-14T19:09:46.305136+00:00",
+  "current_price": 22.678,
+  "status": "CONFIRMED LONG",
   "mtf_alignment": {
-    "label": "ALIGNED",
-    "direction": "bearish",
-    "supporters": [
+    "label": "CONFLICT",
+    "direction": "bullish",
+    "supporters": [],
+    "conflicts": [
       "1H active setup",
       "1H regime",
       "4H parent trend"
     ],
-    "conflicts": [],
     "notes": [
       "4H is in a counter-move/pullback state"
     ]
@@ -19,77 +19,79 @@
     "active": true,
     "execution_ready": false,
     "blockers": [
-      "First liquidity target is only 0.80R"
+      "Higher-timeframe alignment is CONFLICT",
+      "First liquidity target is only 0.91R",
+      "1H active setup is opposite the 15M direction"
     ],
-    "higher_tf_conflict": false,
+    "higher_tf_conflict": true,
     "mtf_alignment": {
-      "label": "ALIGNED",
-      "direction": "bearish",
-      "supporters": [
+      "label": "CONFLICT",
+      "direction": "bullish",
+      "supporters": [],
+      "conflicts": [
         "1H active setup",
         "1H regime",
         "4H parent trend"
       ],
-      "conflicts": [],
       "notes": [
         "4H is in a counter-move/pullback state"
       ]
     },
     "entry_zone_grade": null,
-    "first_target_rr": 0.8025968602289255,
-    "direction": "short",
-    "setup_state": "developing",
-    "setup_score": 3,
+    "first_target_rr": 0.9079854073773838,
+    "direction": "long",
+    "setup_state": "confirmed",
+    "setup_score": 4,
     "entry_zone": {
-      "lower": 22.467721428571426,
-      "upper": 22.52427857142857,
+      "lower": 22.69373571428571,
+      "upper": 22.740264285714286,
       "source": "retest",
       "zone_grade": null,
       "zone_quality": null
     },
-    "entry_mid": 22.496,
-    "stop_loss": 22.872278571428573,
-    "risk": 0.3762785714285748,
+    "entry_mid": 22.717,
+    "stop_loss": 22.170735714285712,
+    "risk": 0.5462642857142868,
     "targets": [
       {
         "name": "TP1",
-        "price": 22.194,
-        "source": "15M SSL",
-        "rr": 0.8025968602289255
+        "price": 23.213,
+        "source": "15M BSL",
+        "rr": 0.9079854073773838
       },
       {
         "name": "TP2",
-        "price": 21.235,
-        "source": "1H SSL",
-        "rr": 3.3512405322803835
+        "price": 23.457,
+        "source": "1H BSL",
+        "rr": 1.3546556481033525
       },
       {
         "name": "TP3",
-        "price": 20.9908857142857,
-        "source": "4R",
-        "rr": 4.0
+        "price": 25.53,
+        "source": "4H BSL",
+        "rr": 5.14952207853341
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 22.561,
+    "last_price": 22.678,
     "high_24h": 23.679,
-    "low_24h": 21.235,
-    "change_rate_24h": 0.0456,
-    "change_value_24h": 0.985,
-    "hold_vol": 1111572.0,
-    "funding_rate": -1.9e-05,
-    "index_price": 22.59,
-    "fair_price": 22.566,
-    "timestamp": 1791991409930,
-    "hold_vol_change_pct": -0.504649976280198,
+    "low_24h": 21.8,
+    "change_rate_24h": 0.0112,
+    "change_value_24h": 0.253,
+    "hold_vol": 1183883.0,
+    "funding_rate": 5e-06,
+    "index_price": 22.712,
+    "fair_price": 22.685,
+    "timestamp": 1792004984111,
+    "hold_vol_change_pct": 6.505291605042228,
     "participation_context": {
-      "regime": "PRICE_UP_HOLD_DOWN",
-      "price_change_pct": 1.3430958584134376,
-      "hold_vol_change_pct": -0.504649976280198,
-      "note": "Giá tăng nhưng holdVol giảm; có thể phản ánh đóng vị thế/short covering.",
+      "regime": "PRICE_UP_HOLD_UP",
+      "price_change_pct": 0.5185940339523997,
+      "hold_vol_change_pct": 6.505291605042228,
+      "note": "Giá tăng cùng holdVol tăng; mức tham gia vị thế đang mở rộng.",
       "signal_weight": "context_only"
     }
   },
@@ -112,7 +114,7 @@
         "level": 23.239
       },
       "last_sweep": {
-        "index": 414,
+        "index": 413,
         "time": "2026-10-13T12:00:00+00:00",
         "type": "SSL",
         "direction": "bullish",
@@ -133,7 +135,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 419,
+        "index": 418,
         "time": "2026-10-14T08:00:00+00:00",
         "direction": "bullish",
         "kind": "BOS",
@@ -156,15 +158,15 @@
       }
     },
     "1H": {
-      "trend": "mixed",
-      "regime": "BEARISH_TRANSITION",
+      "trend": "bearish",
+      "regime": "BEARISH_TREND",
       "bsl": {
         "price": 23.457,
         "time": "2026-10-14T12:00:00+00:00"
       },
       "ssl": {
-        "price": 21.235,
-        "time": "2026-10-13T15:00:00+00:00"
+        "price": 22.194,
+        "time": "2026-10-14T14:00:00+00:00"
       },
       "last_event": {
         "time": "2026-10-14T12:00:00+00:00",
@@ -173,7 +175,7 @@
         "level": 22.532
       },
       "last_sweep": {
-        "index": 413,
+        "index": 409,
         "time": "2026-10-14T08:00:00+00:00",
         "type": "BSL",
         "direction": "bearish",
@@ -181,7 +183,7 @@
         "extreme": 23.679
       },
       "last_displacement": {
-        "index": 417,
+        "index": 413,
         "time": "2026-10-14T12:00:00+00:00",
         "direction": "bearish",
         "strength": 1.6853020739404836,
@@ -191,12 +193,12 @@
         "low": 22.46
       },
       "last_retest": {
-        "index": 418,
+        "index": 414,
         "time": "2026-10-14T13:00:00+00:00",
         "direction": "bearish",
         "structure_kind": "CHoCH",
         "level": 22.532,
-        "source_index": 417
+        "source_index": 413
       },
       "setup": {
         "direction": "bearish",
@@ -210,7 +212,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 417,
+        "index": 413,
         "time": "2026-10-14T12:00:00+00:00",
         "direction": "bearish",
         "kind": "CHoCH",
@@ -222,58 +224,65 @@
         "upper": 23.283,
         "quality": "HIGH",
         "grade": "A+",
-        "mitigations": 0
+        "mitigations": 1
       },
       "nearest_demand": {
-        "lower": 21.8,
-        "upper": 21.918,
-        "quality": "HIGH",
-        "grade": "A+",
-        "mitigations": 0
+        "lower": 22.194,
+        "upper": 22.521,
+        "quality": "LOW",
+        "grade": "C",
+        "mitigations": 1
       }
     },
     "15M": {
-      "trend": "bearish",
-      "regime": "BEARISH_PULLBACK",
+      "trend": "bullish",
+      "regime": "BULLISH_TREND",
       "bsl": {
-        "price": 22.844,
-        "time": "2026-10-14T13:45:00+00:00"
+        "price": 23.213,
+        "time": "2026-10-14T17:15:00+00:00"
       },
       "ssl": {
-        "price": 22.194,
-        "time": "2026-10-14T14:30:00+00:00"
+        "price": 22.311,
+        "time": "2026-10-14T16:00:00+00:00"
       },
       "last_event": {
-        "time": "2026-10-14T12:45:00+00:00",
-        "direction": "bearish",
+        "time": "2026-10-14T16:30:00+00:00",
+        "direction": "bullish",
         "kind": "CHoCH",
-        "level": 22.496
+        "level": 22.717
       },
-      "last_sweep": null,
+      "last_sweep": {
+        "index": 402,
+        "time": "2026-10-14T14:30:00+00:00",
+        "type": "SSL",
+        "direction": "bullish",
+        "level": 22.222,
+        "extreme": 22.194
+      },
       "last_displacement": {
-        "index": 409,
-        "time": "2026-10-14T12:30:00+00:00",
-        "direction": "bearish",
-        "strength": 2.748414376321353,
-        "open": 23.367,
-        "close": 22.717,
-        "high": 23.367,
-        "low": 22.642
+        "index": 410,
+        "time": "2026-10-14T16:30:00+00:00",
+        "direction": "bullish",
+        "strength": 1.5972406473865728,
+        "open": 22.579,
+        "close": 23.009,
+        "high": 23.009,
+        "low": 22.532
       },
       "last_retest": {
-        "index": 411,
-        "time": "2026-10-14T13:00:00+00:00",
-        "direction": "bearish",
+        "index": 414,
+        "time": "2026-10-14T17:30:00+00:00",
+        "direction": "bullish",
         "structure_kind": "CHoCH",
-        "level": 22.496,
+        "level": 22.717,
         "source_index": 410
       },
       "setup": {
-        "direction": "bearish",
-        "score": 3,
-        "confirmed": false,
+        "direction": "bullish",
+        "score": 4,
+        "confirmed": true,
         "signals": {
-          "sweep": false,
+          "sweep": true,
           "displacement": true,
           "structure": true,
           "retest": true
@@ -281,24 +290,24 @@
       },
       "last_structure_signal": {
         "index": 410,
-        "time": "2026-10-14T12:45:00+00:00",
-        "direction": "bearish",
+        "time": "2026-10-14T16:30:00+00:00",
+        "direction": "bullish",
         "kind": "CHoCH",
-        "level": 22.496,
-        "close": 22.468
+        "level": 22.717,
+        "close": 23.009
       },
       "nearest_supply": {
-        "lower": 22.466,
-        "upper": 22.813,
-        "quality": "LOW",
-        "grade": "C",
-        "mitigations": 1
+        "lower": 23.269,
+        "upper": 23.457,
+        "quality": "HIGH",
+        "grade": "A+",
+        "mitigations": 0
       },
       "nearest_demand": {
-        "lower": 22.222,
-        "upper": 22.466,
-        "quality": "MEDIUM",
-        "grade": "B",
+        "lower": 22.311,
+        "upper": 22.579,
+        "quality": "HIGH",
+        "grade": "A+",
         "mitigations": 1
       }
     }
