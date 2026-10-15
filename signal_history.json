@@ -6368,16 +6368,16 @@
       "hold_vol": 1323812.0,
       "ai_bias": null,
       "entered_at": "2026-10-14T02:30:00+00:00",
-      "last_evaluated_at": "2026-10-14T22:00:00+00:00",
-      "bars_observed": 87,
+      "last_evaluated_at": "2026-10-15T00:15:00+00:00",
+      "bars_observed": 96,
       "mfe_r": 1.450570223541893,
       "mae_r": 0.48810065181143136,
       "targets_hit": [
         1,
         2
       ],
-      "outcome": "ENTERED",
-      "closed_at": null
+      "outcome": "TIMEOUT_ENTERED",
+      "closed_at": "2026-10-15T00:15:00+00:00"
     },
     {
       "id": "2026-10-14T04:46:17.932245+00:00",
@@ -6776,8 +6776,8 @@
       "hold_vol": 1183883.0,
       "ai_bias": null,
       "entered_at": "2026-10-14T19:00:00+00:00",
-      "last_evaluated_at": "2026-10-14T22:00:00+00:00",
-      "bars_observed": 13,
+      "last_evaluated_at": "2026-10-15T00:15:00+00:00",
+      "bars_observed": 22,
       "mfe_r": 1.8855342129006092,
       "mae_r": 0.17940034258665782,
       "targets_hit": [
@@ -6789,18 +6789,18 @@
     }
   ],
   "last_seen_signature": null,
-  "updated_at_utc": "2026-10-14T22:20:58.287465+00:00",
+  "updated_at_utc": "2026-10-15T00:43:10.990459+00:00",
   "stats": {
     "total_signals": 116,
     "entered": 98,
-    "resolved": 96,
+    "resolved": 97,
     "stops": 48,
     "tp1_plus": 43,
     "tp2_plus": 27,
     "tp3_plus": 17,
     "ambiguous": 16,
     "expired_no_entry": 18,
-    "timeout_entered": 15,
+    "timeout_entered": 16,
     "avg_mfe_r": 2.4919821529995017,
     "avg_mae_r": 1.023573450385076,
     "by_zone_grade": {
