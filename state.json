@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-18T19:40:03.269140+00:00",
-  "current_price": 21.237,
+  "generated_at_utc": "2026-10-18T21:53:31.849035+00:00",
+  "current_price": 21.652,
   "status": "DEVELOPING SHORT",
   "mtf_alignment": {
     "label": "ALIGNED",
@@ -15,8 +15,10 @@
   },
   "trade_plan": {
     "active": true,
-    "execution_ready": true,
-    "blockers": [],
+    "execution_ready": false,
+    "blockers": [
+      "First liquidity target is only 0.56R"
+    ],
     "higher_tf_conflict": false,
     "mtf_alignment": {
       "label": "ALIGNED",
@@ -29,61 +31,61 @@
       "conflicts": [],
       "notes": []
     },
-    "entry_zone_grade": "A",
-    "first_target_rr": 4.358306188925077,
+    "entry_zone_grade": "B",
+    "first_target_rr": 0.5587887334042365,
     "direction": "short",
     "setup_state": "developing",
     "setup_score": 3,
     "entry_zone": {
-      "lower": 21.769,
-      "upper": 21.898,
+      "lower": 21.252,
+      "upper": 21.388,
       "source": "supply",
-      "zone_grade": "A",
-      "zone_quality": "HIGH"
+      "zone_grade": "B",
+      "zone_quality": "MEDIUM"
     },
-    "entry_mid": 21.8335,
-    "stop_loss": 21.91025,
-    "risk": 0.07675000000000054,
+    "entry_mid": 21.32,
+    "stop_loss": 21.91772142857143,
+    "risk": 0.597721428571429,
     "targets": [
       {
         "name": "TP1",
-        "price": 21.499,
+        "price": 20.986,
         "source": "15M SSL",
-        "rr": 4.358306188925077
+        "rr": 0.5587887334042365
       },
       {
         "name": "TP2",
-        "price": 21.289,
+        "price": 17.539,
         "source": "4H SSL",
-        "rr": 7.094462540716553
+        "rr": 6.32568922455515
       },
       {
         "name": "TP3",
-        "price": 21.219499999999996,
-        "source": "8R",
-        "rr": 8.0
+        "price": 17.135949999999998,
+        "source": "7R",
+        "rr": 7.0
       }
     ],
-    "trigger": "Execution map is ready. Wait for price to trade into the entry zone and show a 15M hold/rejection in the setup direction."
+    "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 21.237,
+    "last_price": 21.652,
     "high_24h": 22.841,
-    "low_24h": 21.231,
-    "change_rate_24h": -0.0279,
-    "change_value_24h": -0.61,
-    "hold_vol": 977608.0,
+    "low_24h": 20.986,
+    "change_rate_24h": -0.0089,
+    "change_value_24h": -0.195,
+    "hold_vol": 1018344.0,
     "funding_rate": 5e-05,
-    "index_price": 21.248,
-    "fair_price": 21.237,
-    "timestamp": 1792352398856,
-    "hold_vol_change_pct": 0.22801276215316224,
+    "index_price": 21.642,
+    "fair_price": 21.642,
+    "timestamp": 1792360408830,
+    "hold_vol_change_pct": 4.16690534447345,
     "participation_context": {
-      "regime": "PRICE_DOWN_HOLD_UP",
-      "price_change_pct": -2.038839429863002,
-      "hold_vol_change_pct": 0.22801276215316224,
-      "note": "Giá giảm cùng holdVol tăng; mức tham gia vị thế đang mở rộng theo nhịp giảm.",
+      "regime": "PRICE_UP_HOLD_UP",
+      "price_change_pct": 1.9541366483025038,
+      "hold_vol_change_pct": 4.16690534447345,
+      "note": "Giá tăng cùng holdVol tăng; mức tham gia vị thế đang mở rộng.",
       "signal_weight": "context_only"
     }
   },
@@ -96,8 +98,8 @@
         "time": "2026-10-17T08:00:00+00:00"
       },
       "ssl": {
-        "price": 21.289,
-        "time": "2026-10-15T00:00:00+00:00"
+        "price": 17.539,
+        "time": "2026-09-08T04:00:00+00:00"
       },
       "last_event": {
         "time": "2026-10-18T12:00:00+00:00",
@@ -108,12 +110,12 @@
       "last_sweep": null,
       "last_displacement": null,
       "last_retest": {
-        "index": 415,
-        "time": "2026-10-17T20:00:00+00:00",
+        "index": 419,
+        "time": "2026-10-18T16:00:00+00:00",
         "direction": "bearish",
         "structure_kind": "BOS",
-        "level": 22.585,
-        "source_index": 413
+        "level": 21.88,
+        "source_index": 418
       },
       "setup": {
         "direction": "bearish",
@@ -127,7 +129,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 419,
+        "index": 418,
         "time": "2026-10-18T12:00:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
@@ -135,11 +137,11 @@
         "close": 21.847
       },
       "nearest_supply": {
-        "lower": 24.277,
-        "upper": 25.215,
-        "quality": "MEDIUM",
-        "grade": "B",
-        "mitigations": 2
+        "lower": 22.155,
+        "upper": 22.667,
+        "quality": "HIGH",
+        "grade": "A",
+        "mitigations": 0
       },
       "nearest_demand": {
         "lower": 21.235,
@@ -153,62 +155,62 @@
       "trend": "bearish",
       "regime": "BEARISH_TREND",
       "bsl": {
-        "price": 22.667,
-        "time": "2026-10-18T10:00:00+00:00"
+        "price": 21.898,
+        "time": "2026-10-18T18:00:00+00:00"
       },
-      "ssl": {
-        "price": 21.499,
-        "time": "2026-10-18T16:00:00+00:00"
-      },
+      "ssl": null,
       "last_event": {
-        "time": "2026-10-18T14:00:00+00:00",
+        "time": "2026-10-18T19:00:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
-        "level": 22.097
+        "level": 21.499
       },
       "last_sweep": null,
-      "last_displacement": null,
+      "last_displacement": {
+        "index": 418,
+        "time": "2026-10-18T19:00:00+00:00",
+        "direction": "bearish",
+        "strength": 1.790507364975443,
+        "open": 21.842,
+        "close": 21.295,
+        "high": 21.874,
+        "low": 21.13
+      },
       "last_retest": {
-        "index": 416,
+        "index": 414,
         "time": "2026-10-18T15:00:00+00:00",
         "direction": "bearish",
         "structure_kind": "BOS",
         "level": 22.097,
-        "source_index": 415
+        "source_index": 413
       },
       "setup": {
         "direction": "bearish",
-        "score": 2,
+        "score": 3,
         "confirmed": false,
         "signals": {
           "sweep": false,
-          "displacement": false,
+          "displacement": true,
           "structure": true,
           "retest": true
         }
       },
       "last_structure_signal": {
-        "index": 415,
-        "time": "2026-10-18T14:00:00+00:00",
+        "index": 418,
+        "time": "2026-10-18T19:00:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
-        "level": 22.097,
-        "close": 22.071
+        "level": 21.499,
+        "close": 21.295
       },
       "nearest_supply": {
-        "lower": 22.437,
-        "upper": 22.667,
+        "lower": 21.724,
+        "upper": 21.898,
         "quality": "HIGH",
         "grade": "A+",
         "mitigations": 0
       },
-      "nearest_demand": {
-        "lower": 21.289,
-        "upper": 21.727,
-        "quality": "HIGH",
-        "grade": "A+",
-        "mitigations": 1
-      }
+      "nearest_demand": null
     },
     "15M": {
       "trend": "mixed",
@@ -218,17 +220,17 @@
         "time": "2026-10-18T18:45:00+00:00"
       },
       "ssl": {
-        "price": 21.499,
-        "time": "2026-10-18T16:45:00+00:00"
+        "price": 20.986,
+        "time": "2026-10-18T20:30:00+00:00"
       },
       "last_event": {
-        "time": "2026-10-18T16:30:00+00:00",
+        "time": "2026-10-18T20:30:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
-        "level": 21.673
+        "level": 21.13
       },
       "last_sweep": {
-        "index": 417,
+        "index": 408,
         "time": "2026-10-18T18:45:00+00:00",
         "type": "BSL",
         "direction": "bearish",
@@ -236,14 +238,14 @@
         "extreme": 21.898
       },
       "last_displacement": {
-        "index": 419,
-        "time": "2026-10-18T19:15:00+00:00",
+        "index": 415,
+        "time": "2026-10-18T20:30:00+00:00",
         "direction": "bearish",
-        "strength": 1.640816326530613,
-        "open": 21.813,
-        "close": 21.612,
-        "high": 21.874,
-        "low": 21.601
+        "strength": 1.2640064490124954,
+        "open": 21.288,
+        "close": 21.064,
+        "high": 21.322,
+        "low": 20.986
       },
       "last_retest": null,
       "setup": {
@@ -258,19 +260,19 @@
         }
       },
       "last_structure_signal": {
-        "index": 408,
-        "time": "2026-10-18T16:30:00+00:00",
+        "index": 415,
+        "time": "2026-10-18T20:30:00+00:00",
         "direction": "bearish",
         "kind": "BOS",
-        "level": 21.673,
-        "close": 21.622
+        "level": 21.13,
+        "close": 21.064
       },
       "nearest_supply": {
-        "lower": 21.769,
-        "upper": 21.898,
-        "quality": "HIGH",
-        "grade": "A",
-        "mitigations": 0
+        "lower": 21.252,
+        "upper": 21.388,
+        "quality": "MEDIUM",
+        "grade": "B",
+        "mitigations": 1
       },
       "nearest_demand": null
     }
