@@ -8980,16 +8980,17 @@
       "hold_vol": 1235587.0,
       "ai_bias": null,
       "entered_at": "2026-10-21T02:00:00+00:00",
-      "last_evaluated_at": "2026-10-21T15:00:00+00:00",
-      "bars_observed": 59,
-      "mfe_r": 1.7328609700039435,
+      "last_evaluated_at": "2026-10-21T15:30:00+00:00",
+      "bars_observed": 62,
+      "mfe_r": 2.0884510093838164,
       "mae_r": 0.2756591371561587,
       "targets_hit": [
         1,
-        2
+        2,
+        3
       ],
-      "outcome": "ENTERED",
-      "closed_at": null
+      "outcome": "TP3",
+      "closed_at": "2026-10-21T15:45:00+00:00"
     },
     {
       "id": "2026-10-21T05:20:45.097859+00:00",
@@ -9098,31 +9099,31 @@
       "funding_rate": 5e-05,
       "hold_vol": 1132815.0,
       "ai_bias": null,
-      "entered_at": null,
-      "last_evaluated_at": null,
-      "bars_observed": 0,
-      "mfe_r": 0.0,
-      "mae_r": 0.0,
+      "entered_at": "2026-10-21T16:15:00+00:00",
+      "last_evaluated_at": "2026-10-21T19:00:00+00:00",
+      "bars_observed": 16,
+      "mfe_r": 0.3233908759080107,
+      "mae_r": 0.20449097107612232,
       "targets_hit": [],
-      "outcome": "OPEN",
+      "outcome": "ENTERED",
       "closed_at": null
     }
   ],
-  "last_seen_signature": "long|26.974|27.053|25.827629|(28.752, 29.316, 29.385243)",
-  "updated_at_utc": "2026-10-21T15:23:24.584496+00:00",
+  "last_seen_signature": null,
+  "updated_at_utc": "2026-10-21T19:28:59.516485+00:00",
   "stats": {
     "total_signals": 156,
-    "entered": 129,
-    "resolved": 128,
+    "entered": 130,
+    "resolved": 129,
     "stops": 66,
     "tp1_plus": 56,
     "tp2_plus": 34,
-    "tp3_plus": 19,
+    "tp3_plus": 20,
     "ambiguous": 22,
     "expired_no_entry": 26,
     "timeout_entered": 21,
-    "avg_mfe_r": 2.243173098279314,
-    "avg_mae_r": 1.0937208777028506,
+    "avg_mfe_r": 2.2311408507178414,
+    "avg_mae_r": 1.0868806476518758,
     "by_zone_grade": {
       "NA": {
         "total": 111,
@@ -9138,7 +9139,7 @@
       },
       "B": {
         "total": 15,
-        "entered": 12,
+        "entered": 13,
         "stop": 7,
         "tp1_plus": 5
       },
@@ -9170,7 +9171,7 @@
       },
       "PARTIAL": {
         "total": 36,
-        "entered": 28,
+        "entered": 29,
         "stop": 16,
         "tp1_plus": 9
       }
@@ -9214,7 +9215,7 @@
       },
       "BULLISH_TREND": {
         "total": 34,
-        "entered": 28,
+        "entered": 29,
         "stop": 16,
         "tp1_plus": 10
       },
