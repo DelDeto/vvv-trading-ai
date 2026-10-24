@@ -9739,16 +9739,16 @@
       "hold_vol": 917009.0,
       "ai_bias": null,
       "entered_at": "2026-10-23T01:45:00+00:00",
-      "last_evaluated_at": "2026-10-23T23:00:00+00:00",
-      "bars_observed": 87,
-      "mfe_r": 2.863351402309689,
+      "last_evaluated_at": "2026-10-24T01:15:00+00:00",
+      "bars_observed": 96,
+      "mfe_r": 3.2447796370492625,
       "mae_r": 0.0,
       "targets_hit": [
         1,
         2
       ],
-      "outcome": "ENTERED",
-      "closed_at": null
+      "outcome": "TIMEOUT_ENTERED",
+      "closed_at": "2026-10-24T01:15:00+00:00"
     },
     {
       "id": "2026-10-23T06:28:41.324001+00:00",
@@ -10088,8 +10088,8 @@
       "hold_vol": 1014237.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-23T23:00:00+00:00",
-      "bars_observed": 12,
+      "last_evaluated_at": "2026-10-24T01:15:00+00:00",
+      "bars_observed": 21,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -10144,6 +10144,63 @@
       "funding_rate": 5e-05,
       "hold_vol": 932091.0,
       "ai_bias": null,
+      "entered_at": "2026-10-24T00:00:00+00:00",
+      "last_evaluated_at": "2026-10-24T01:15:00+00:00",
+      "bars_observed": 9,
+      "mfe_r": 6.086956521739118,
+      "mae_r": 0.45403871490827935,
+      "targets_hit": [],
+      "outcome": "ENTERED",
+      "closed_at": null
+    },
+    {
+      "id": "2026-10-24T01:43:55.392520+00:00",
+      "signature": "short|24.529414|24.570586|25.263586|(24.261, 24.034, 23.074)",
+      "created_at": "2026-10-24T01:15:00+00:00",
+      "generated_at_utc": "2026-10-24T01:43:55.392520+00:00",
+      "status": "CONFIRMED SHORT",
+      "direction": "short",
+      "execution_ready": false,
+      "mtf_alignment": "PARTIAL",
+      "regimes": {
+        "4H": "BULLISH_TO_BEARISH_TRANSITION",
+        "1H": "BULLISH_PULLBACK",
+        "15M": "BEARISH_TREND"
+      },
+      "setup_score": 4,
+      "entry_zone": {
+        "lower": 24.529414285714285,
+        "upper": 24.570585714285716,
+        "source": "retest",
+        "grade": null
+      },
+      "entry_mid": 24.55,
+      "stop_loss": 25.263585714285714,
+      "risk": 0.7135857142857134,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 24.261,
+          "source": "15M SSL",
+          "rr": 0.4049968969590224
+        },
+        {
+          "name": "TP2",
+          "price": 24.034,
+          "source": "1H SSL",
+          "rr": 0.7231086464735476
+        },
+        {
+          "name": "TP3",
+          "price": 23.074,
+          "source": "4H SSL",
+          "rr": 2.0684270585173485
+        }
+      ],
+      "participation_regime": "PRICE_DOWN_HOLD_DOWN",
+      "funding_rate": 5e-05,
+      "hold_vol": 889761.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -10154,25 +10211,25 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": "short|25.102043|25.135957|25.259957|(24.221, 24.034, 23.074)",
-  "updated_at_utc": "2026-10-23T23:21:20.797157+00:00",
+  "last_seen_signature": "short|24.529414|24.570586|25.263586|(24.261, 24.034, 23.074)",
+  "updated_at_utc": "2026-10-24T01:43:55.396165+00:00",
   "stats": {
-    "total_signals": 174,
-    "entered": 145,
-    "resolved": 144,
+    "total_signals": 175,
+    "entered": 146,
+    "resolved": 145,
     "stops": 75,
     "tp1_plus": 63,
     "tp2_plus": 38,
     "tp3_plus": 21,
     "ambiguous": 24,
     "expired_no_entry": 27,
-    "timeout_entered": 24,
-    "avg_mfe_r": 2.1702879039671172,
-    "avg_mae_r": 1.0744714731037666,
+    "timeout_entered": 25,
+    "avg_mfe_r": 2.1997269235048673,
+    "avg_mae_r": 1.0702219336640715,
     "by_zone_grade": {
       "NA": {
-        "total": 123,
-        "entered": 100,
+        "total": 124,
+        "entered": 101,
         "stop": 48,
         "tp1_plus": 46
       },
@@ -10215,8 +10272,8 @@
         "tp1_plus": 23
       },
       "PARTIAL": {
-        "total": 46,
-        "entered": 36,
+        "total": 47,
+        "entered": 37,
         "stop": 19,
         "tp1_plus": 13
       }
@@ -10230,12 +10287,12 @@
       },
       "BULLISH_PULLBACK": {
         "total": 6,
-        "entered": 5,
+        "entered": 6,
         "stop": 2,
         "tp1_plus": 4
       },
       "BEARISH_TREND": {
-        "total": 41,
+        "total": 42,
         "entered": 34,
         "stop": 13,
         "tp1_plus": 16
