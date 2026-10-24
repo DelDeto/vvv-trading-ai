@@ -10145,8 +10145,8 @@
       "hold_vol": 932091.0,
       "ai_bias": null,
       "entered_at": "2026-10-24T00:00:00+00:00",
-      "last_evaluated_at": "2026-10-24T20:45:00+00:00",
-      "bars_observed": 87,
+      "last_evaluated_at": "2026-10-24T22:30:00+00:00",
+      "bars_observed": 94,
       "mfe_r": 12.344177561568822,
       "mae_r": 0.45403871490827935,
       "targets_hit": [
@@ -10205,8 +10205,8 @@
       "hold_vol": 889761.0,
       "ai_bias": null,
       "entered_at": "2026-10-24T01:30:00+00:00",
-      "last_evaluated_at": "2026-10-24T20:45:00+00:00",
-      "bars_observed": 78,
+      "last_evaluated_at": "2026-10-24T22:30:00+00:00",
+      "bars_observed": 85,
       "mfe_r": 1.641008188024265,
       "mae_r": 0.5423314848551594,
       "targets_hit": [
@@ -10550,8 +10550,8 @@
       "hold_vol": 745586.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-24T20:45:00+00:00",
-      "bars_observed": 2,
+      "last_evaluated_at": "2026-10-24T22:30:00+00:00",
+      "bars_observed": 9,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -10560,7 +10560,7 @@
     }
   ],
   "last_seen_signature": null,
-  "updated_at_utc": "2026-10-24T21:10:08.408458+00:00",
+  "updated_at_utc": "2026-10-24T22:45:27.333353+00:00",
   "stats": {
     "total_signals": 181,
     "entered": 152,
