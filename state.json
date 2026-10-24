@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-24T22:45:27.328681+00:00",
-  "current_price": 24.121,
+  "generated_at_utc": "2026-10-24T23:20:39.331043+00:00",
+  "current_price": 24.101,
   "status": "WAIT",
   "mtf_alignment": {
     "label": "ALIGNED",
@@ -20,21 +20,21 @@
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 24.121,
-    "high_24h": 25.243,
+    "last_price": 24.101,
+    "high_24h": 25.183,
     "low_24h": 23.379,
-    "change_rate_24h": 0.0104,
-    "change_value_24h": 0.249,
-    "hold_vol": 722899.0,
+    "change_rate_24h": 0.0095,
+    "change_value_24h": 0.229,
+    "hold_vol": 740495.0,
     "funding_rate": 5e-05,
-    "index_price": 24.138,
-    "fair_price": 24.126,
-    "timestamp": 1792881922044,
-    "hold_vol_change_pct": -1.3846277670387657,
+    "index_price": 24.098,
+    "fair_price": 24.098,
+    "timestamp": 1792884037066,
+    "hold_vol_change_pct": 2.434088302791953,
     "participation_context": {
       "regime": "NEUTRAL_MIXED",
-      "price_change_pct": -0.04144047076375436,
-      "hold_vol_change_pct": -1.3846277670387657,
+      "price_change_pct": -0.08291530201898584,
+      "hold_vol_change_pct": 2.434088302791953,
       "note": "Biến động giá/holdVol chưa đủ rõ để tạo bối cảnh participation.",
       "signal_weight": "context_only"
     }
@@ -113,7 +113,7 @@
       },
       "last_sweep": null,
       "last_displacement": {
-        "index": 416,
+        "index": 415,
         "time": "2026-10-24T18:00:00+00:00",
         "direction": "bullish",
         "strength": 1.6262626262626276,
@@ -135,7 +135,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 416,
+        "index": 415,
         "time": "2026-10-24T18:00:00+00:00",
         "direction": "bullish",
         "kind": "CHoCH",
@@ -158,15 +158,15 @@
       }
     },
     "15M": {
-      "trend": "bearish",
-      "regime": "BEARISH_TREND",
+      "trend": "mixed",
+      "regime": "BULLISH_TRANSITION",
       "bsl": {
         "price": 24.385,
         "time": "2026-10-24T20:00:00+00:00"
       },
       "ssl": {
-        "price": 24.026,
-        "time": "2026-10-24T21:00:00+00:00"
+        "price": 24.038,
+        "time": "2026-10-24T22:15:00+00:00"
       },
       "last_event": {
         "time": "2026-10-24T18:00:00+00:00",
@@ -175,7 +175,7 @@
         "level": 23.91
       },
       "last_sweep": {
-        "index": 413,
+        "index": 411,
         "time": "2026-10-24T21:00:00+00:00",
         "type": "SSL",
         "direction": "bullish",

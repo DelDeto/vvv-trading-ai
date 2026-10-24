@@ -10145,16 +10145,16 @@
       "hold_vol": 932091.0,
       "ai_bias": null,
       "entered_at": "2026-10-24T00:00:00+00:00",
-      "last_evaluated_at": "2026-10-24T22:30:00+00:00",
-      "bars_observed": 94,
+      "last_evaluated_at": "2026-10-24T23:00:00+00:00",
+      "bars_observed": 96,
       "mfe_r": 12.344177561568822,
       "mae_r": 0.45403871490827935,
       "targets_hit": [
         1,
         2
       ],
-      "outcome": "ENTERED",
-      "closed_at": null
+      "outcome": "TIMEOUT_ENTERED",
+      "closed_at": "2026-10-24T23:00:00+00:00"
     },
     {
       "id": "2026-10-24T01:43:55.392520+00:00",
@@ -10205,8 +10205,8 @@
       "hold_vol": 889761.0,
       "ai_bias": null,
       "entered_at": "2026-10-24T01:30:00+00:00",
-      "last_evaluated_at": "2026-10-24T22:30:00+00:00",
-      "bars_observed": 85,
+      "last_evaluated_at": "2026-10-24T23:00:00+00:00",
+      "bars_observed": 87,
       "mfe_r": 1.641008188024265,
       "mae_r": 0.5423314848551594,
       "targets_hit": [
@@ -10550,8 +10550,8 @@
       "hold_vol": 745586.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-24T22:30:00+00:00",
-      "bars_observed": 9,
+      "last_evaluated_at": "2026-10-24T23:00:00+00:00",
+      "bars_observed": 11,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -10560,18 +10560,18 @@
     }
   ],
   "last_seen_signature": null,
-  "updated_at_utc": "2026-10-24T22:45:27.333353+00:00",
+  "updated_at_utc": "2026-10-24T23:20:39.335938+00:00",
   "stats": {
     "total_signals": 181,
     "entered": 152,
-    "resolved": 150,
+    "resolved": 151,
     "stops": 78,
     "tp1_plus": 65,
     "tp2_plus": 40,
     "tp3_plus": 21,
     "ambiguous": 26,
     "expired_no_entry": 28,
-    "timeout_entered": 25,
+    "timeout_entered": 26,
     "avg_mfe_r": 2.2002148351518973,
     "avg_mae_r": 1.0802860827562117,
     "by_zone_grade": {
