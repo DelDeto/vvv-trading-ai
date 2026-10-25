@@ -10205,8 +10205,8 @@
       "hold_vol": 889761.0,
       "ai_bias": null,
       "entered_at": "2026-10-24T01:30:00+00:00",
-      "last_evaluated_at": "2026-10-24T23:00:00+00:00",
-      "bars_observed": 87,
+      "last_evaluated_at": "2026-10-25T00:15:00+00:00",
+      "bars_observed": 92,
       "mfe_r": 1.641008188024265,
       "mae_r": 0.5423314848551594,
       "targets_hit": [
@@ -10550,8 +10550,65 @@
       "hold_vol": 745586.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-24T23:00:00+00:00",
-      "bars_observed": 11,
+      "last_evaluated_at": "2026-10-25T00:15:00+00:00",
+      "bars_observed": 16,
+      "mfe_r": 0.0,
+      "mae_r": 0.0,
+      "targets_hit": [],
+      "outcome": "OPEN",
+      "closed_at": null
+    },
+    {
+      "id": "2026-10-25T00:35:00.063084+00:00",
+      "signature": "long|24.242|24.325|23.727771|(24.407, 24.937, 28.3)",
+      "created_at": "2026-10-25T00:15:00+00:00",
+      "generated_at_utc": "2026-10-25T00:35:00.063084+00:00",
+      "status": "DEVELOPING LONG",
+      "direction": "long",
+      "execution_ready": false,
+      "mtf_alignment": "ALIGNED",
+      "regimes": {
+        "4H": "BULLISH_TREND",
+        "1H": "BULLISH_TREND",
+        "15M": "BULLISH_TRANSITION"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 24.242,
+        "upper": 24.325,
+        "source": "bullish FVG",
+        "grade": null
+      },
+      "entry_mid": 24.2835,
+      "stop_loss": 23.727771428571426,
+      "risk": 0.555728571428574,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 24.407,
+          "source": "1H BSL",
+          "rr": 0.22223079098223583
+        },
+        {
+          "name": "TP2",
+          "price": 24.937,
+          "source": "15M BSL",
+          "rr": 1.1759337806226027
+        },
+        {
+          "name": "TP3",
+          "price": 28.3,
+          "source": "4H BSL",
+          "rr": 7.22744916583118
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_UP",
+      "funding_rate": 5e-05,
+      "hold_vol": 758532.0,
+      "ai_bias": null,
+      "entered_at": null,
+      "last_evaluated_at": null,
+      "bars_observed": 0,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -10559,10 +10616,10 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": null,
-  "updated_at_utc": "2026-10-24T23:20:39.335938+00:00",
+  "last_seen_signature": "long|24.242|24.325|23.727771|(24.407, 24.937, 28.3)",
+  "updated_at_utc": "2026-10-25T00:35:00.067517+00:00",
   "stats": {
-    "total_signals": 181,
+    "total_signals": 182,
     "entered": 152,
     "resolved": 151,
     "stops": 78,
@@ -10576,7 +10633,7 @@
     "avg_mae_r": 1.0802860827562117,
     "by_zone_grade": {
       "NA": {
-        "total": 128,
+        "total": 129,
         "entered": 105,
         "stop": 50,
         "tp1_plus": 48
@@ -10614,7 +10671,7 @@
         "tp1_plus": 27
       },
       "ALIGNED": {
-        "total": 71,
+        "total": 72,
         "entered": 60,
         "stop": 28,
         "tp1_plus": 23
@@ -10658,7 +10715,7 @@
         "tp1_plus": 2
       },
       "BULLISH_TRANSITION": {
-        "total": 33,
+        "total": 34,
         "entered": 29,
         "stop": 19,
         "tp1_plus": 6
