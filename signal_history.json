@@ -11949,6 +11949,65 @@
       "funding_rate": 5e-05,
       "hold_vol": 748811.0,
       "ai_bias": null,
+      "entered_at": "2026-10-27T12:15:00+00:00",
+      "last_evaluated_at": "2026-10-27T15:00:00+00:00",
+      "bars_observed": 12,
+      "mfe_r": 0.5019925381940962,
+      "mae_r": 0.22621435898366993,
+      "targets_hit": [
+        1
+      ],
+      "outcome": "ENTERED",
+      "closed_at": null
+    },
+    {
+      "id": "2026-10-27T15:29:05.561334+00:00",
+      "signature": "long|25.3|25.432|24.677157|(25.771, 25.874, 26.054843)",
+      "created_at": "2026-10-27T15:00:00+00:00",
+      "generated_at_utc": "2026-10-27T15:29:05.561334+00:00",
+      "status": "DEVELOPING LONG",
+      "direction": "long",
+      "execution_ready": false,
+      "mtf_alignment": "ALIGNED",
+      "regimes": {
+        "4H": "BULLISH_TRANSITION",
+        "1H": "BULLISH_TRANSITION",
+        "15M": "BULLISH_TRANSITION"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 25.3,
+        "upper": 25.432,
+        "source": "demand",
+        "grade": "A"
+      },
+      "entry_mid": 25.366,
+      "stop_loss": 24.677157142857144,
+      "risk": 0.6888428571428555,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 25.771,
+          "source": "1H BSL",
+          "rr": 0.5879425122876905
+        },
+        {
+          "name": "TP2",
+          "price": 25.874,
+          "source": "15M BSL",
+          "rr": 0.7374686326966553
+        },
+        {
+          "name": "TP3",
+          "price": 26.054842857142855,
+          "source": "1R",
+          "rr": 1.0
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_UP",
+      "funding_rate": 5e-05,
+      "hold_vol": 768707.0,
+      "ai_bias": null,
       "entered_at": null,
       "last_evaluated_at": null,
       "bars_observed": 0,
@@ -11959,27 +12018,27 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": "long|25.441136|25.484864|24.676136|(25.752, 25.874, 26.249864)",
-  "updated_at_utc": "2026-10-27T12:25:34.991176+00:00",
+  "last_seen_signature": "long|25.3|25.432|24.677157|(25.771, 25.874, 26.054843)",
+  "updated_at_utc": "2026-10-27T15:29:05.564105+00:00",
   "stats": {
-    "total_signals": 205,
-    "entered": 174,
+    "total_signals": 206,
+    "entered": 175,
     "resolved": 174,
     "stops": 89,
-    "tp1_plus": 76,
+    "tp1_plus": 77,
     "tp2_plus": 47,
     "tp3_plus": 21,
     "ambiguous": 29,
     "expired_no_entry": 30,
     "timeout_entered": 35,
-    "avg_mfe_r": 2.242943049718849,
-    "avg_mae_r": 1.0738030342181164,
+    "avg_mfe_r": 2.2329947610815646,
+    "avg_mae_r": 1.0689596703596338,
     "by_zone_grade": {
       "NA": {
         "total": 144,
-        "entered": 119,
+        "entered": 120,
         "stop": 53,
-        "tp1_plus": 55
+        "tp1_plus": 56
       },
       "A+": {
         "total": 23,
@@ -11994,7 +12053,7 @@
         "tp1_plus": 5
       },
       "A": {
-        "total": 16,
+        "total": 17,
         "entered": 15,
         "stop": 9,
         "tp1_plus": 8
@@ -12014,16 +12073,16 @@
         "tp1_plus": 32
       },
       "ALIGNED": {
-        "total": 78,
+        "total": 79,
         "entered": 67,
         "stop": 31,
         "tp1_plus": 25
       },
       "PARTIAL": {
         "total": 57,
-        "entered": 47,
+        "entered": 48,
         "stop": 23,
-        "tp1_plus": 19
+        "tp1_plus": 20
       }
     },
     "by_15m_regime": {
@@ -12058,16 +12117,16 @@
         "tp1_plus": 3
       },
       "BULLISH_TRANSITION": {
-        "total": 37,
+        "total": 38,
         "entered": 32,
         "stop": 21,
         "tp1_plus": 8
       },
       "BULLISH_TREND": {
         "total": 44,
-        "entered": 37,
+        "entered": 38,
         "stop": 19,
-        "tp1_plus": 12
+        "tp1_plus": 13
       },
       "BULLISH_TO_BEARISH_TRANSITION": {
         "total": 13,
