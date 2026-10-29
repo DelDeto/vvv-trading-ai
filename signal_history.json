@@ -12239,8 +12239,8 @@
       "hold_vol": 794348.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-28T23:00:00+00:00",
-      "bars_observed": 88,
+      "last_evaluated_at": "2026-10-29T00:45:00+00:00",
+      "bars_observed": 95,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -12296,8 +12296,8 @@
       "hold_vol": 845869.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-28T23:00:00+00:00",
-      "bars_observed": 78,
+      "last_evaluated_at": "2026-10-29T00:45:00+00:00",
+      "bars_observed": 85,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -12526,13 +12526,13 @@
       "funding_rate": 4.2e-05,
       "hold_vol": 1111026.0,
       "ai_bias": null,
-      "entered_at": null,
-      "last_evaluated_at": "2026-10-28T23:00:00+00:00",
-      "bars_observed": 8,
-      "mfe_r": 0.0,
-      "mae_r": 0.0,
+      "entered_at": "2026-10-28T23:30:00+00:00",
+      "last_evaluated_at": "2026-10-29T00:45:00+00:00",
+      "bars_observed": 15,
+      "mfe_r": 0.5420409330251812,
+      "mae_r": 0.18012437158990766,
       "targets_hit": [],
-      "outcome": "OPEN",
+      "outcome": "ENTERED",
       "closed_at": null
     },
     {
@@ -12583,21 +12583,21 @@
       "funding_rate": 4.8e-05,
       "hold_vol": 1203426.0,
       "ai_bias": null,
-      "entered_at": null,
-      "last_evaluated_at": null,
-      "bars_observed": 0,
-      "mfe_r": 0.0,
-      "mae_r": 0.0,
+      "entered_at": "2026-10-28T23:30:00+00:00",
+      "last_evaluated_at": "2026-10-29T00:45:00+00:00",
+      "bars_observed": 7,
+      "mfe_r": 0.5482786460529925,
+      "mae_r": 0.18219721161145727,
       "targets_hit": [],
-      "outcome": "OPEN",
+      "outcome": "ENTERED",
       "closed_at": null
     }
   ],
-  "last_seen_signature": "short|24.117236|24.166764|24.734764|(23.758, 23.625, 23.379)",
-  "updated_at_utc": "2026-10-28T23:28:21.736243+00:00",
+  "last_seen_signature": null,
+  "updated_at_utc": "2026-10-29T01:08:24.244530+00:00",
   "stats": {
     "total_signals": 216,
-    "entered": 182,
+    "entered": 184,
     "resolved": 182,
     "stops": 94,
     "tp1_plus": 78,
@@ -12606,12 +12606,12 @@
     "ambiguous": 31,
     "expired_no_entry": 30,
     "timeout_entered": 35,
-    "avg_mfe_r": 2.2099574452179755,
-    "avg_mae_r": 1.071550417353272,
+    "avg_mfe_r": 2.191861818525814,
+    "avg_mae_r": 1.0618722692472655,
     "by_zone_grade": {
       "NA": {
         "total": 151,
-        "entered": 123,
+        "entered": 125,
         "stop": 55,
         "tp1_plus": 56
       },
@@ -12643,7 +12643,7 @@
     "by_mtf_alignment": {
       "CONFLICT": {
         "total": 74,
-        "entered": 61,
+        "entered": 63,
         "stop": 36,
         "tp1_plus": 32
       },
@@ -12663,7 +12663,7 @@
     "by_15m_regime": {
       "BEARISH_TRANSITION": {
         "total": 43,
-        "entered": 35,
+        "entered": 37,
         "stop": 15,
         "tp1_plus": 19
       },
