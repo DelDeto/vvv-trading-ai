@@ -12296,13 +12296,13 @@
       "hold_vol": 845869.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-29T02:15:00+00:00",
-      "bars_observed": 91,
+      "last_evaluated_at": "2026-10-29T03:30:00+00:00",
+      "bars_observed": 96,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
-      "outcome": "OPEN",
-      "closed_at": null
+      "outcome": "EXPIRED_NO_ENTRY",
+      "closed_at": "2026-10-29T03:30:00+00:00"
     },
     {
       "id": "2026-10-28T13:59:11.108010+00:00",
@@ -12649,8 +12649,8 @@
       "hold_vol": 1083696.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": null,
-      "bars_observed": 0,
+      "last_evaluated_at": "2026-10-29T06:45:00+00:00",
+      "bars_observed": 18,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -12658,8 +12658,8 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": "short|23.795326|23.832674|24.015343|(23.379, 23.209971, 23.008629)",
-  "updated_at_utc": "2026-10-29T02:42:45.840355+00:00",
+  "last_seen_signature": null,
+  "updated_at_utc": "2026-10-29T07:11:13.968766+00:00",
   "stats": {
     "total_signals": 217,
     "entered": 184,
@@ -12669,7 +12669,7 @@
     "tp2_plus": 51,
     "tp3_plus": 24,
     "ambiguous": 31,
-    "expired_no_entry": 31,
+    "expired_no_entry": 32,
     "timeout_entered": 35,
     "avg_mfe_r": 2.2092194145004362,
     "avg_mae_r": 1.0618722692472655,
