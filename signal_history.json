@@ -12649,8 +12649,65 @@
       "hold_vol": 1083696.0,
       "ai_bias": null,
       "entered_at": null,
-      "last_evaluated_at": "2026-10-29T06:45:00+00:00",
-      "bars_observed": 18,
+      "last_evaluated_at": "2026-10-29T08:30:00+00:00",
+      "bars_observed": 25,
+      "mfe_r": 0.0,
+      "mae_r": 0.0,
+      "targets_hit": [],
+      "outcome": "OPEN",
+      "closed_at": null
+    },
+    {
+      "id": "2026-10-29T08:58:41.133760+00:00",
+      "signature": "long|23.286|23.359|22.828107|(23.686, 24.71, 24.805679)",
+      "created_at": "2026-10-29T08:30:00+00:00",
+      "generated_at_utc": "2026-10-29T08:58:41.133760+00:00",
+      "status": "DEVELOPING LONG",
+      "direction": "long",
+      "execution_ready": false,
+      "mtf_alignment": "CONFLICT",
+      "regimes": {
+        "4H": "BEARISH_TRANSITION",
+        "1H": "BEARISH_TREND",
+        "15M": "BULLISH_TRANSITION"
+      },
+      "setup_score": 2,
+      "entry_zone": {
+        "lower": 23.286,
+        "upper": 23.359,
+        "source": "bullish FVG",
+        "grade": null
+      },
+      "entry_mid": 23.3225,
+      "stop_loss": 22.828107142857142,
+      "risk": 0.4943928571428593,
+      "targets": [
+        {
+          "name": "TP1",
+          "price": 23.686,
+          "source": "15M BSL",
+          "rr": 0.7352452503070079
+        },
+        {
+          "name": "TP2",
+          "price": 24.71,
+          "source": "4H BSL",
+          "rr": 2.806472585422221
+        },
+        {
+          "name": "TP3",
+          "price": 24.80567857142858,
+          "source": "3R",
+          "rr": 3.0
+        }
+      ],
+      "participation_regime": "PRICE_UP_HOLD_DOWN",
+      "funding_rate": 5e-05,
+      "hold_vol": 965322.0,
+      "ai_bias": null,
+      "entered_at": null,
+      "last_evaluated_at": null,
+      "bars_observed": 0,
       "mfe_r": 0.0,
       "mae_r": 0.0,
       "targets_hit": [],
@@ -12658,10 +12715,10 @@
       "closed_at": null
     }
   ],
-  "last_seen_signature": null,
-  "updated_at_utc": "2026-10-29T07:11:13.968766+00:00",
+  "last_seen_signature": "long|23.286|23.359|22.828107|(23.686, 24.71, 24.805679)",
+  "updated_at_utc": "2026-10-29T08:58:41.138175+00:00",
   "stats": {
-    "total_signals": 217,
+    "total_signals": 218,
     "entered": 184,
     "resolved": 184,
     "stops": 94,
@@ -12675,7 +12732,7 @@
     "avg_mae_r": 1.0618722692472655,
     "by_zone_grade": {
       "NA": {
-        "total": 152,
+        "total": 153,
         "entered": 125,
         "stop": 55,
         "tp1_plus": 58
@@ -12707,7 +12764,7 @@
     },
     "by_mtf_alignment": {
       "CONFLICT": {
-        "total": 74,
+        "total": 75,
         "entered": 63,
         "stop": 36,
         "tp1_plus": 34
@@ -12757,7 +12814,7 @@
         "tp1_plus": 3
       },
       "BULLISH_TRANSITION": {
-        "total": 40,
+        "total": 41,
         "entered": 35,
         "stop": 23,
         "tp1_plus": 8
