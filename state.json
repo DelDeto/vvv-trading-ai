@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-31T20:40:04.222508+00:00",
-  "current_price": 23.046,
+  "generated_at_utc": "2026-10-31T21:57:35.023722+00:00",
+  "current_price": 23.198,
   "status": "DEVELOPING SHORT",
   "mtf_alignment": {
     "label": "CONFLICT",
@@ -19,7 +19,7 @@
       "Higher-timeframe alignment is CONFLICT",
       "15M setup has fewer than 3/4 signals",
       "15M displacement is missing",
-      "First liquidity target is only 0.44R"
+      "First liquidity target is only 0.14R"
     ],
     "higher_tf_conflict": false,
     "mtf_alignment": {
@@ -33,60 +33,60 @@
       "notes": []
     },
     "entry_zone_grade": null,
-    "first_target_rr": 0.44447222829994176,
+    "first_target_rr": 0.139460525868228,
     "direction": "short",
     "setup_state": "watch",
     "setup_score": 2,
     "entry_zone": {
-      "lower": 23.00335,
-      "upper": 23.02665,
-      "source": "retest",
+      "lower": 23.14,
+      "upper": 23.146,
+      "source": "bearish FVG",
       "zone_grade": null,
       "zone_quality": null
     },
-    "entry_mid": 23.015,
-    "stop_loss": 24.61465,
-    "risk": 1.5996500000000005,
+    "entry_mid": 23.143,
+    "stop_loss": 24.61295,
+    "risk": 1.4699500000000008,
     "targets": [
       {
         "name": "TP1",
-        "price": 22.304,
+        "price": 22.938,
         "source": "15M SSL",
-        "rr": 0.44447222829994176
+        "rr": 0.139460525868228
       },
       {
         "name": "TP2",
-        "price": 22.069,
-        "source": "4H SSL",
-        "rr": 0.5913793642359274
+        "price": 22.304,
+        "source": "1H SSL",
+        "rr": 0.5707677131875246
       },
       {
         "name": "TP3",
-        "price": 21.41535,
-        "source": "1R",
-        "rr": 1.0
+        "price": 22.069,
+        "source": "4H SSL",
+        "rr": 0.7306370964998816
       }
     ],
     "trigger": "WATCH ONLY. Do not treat the zone as an entry until the blockers clear."
   },
   "market_snapshot": {
     "symbol": "VVV_USDT",
-    "last_price": 23.046,
+    "last_price": 23.198,
     "high_24h": 23.521,
     "low_24h": 22.069,
-    "change_rate_24h": -0.011,
-    "change_value_24h": -0.257,
-    "hold_vol": 1062221.0,
+    "change_rate_24h": -0.0045,
+    "change_value_24h": -0.105,
+    "hold_vol": 1133217.0,
     "funding_rate": 5e-05,
-    "index_price": 23.036,
-    "fair_price": 23.037,
-    "timestamp": 1793479201996,
-    "hold_vol_change_pct": 2.6174566019435295,
+    "index_price": 23.177,
+    "fair_price": 23.198,
+    "timestamp": 1793483851112,
+    "hold_vol_change_pct": 6.683731539858466,
     "participation_context": {
-      "regime": "PRICE_DOWN_HOLD_UP",
-      "price_change_pct": -0.2683053487969585,
-      "hold_vol_change_pct": 2.6174566019435295,
-      "note": "Giá giảm cùng holdVol tăng; mức tham gia vị thế đang mở rộng theo nhịp giảm.",
+      "regime": "PRICE_UP_HOLD_UP",
+      "price_change_pct": 0.6595504642888181,
+      "hold_vol_change_pct": 6.683731539858466,
+      "note": "Giá tăng cùng holdVol tăng; mức tham gia vị thế đang mở rộng.",
       "signal_weight": "context_only"
     }
   },
@@ -191,7 +191,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 415,
+        "index": 414,
         "time": "2026-10-31T15:00:00+00:00",
         "direction": "bullish",
         "kind": "CHoCH",
@@ -214,15 +214,15 @@
       }
     },
     "15M": {
-      "trend": "mixed",
-      "regime": "BEARISH_TRANSITION",
+      "trend": "bearish",
+      "regime": "BEARISH_TREND",
       "bsl": {
         "price": 23.338,
         "time": "2026-10-31T18:15:00+00:00"
       },
       "ssl": {
-        "price": 22.304,
-        "time": "2026-10-31T14:00:00+00:00"
+        "price": 22.938,
+        "time": "2026-10-31T21:00:00+00:00"
       },
       "last_event": {
         "time": "2026-10-31T19:45:00+00:00",
@@ -233,12 +233,12 @@
       "last_sweep": null,
       "last_displacement": null,
       "last_retest": {
-        "index": 418,
+        "index": 413,
         "time": "2026-10-31T20:00:00+00:00",
         "direction": "bearish",
         "structure_kind": "CHoCH",
         "level": 23.015,
-        "source_index": 417
+        "source_index": 412
       },
       "setup": {
         "direction": "bearish",
@@ -252,7 +252,7 @@
         }
       },
       "last_structure_signal": {
-        "index": 417,
+        "index": 412,
         "time": "2026-10-31T19:45:00+00:00",
         "direction": "bearish",
         "kind": "CHoCH",
