@@ -1,0 +1,72 @@
+name: VVV Reliability Validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - '.github/workflows/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install and verify pinned runtime
+        run: |
+          pip install -r requirements.txt
+          pip check
+          python -c 'import six, mplfinance, pandas, numpy, matplotlib, requests, openai; import main, telegram_notify'
+          python -m compileall -q .
+      - name: Offline regression tests
+        run: python -m unittest -v test_reliability
+      - name: Live MEXC analysis without state publication
+        run: |
+          python main.py
+          python self_check.py
+          test -s output/VVVUSDT_4H.png
+          test -s output/VVVUSDT_1H.png
+          test -s output/VVVUSDT_15M.png
+      - name: OpenRouter live review (optional fallback)
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: qwen/qwen3.8-27b:free
+          OPENROUTER_FALLBACK_MODEL: openrouter/free
+        run: python ai_analysis.py
+      - name: Telegram credentials and chat reachability (no send)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import os, requests
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat = os.environ["TELEGRAM_CHAT_ID"]
+          if not token or not chat:
+              raise SystemExit("VVV Telegram credentials missing")
+          for method, data in [("getMe", {}), ("getChat", {"chat_id": chat})]:
+              try:
+                  r = requests.post(f"https://api.telegram.org/bot{token}/{method}", data=data, timeout=20)
+                  ok = r.status_code == 200 and r.json().get("ok")
+              except Exception:
+                  ok = False
+              if not ok:
+                  raise SystemExit(f"VVV Telegram {method} failed")
+              print(f"VVV Telegram {method} OK (read only)")
+          PY
+      - name: Upload dry-run evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: VVV-validation-evidence
+          path: output/
+          if-no-files-found: ignore
+          retention-days: 7
