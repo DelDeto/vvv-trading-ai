@@ -48,7 +48,7 @@ def _load_delivery_state():
         }
 
 
-def _save_delivery_state():
+def _save_delivery_state(receipt, slot):
     previous = _load_delivery_state()
 
     event_label = (
@@ -64,21 +64,12 @@ def _save_delivery_state():
     )
 
     is_auto_delivery = (
-        RUN_EVENT in (
-            "schedule",
-            "push",
-        )
+        RUN_EVENT == "schedule"
         or RUN_SOURCE == "watchdog"
     )
 
     if is_auto_delivery:
-        last_auto_slot = (
-            datetime.now(
-                LOCAL_TZ
-            ).strftime(
-                "%Y-%m-%dT%H"
-            )
-        )
+        last_auto_slot = slot
 
     TELEGRAM_STATE_PATH.write_text(
         json.dumps(
@@ -89,6 +80,7 @@ def _save_delivery_state():
                     ).isoformat()
                 ),
                 "last_event": event_label,
+                "message_id": receipt["result"]["message_id"],
                 "last_auto_slot": (
                     last_auto_slot
                 ),
@@ -265,70 +257,38 @@ def _send_text_update():
     )
 
     if not source.exists():
-        print(
-            "No hourly or AI update file found; "
-            "skipping Telegram text update."
-        )
+        raise FileNotFoundError("Missing VVV text report")
+    text = source.read_text(encoding="utf-8").strip()
+    if not text:
+        raise RuntimeError("Empty VVV text report")
+    print("Telegram text mode:", "hybrid AI" if source == AI_UPDATE_PATH else "Python fallback")
+    # One acknowledged core report per slot. Long reports use a document,
+    # avoiding partial multi-message delivery and duplicate text on retry.
+    if len(text.encode("utf-16-le")) // 2 <= 3900:
+        return _post("sendMessage", data={"chat_id": CHAT_ID, "text": text,
+                     "disable_web_page_preview": "true"})
+    import io
+    with io.BytesIO(text.encode("utf-8")) as stream:
+        return _post("sendDocument", data={"chat_id": CHAT_ID,
+                     "caption": "VVV_USDT | MEXC hourly report"},
+                     files={"document": ("VVV_hourly_report.txt", stream, "text/plain")})
+
+
+
+def _send_chart(report, timeframe, path):
+    if not path.exists():
+        print(f"::warning::Chart missing: {path}")
         return
+    with path.open("rb") as image_file:
+        _post("sendPhoto", data={"chat_id": CHAT_ID,
+              "caption": _short_caption(report, timeframe)}, files={"photo": image_file})
+    print(f"Telegram sent: {path}")
 
-    text = source.read_text(
-        encoding="utf-8"
-    )
-
-    mode = (
-        "hybrid AI"
-        if source == AI_UPDATE_PATH
-        else "Python fallback"
-    )
-
-    print(
-        f"Telegram text mode: {mode}"
-    )
-
-    for chunk in _split_message(text):
-        _post(
-            "sendMessage",
-            data={
-                "chat_id": CHAT_ID,
-                "text": chunk,
-                "disable_web_page_preview": "true",
-            },
-        )
-
-
-def _send_charts(report):
-    for timeframe, path in CHARTS:
-        if not path.exists():
-            print(
-                f"Chart missing: {path}"
-            )
-            continue
-
-        caption = _short_caption(
-            report,
-            timeframe,
-        )
-
-        with path.open("rb") as image_file:
-            _post(
-                "sendPhoto",
-                data={
-                    "chat_id": CHAT_ID,
-                    "caption": caption,
-                },
-                files={
-                    "photo": image_file,
-                },
-            )
-
-        print(
-            f"Telegram sent: {path}"
-        )
 
 
 def main():
     if not _check_config():
-        return 0
+        raise RuntimeError("VVV Telegram secrets missing")
 
     if not REPORT_PATH.exists():
         raise FileNotFoundError(
@@ -341,10 +301,21 @@ def main():
         )
     )
 
-    _send_text_update()
-    _send_charts(report)
-
-    _save_delivery_state()
+    slot = datetime.now(LOCAL_TZ).strftime("%Y-%m-%dT%H")
+    automatic = RUN_EVENT == "schedule" or RUN_SOURCE == "watchdog"
+    if automatic and _load_delivery_state().get("last_auto_slot") == slot:
+        print("VVV automatic delivery already completed for", slot)
+        return 0
+    receipt = _send_text_update()
+    _save_delivery_state(receipt, slot)
+    print("VVV Telegram acknowledged message_id=", receipt["result"]["message_id"])
+    # Charts are supplemental. Never resend a successful core report because
+    # an optional photo failed.
+    for item in CHARTS:
+        try:
+            _send_chart(report, *item)
+        except Exception as exc:
+            print(f"::warning::VVV photo unavailable {item[0]}: {type(exc).__name__}")
 
     print(
         "Telegram notification completed."
