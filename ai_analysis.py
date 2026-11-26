@@ -17,7 +17,7 @@ AI_TEXT_PATH = OUTPUT_DIR / "VVVUSDT_ai_analysis.txt"
 
 MODEL = os.getenv(
     "OPENROUTER_MODEL",
-    "qwen/qwen3.8-27b:free",
+    "openrouter/free",
 )
 
 FALLBACK_MODEL = os.getenv(
@@ -1998,7 +1998,7 @@ def _request_analysis(
                     ),
                 },
             },
-            max_tokens=1800,
+            max_tokens=4096,
             temperature=0.1,
             extra_body=extra_body,
         )
@@ -2085,7 +2085,7 @@ def main():
             "OPENROUTER_API_KEY is not configured."
         )
 
-        return 0
+        raise RuntimeError("VVV OpenRouter credentials missing")
 
     if not INPUT_PATH.exists():
         raise FileNotFoundError(
@@ -2109,7 +2109,7 @@ def main():
         base_url=(
             OPENROUTER_BASE_URL
         ),
-        timeout=35.0,
+        timeout=40.0,
         max_retries=0,
         default_headers={
             "X-Title": (
@@ -2130,6 +2130,10 @@ def main():
         candidate_models.append(
             FALLBACK_MODEL
         )
+
+    # A free router can select a different provider on a second attempt.
+    if candidate_models == ["openrouter/free"]:
+        candidate_models.append("openrouter/free")
 
     result = None
     routed_model = None

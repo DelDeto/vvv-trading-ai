@@ -18,15 +18,19 @@ concurrency:
 jobs:
   check-delivery:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Check current local hourly slot
         id: health
         shell: bash
         run: |
+          set -o pipefail
           python - <<'PY' | tee /tmp/vvv-watchdog.txt
           import json
           from datetime import datetime
@@ -91,7 +95,25 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "Automatic VVV delivery is missing for the current local hour."
-          gh workflow run vvv-hourly.yml --ref main -f source=watchdog
+          ACTIVE=$(gh run list --workflow vvv-hourly.yml --branch main --limit 20 --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress" or .status == "waiting" or .status == "pending")] | length')
+          if [ "$ACTIVE" -gt 0 ]; then
+            echo "VVV worker is already queued or running."
+          else
+            gh workflow run vvv-hourly.yml --ref main -f source=watchdog
+          fi
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          try:
+              last = json.loads(Path("telegram_state.json").read_text()).get("last_sent_utc")
+              age = (datetime.now(timezone.utc) - datetime.fromisoformat(last)).total_seconds()
+          except Exception:
+              age = float("inf")
+          if age >= 7200:
+              print("::error::VVV delivery overdue by at least two hours; inspect worker logs.")
+              raise SystemExit(1)
+          PY
 
       - name: Healthy
         if: steps.health.outputs.missing != 'true'

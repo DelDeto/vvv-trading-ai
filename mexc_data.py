@@ -1,4 +1,5 @@
 import time
+import math
 import requests
 import pandas as pd
 
@@ -17,6 +18,18 @@ INTERVAL_SECONDS = {
     "1h": 60 * 60,
     "4h": 4 * 60 * 60,
 }
+
+
+def _get_with_retry(url, **kwargs):
+    for attempt in range(3):
+        try:
+            response = requests.get(url, **kwargs)
+            if response.status_code not in (429, 500, 502, 503, 504) or attempt == 2:
+                return response
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt == 2:
+                raise
+        time.sleep(2 ** attempt)
 
 
 def get_klines(interval="4h", limit=200):
@@ -53,7 +66,7 @@ def get_klines(interval="4h", limit=200):
         f"{SYMBOL} | {interval} ({mexc_interval}) | ~{limit} candles"
     )
 
-    response = requests.get(
+    response = _get_with_retry(
         url,
         params=params,
         timeout=20
@@ -88,6 +101,8 @@ def get_klines(interval="4h", limit=200):
         )
 
     lengths = [len(data[key]) for key in required]
+    if len(set(lengths)) != 1:
+        raise RuntimeError('MEXC mismatched candle field lengths')
     row_count = min(lengths) if lengths else 0
 
     if row_count == 0:
@@ -116,6 +131,14 @@ def get_klines(interval="4h", limit=200):
 
     df.set_index("open_time", inplace=True)
     df.sort_index(inplace=True)
+
+    if df.index.has_duplicates or df.index.hasnans or not df.map(math.isfinite).all().all():
+        raise RuntimeError('MEXC invalid or duplicated candle data')
+    if ((df[['open', 'high', 'low', 'close']] <= 0).any().any() or
+            (df['volume'] < 0).any() or
+            (df['high'] < df[['open', 'low', 'close']].max(axis=1)).any() or
+            (df['low'] > df[['open', 'high', 'close']].min(axis=1)).any()):
+        raise RuntimeError('MEXC invalid OHLCV relationships')
 
     # Giữ đúng số nến gần nhất mà caller yêu cầu.
     df = df.tail(limit)
@@ -190,6 +213,11 @@ def get_closed_klines(
             )
         )
 
+    if now - (closed.index[-1] + candle_delta) > candle_delta + pd.Timedelta(seconds=120):
+        raise RuntimeError(f'MEXC stale closed candles for {interval}')
+    if (closed.index.to_series().diff().dropna() != candle_delta).any():
+        raise RuntimeError(f'MEXC missing closed candles for {interval}')
+
     dropped = len(raw) - len(closed)
 
     print(
@@ -216,7 +244,7 @@ def get_contract_snapshot():
         f"{BASE_URL}/api/v1/contract/ticker"
     )
 
-    response = requests.get(
+    response = _get_with_retry(
         url,
         params={
             "symbol": SYMBOL,
@@ -338,6 +366,11 @@ def get_contract_snapshot():
             data.get("timestamp")
         ),
     }
+
+    if snapshot['symbol'] != SYMBOL or not math.isfinite(snapshot['last_price'] or 0) or (snapshot['last_price'] or 0) <= 0:
+        raise RuntimeError('MEXC invalid VVV ticker')
+    if snapshot['timestamp'] is None or abs(time.time() - float(snapshot['timestamp']) / 1000) > 300:
+        raise RuntimeError('MEXC stale or invalid ticker timestamp')
 
     print(
         (
