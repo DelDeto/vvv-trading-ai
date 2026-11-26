@@ -6,7 +6,6 @@ from mexc_data import (
     get_closed_klines,
     get_contract_snapshot,
 )
-from chart import create_chart
 from trade_plan import build_trade_plan
 from signal_journal import (
     update_signal_journal,
@@ -2553,50 +2552,27 @@ def main():
             indent=2,
         )
 
-    # Real candlestick charts + SMC overlay
-    create_chart(
-        df_4h,
-        "4H",
-        "output/VVVUSDT_4H.png",
-        candles=160,
-        exchange="MEXC",
-        analysis=smc_4h,
-        market_snapshot=(
-            market_snapshot
-        ),
-    )
-
-    create_chart(
-        df_1h,
-        "1H",
-        "output/VVVUSDT_1H.png",
-        candles=160,
-        exchange="MEXC",
-        analysis=smc_1h,
-        market_snapshot=(
-            market_snapshot
-        ),
-    )
-
-    create_chart(
-        df_15m,
-        "15M",
-        "output/VVVUSDT_15M.png",
-        candles=160,
-        exchange="MEXC",
-        analysis=smc_15m,
-        trade_plan=trade_plan,
-        market_snapshot=(
-            market_snapshot
-        ),
-    )
-
-    print()
-    print("=" * 50)
-    print(
-        "ALL MEXC SMC CHARTS CREATED"
-    )
-    print("=" * 50)
+    # Charts are optional; deterministic analysis and text must survive.
+    for timeframe, frame, analysis in (
+        ("4H", df_4h, smc_4h),
+        ("1H", df_1h, smc_1h),
+        ("15M", df_15m, smc_15m),
+    ):
+        path = f"output/VVVUSDT_{timeframe}.png"
+        try:
+            from chart import create_chart
+            if os.path.exists(path):
+                os.remove(path)
+            kwargs = {"trade_plan": trade_plan} if timeframe == "15M" else {}
+            create_chart(
+                frame, timeframe, path, candles=160, exchange="MEXC",
+                analysis=analysis, market_snapshot=market_snapshot, **kwargs,
+            )
+        except Exception as exc:
+            if os.path.exists(path):
+                os.remove(path)
+            print(f"::warning::VVV chart {timeframe} unavailable: {type(exc).__name__}")
+    print("VVV report completed; chart availability is optional.")
 
 
 if __name__ == "__main__":
