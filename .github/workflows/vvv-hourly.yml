@@ -27,12 +27,14 @@ concurrency:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -45,14 +47,20 @@ jobs:
           VVV_RUN_EVENT: ${{ github.event_name }}
           VVV_RUN_SOURCE: ${{ inputs.source }}
         run: |
+          set -o pipefail
           python schedule_gate.py | tee /tmp/vvv-gate.txt
           RUN_VALUE=$(grep '^run=' /tmp/vvv-gate.txt | tail -1 | cut -d= -f2)
-          echo "run=${RUN_VALUE:-true}" >> "$GITHUB_OUTPUT"
+          echo "run=${RUN_VALUE:-false}" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
         if: steps.delivery_gate.outputs.run == 'true'
         run: |
           pip install -r requirements.txt
+          pip check
+
+      - name: Import smoke test
+        if: steps.delivery_gate.outputs.run == 'true'
+        run: python -c 'import six, mplfinance, pandas, numpy, matplotlib, requests, openai; import main, telegram_notify'
 
       - name: Compile Python modules
         if: steps.delivery_gate.outputs.run == 'true'
@@ -82,6 +90,7 @@ jobs:
 
       - name: Upload charts, report and hourly update
         if: steps.delivery_gate.outputs.run == 'true'
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: VVVUSDT-MEXC-SMC
