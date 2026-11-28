@@ -1,6 +1,6 @@
 {
-  "last_sent_utc": "2026-11-27T20:17:33.212413+00:00",
-  "last_event": "schedule",
-  "message_id": 1351,
-  "last_auto_slot": "2026-11-28T03"
+  "last_sent_utc": "2026-11-28T01:31:15.315367+00:00",
+  "last_event": "watchdog",
+  "message_id": 1355,
+  "last_auto_slot": "2026-11-28T08"
 }
